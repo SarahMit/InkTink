@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InkTink</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1a1a">
+  <script>
+    (function () {
+      var t = localStorage.getItem('inktink-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="assets/Logo.svg" alt="InkTink" class="topbar-logo">
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-actions">
+      <button class="tb-util" id="theme-switch" title="Toggle light/dark" aria-label="Toggle light/dark">☾</button>
+      <button class="tb-util" id="lang-toggle">EN</button>
+      <div class="tb-divider"></div>
+      <button class="tb-ghost" id="btn-new-project" data-i18n="btn.new">New</button>
+      <button class="tb-ghost" id="btn-load-project" data-i18n="btn.load">Load</button>
+      <button class="tb-ghost" id="btn-import-project" data-i18n="btn.import" data-i18n-tooltip="btn.import.title">Import</button>
+      <button class="tb-ghost" id="btn-export-project" data-i18n="btn.export" data-i18n-tooltip="btn.export.title">Export</button>
+      <button class="tb-cta" id="btn-save-project" data-i18n="btn.save">Save</button>
+    </div>
+  </header>
+
+  <nav class="icon-nav">
+    <button class="icon-nav-btn" data-page="writing" data-tooltip="Writing" data-i18n-tooltip="nav.writing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="brainstorm" data-tooltip="Notes" data-i18n-tooltip="nav.notes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="moodboard" data-tooltip="Moodboard" data-i18n-tooltip="nav.moodboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="theme" data-tooltip="Theme" data-i18n-tooltip="nav.theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="brainstorming" data-tooltip="Brainstorming" data-i18n-tooltip="nav.brainstorming">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="beats" data-tooltip="Story Beats" data-i18n-tooltip="nav.beats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="timeline" data-tooltip="Timeline" data-i18n-tooltip="nav.timeline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="characters" data-tooltip="Characters" data-i18n-tooltip="nav.characters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="worldbuilding" data-tooltip="Worldbuilding" data-i18n-tooltip="nav.worldbuilding">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </button>
+    <button class="icon-nav-btn" data-page="stats" data-tooltip="Stats" data-i18n-tooltip="nav.stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+    </button>
+  </nav>
+
+  <aside class="sidebar">
+    <div class="proj-title" id="proj-title">Untitled Project</div>
+    <textarea class="proj-blurb" id="project-blurb" placeholder="What's it about? A short description of your project..." rows="3"></textarea>
+
+    <div class="sb-section">
+      <div class="sb-section-head">
+        <span data-i18n="sidebar.inspiration">Inspiration</span>
+        <button class="sb-add-btn" id="add-inspiration" title="Add image">+</button>
+      </div>
+      <div class="inspiration-grid" id="inspiration-grid"></div>
+    </div>
+
+    <div class="sb-section sb-section-todo">
+      <div class="sb-section-head">
+        <span data-i18n="sidebar.todo">To-do</span>
+      </div>
+      <div class="todo-list" id="todo-list"></div>
+      <input class="todo-input" id="todo-input" placeholder="New task + Enter">
+    </div>
+  </aside>
+
+  <main class="content">
+    <!-- Home -->
+    <section id="page-home" class="page home-page">
+      <div class="home-center">
+        <img src="assets/Logo.svg" alt="InkTink" class="home-logo">
+        <p class="home-tagline" data-i18n="home.tagline">Your creative writing workspace</p>
+        <div class="home-actions">
+          <button class="btn-primary home-btn" id="home-btn-new" data-i18n="btn.new">New Project</button>
+          <button class="btn-secondary home-btn" id="home-btn-load" data-i18n="btn.load">Load Project</button>
+        </div>
+      </div>
+      <div class="home-recent" id="home-recent"></div>
+    </section>
+
+    <!-- Story Beats -->
+    <section id="page-beats" class="page">
+      <div class="page-header">
+        <h1 data-i18n="nav.beats">Story Beats</h1>
+        <div class="beats-toolbar">
+          <select id="structure-select" class="structure-select">
+            <option value="" data-i18n="beats.no.template">No Template</option>
+            <option value="drei-akt" data-i18n="struct.drei-akt.name">3-Act Structure</option>
+            <option value="save-the-cat" data-i18n="struct.save-the-cat.name">Save the Cat</option>
+            <option value="freytag" data-i18n="struct.freytag.name">Freytag's Pyramid</option>
+          </select>
+          <button class="btn-primary" id="add-beat" data-i18n="beats.add">+ New Beat</button>
+        </div>
+      </div>
+      <div class="beats-list" id="beats-list"></div>
+    </section>
+
+    <!-- Writing -->
+    <section id="page-writing" class="page active">
+      <div class="writing-layout">
+        <aside class="chapter-nav">
+          <div class="chapter-nav-header">
+            <span data-i18n="writing.sections">Chapters &amp; Scenes</span>
+            <div class="chapter-nav-actions">
+              <button class="btn-mini" id="btn-export-word" title="Export as Word document">&#8595; .doc</button>
+              <button class="btn-mini" id="add-chapter" data-i18n="writing.add.chapter">+ Chapter</button>
+            </div>
+          </div>
+          <div class="chapter-tree" id="chapter-tree"></div>
+        </aside>
+        <div class="editor-pane" id="editor-pane"></div>
+      </div>
+    </section>
+
+    <!-- Theme -->
+    <section id="page-theme" class="page"></section>
+
+    <!-- Brainstorming (idea tree) -->
+    <section id="page-brainstorming" class="page">
+      <div class="bs2-layout">
+        <div class="page-header">
+          <h1 data-i18n="nav.brainstorming">Brainstorming</h1>
+          <button class="btn-primary" id="bs2-add-root" data-i18n="brainstorming.add">+ New Idea</button>
+        </div>
+        <div class="bs2-tree" id="bs2-tree"></div>
+      </div>
+    </section>
+
+    <!-- Notes (sticky canvas) -->
+    <section id="page-brainstorm" class="page">
+      <div class="page-header">
+        <h1 data-i18n="nav.notes">Notes</h1>
+        <div class="bs-toolbar">
+          <span class="bs-hint" id="bs-hint"></span>
+          <button class="btn-primary" id="add-note-bs" data-i18n="notes.add">+ Note</button>
+        </div>
+      </div>
+      <div class="bs-canvas-wrap" id="bs-canvas-wrap">
+        <div class="bs-canvas" id="bs-canvas">
+          <svg class="bs-links" id="bs-links" width="3000" height="2200"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section id="page-timeline" class="page">
+      <div class="page-header">
+        <h1 data-i18n="nav.timeline">Timeline</h1>
+      </div>
+      <div class="tl-wrap" id="tl-wrap">
+        <div class="tl-grid" id="tl-grid"></div>
+      </div>
+    </section>
+
+    <!-- Characters -->
+    <section id="page-characters" class="page">
+      <div class="page-header">
+        <h1 data-i18n="nav.characters">Characters</h1>
+        <button class="btn-primary" id="add-character" data-i18n="characters.add">+ New Character</button>
+      </div>
+      <div class="characters-grid" id="characters-grid"></div>
+    </section>
+
+    <!-- Worldbuilding -->
+    <section id="page-worldbuilding" class="page">
+      <div class="wb-layout">
+        <aside class="wb-sidebar" id="wb-sidebar"></aside>
+        <div class="wb-main" id="wb-main"></div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="page-stats" class="page"></section>
+
+    <!-- Moodboard -->
+    <section id="page-moodboard" class="page">
+      <div class="page-header">
+        <h1 data-i18n="nav.moodboard">Moodboard</h1>
+        <button class="btn-primary" id="add-mood-image" data-i18n="moodboard.add">+ Add Image</button>
+      </div>
+      <div class="moodboard-grid" id="moodboard-grid"></div>
+    </section>
+  </main>
+
+  <!-- Inline note popover -->
+  <div class="note-popover" id="note-popover">
+    <textarea class="note-popover-text" id="note-popover-text" placeholder="Note..."></textarea>
+    <div class="note-popover-actions">
+      <button class="note-popover-delete" id="note-popover-delete" data-i18n="popover.delete">Delete</button>
+      <button class="note-popover-done" id="note-popover-done" data-i18n="popover.done">Done</button>
+    </div>
+  </div>
+
+  <!-- Modal for character editing -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
