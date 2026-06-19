@@ -251,7 +251,7 @@ const TR = {
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
     'nav.writing': 'Writing', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Find Ideas', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'New task + Enter', 'sidebar.insp.empty': 'Add images as inspiration (+)',
@@ -375,6 +375,13 @@ const TR = {
     'home.tagline': 'Your creative writing workspace', 'home.recent': 'Recent projects',
     'load.modal.title': 'Load project', 'load.modal.empty': 'No saved projects found.',
     'new.modal.title': 'New project', 'new.modal.confirm': 'Unsaved changes will be lost. Continue?',
+    'ideas.tagline': 'Stuck? Start with whatever you already have — one question at a time leads you to the rest.',
+    'ideas.have.title': 'What do you already have?',
+    'ideas.step.have': 'You have', 'ideas.step.q': 'Question',
+    'ideas.answer.placeholder': 'Write freely — even half a thought counts.',
+    'ideas.back': '← Back', 'ideas.skip': "Don't know — skip", 'ideas.next': 'Next',
+    'ideas.done': 'Done', 'ideas.done.empty': 'Nothing noted yet — go back and fill in a few answers.',
+    'ideas.to.brainstorm': 'Send to Brainstorming', 'ideas.to.notes': 'Send to Notes', 'ideas.restart': 'Another starting point',
     'new.modal.create': 'Create new project', 'btn.cancel': 'Cancel',
   },
   de: {
@@ -384,7 +391,7 @@ const TR = {
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
     'nav.writing': 'Schreiben', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Ideen finden', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'Neue Aufgabe + Enter', 'sidebar.insp.empty': 'Bilder als Inspiration hinzufügen (+)',
@@ -505,6 +512,13 @@ const TR = {
     'home.tagline': 'Dein kreatives Schreibwerkzeug', 'home.recent': 'Zuletzt geöffnet',
     'load.modal.title': 'Projekt laden', 'load.modal.empty': 'Keine gespeicherten Projekte vorhanden.',
     'new.modal.title': 'Neues Projekt', 'new.modal.confirm': 'Nicht gespeicherte Änderungen gehen verloren. Trotzdem fortfahren?',
+    'ideas.tagline': 'Festgefahren? Fang mit dem an, was du schon hast — Frage für Frage führt dich zum Rest.',
+    'ideas.have.title': 'Was hast du schon?',
+    'ideas.step.have': 'Du hast', 'ideas.step.q': 'Frage',
+    'ideas.answer.placeholder': 'Schreib frei — auch ein halber Gedanke zählt.',
+    'ideas.back': '← Zurück', 'ideas.skip': 'Weiß nicht — überspringen', 'ideas.next': 'Weiter',
+    'ideas.done': 'Geschafft', 'ideas.done.empty': 'Noch nichts notiert — geh zurück und füll ein paar Antworten aus.',
+    'ideas.to.brainstorm': 'An Brainstorming schicken', 'ideas.to.notes': 'An Notizen schicken', 'ideas.restart': 'Anderer Startpunkt',
     'new.modal.create': 'Neues Projekt erstellen', 'btn.cancel': 'Abbrechen',
   },
 };
@@ -541,6 +555,201 @@ function setLang(lang) {
   if (typeof renderEditor === 'function') renderEditor();
   const activePage = document.querySelector('.page.active');
   if (activePage) switchPage(activePage.id.replace('page-', ''));
+}
+
+// ══════════════════════════════════
+// ── FIND IDEAS (guided, for when you're stuck) ──
+// ══════════════════════════════════
+// Each starter is a path: you pick what you already have, then answer one
+// question at a time until you've built something concrete. Content is kept
+// here (not in TR) so each language's flow reads as a whole.
+const IDEA_ICONS = {
+  user:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  cloud:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
+  map:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+  bulb:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+};
+
+const IDEA_STARTERS = ['char', 'vibe', 'setting', 'theme'];
+
+const IDEA_FLOWS = {
+  en: {
+    char: { icon: 'user', label: 'a character', title: 'Just a character', sub: 'A person, but no plot',
+      qs: [
+        'What does this character want most — out loud?',
+        "And what do they secretly want, that they won't admit to themselves?",
+        'What stands between them and that want?',
+        'What would they never do — and what situation forces them to do exactly that?',
+      ], close: "That's your conflict core. A single character has become a movement." },
+    vibe: { icon: 'cloud', label: 'a mood', title: 'Just a mood', sub: 'A feeling, an image, a tone',
+      qs: [
+        'Describe the feeling in one word. What colour is it?',
+        'Where does this mood live most strongly?',
+        'Who feels least at home in that place?',
+        'What happens that shatters the mood?',
+      ], close: 'A vibe has become a place, a person, and a crack running through it.' },
+    setting: { icon: 'map', label: 'a setting', title: 'Just a setting', sub: 'A world, but no one in it',
+      qs: [
+        'Who holds power in this world — and who does not?',
+        'Which rule of this world is deeply unfair?',
+        'Who benefits from that rule without noticing?',
+        'Who would break it — and what does it cost them?',
+      ], close: 'A world has become a conflict with two sides.' },
+    theme: { icon: 'bulb', label: 'a theme', title: 'Just a theme', sub: 'Something you want to say',
+      qs: [
+        'Phrase your theme as a claim someone believes.',
+        'Who in your story believes the opposite?',
+        'Which single scene would prove your claim wrong?',
+      ], close: 'A theme has become two characters and a key scene.' },
+  },
+  de: {
+    char: { icon: 'user', label: 'einen Charakter', title: 'Nur einen Charakter', sub: 'Eine Person, aber keine Handlung',
+      qs: [
+        'Was will diese Figur am meisten — laut ausgesprochen?',
+        'Und was will sie insgeheim, das sie sich selbst nicht eingesteht?',
+        'Was steht zwischen ihr und diesem Wunsch?',
+        'Was würde sie niemals tun — und welche Situation zwingt sie genau dazu?',
+      ], close: 'Das ist dein Konfliktkern. Aus einem Charakter ist eine Bewegung geworden.' },
+    vibe: { icon: 'cloud', label: 'eine Stimmung', title: 'Nur eine Stimmung', sub: 'Ein Gefühl, ein Bild, ein Ton',
+      qs: [
+        'Beschreib das Gefühl in einem Wort. Welche Farbe hat es?',
+        'An welchem Ort lebt diese Stimmung am stärksten?',
+        'Wer fühlt sich an diesem Ort am wenigsten zuhause?',
+        'Was passiert, das die Stimmung zerbricht?',
+      ], close: 'Aus einem Vibe ist ein Ort mit einer Person und einem Riss geworden.' },
+    setting: { icon: 'map', label: 'ein Setting', title: 'Nur ein Setting', sub: 'Eine Welt, aber niemand drin',
+      qs: [
+        'Wer hat in dieser Welt Macht — und wer nicht?',
+        'Welche Regel dieser Welt ist zutiefst ungerecht?',
+        'Wer profitiert von dieser Regel, ohne es zu merken?',
+        'Wer würde sie brechen — und was kostet es ihn?',
+      ], close: 'Aus einer Welt ist ein Konflikt mit zwei Seiten geworden.' },
+    theme: { icon: 'bulb', label: 'ein Thema', title: 'Nur ein Thema', sub: 'Etwas, das du sagen willst',
+      qs: [
+        'Formulier dein Thema als Behauptung, an die jemand glaubt.',
+        'Wer in deiner Geschichte glaubt das Gegenteil?',
+        'Welche eine Szene würde deine Behauptung widerlegen?',
+      ], close: 'Aus einem Thema sind zwei Figuren und eine Schlüsselszene geworden.' },
+  },
+};
+
+const IDEA_NOTE_COLORS = ['#c8a2ff', '#ffd479', '#7ee0a0', '#7ec8ff', '#ff9eb1'];
+
+function ideaEsc(s) { return (s || '').replace(/</g, '&lt;'); }
+function ideaGenId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function ideaStage() { return document.getElementById('idea-stage'); }
+
+function renderIdeas() {
+  const page = document.getElementById('page-ideas');
+  if (!page) return;
+  page.innerHTML =
+    '<div class="page-header"><h1>' + t('nav.ideas') + '</h1></div>' +
+    '<div class="idea-intro">' + t('ideas.tagline') + '</div>' +
+    '<div class="idea-stage" id="idea-stage"></div>';
+  ideaHome();
+}
+
+function ideaHome() {
+  const flows = IDEA_FLOWS[currentLang] || IDEA_FLOWS.en;
+  const stage = ideaStage();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div class="idea-lead">' + t('ideas.have.title') + '</div>' +
+    '<div class="idea-pick-grid" id="idea-pick-grid"></div>';
+  const grid = stage.querySelector('#idea-pick-grid');
+  IDEA_STARTERS.forEach(key => {
+    const f = flows[key];
+    const b = document.createElement('button');
+    b.className = 'idea-pick';
+    b.innerHTML =
+      '<span class="idea-pick-ic">' + IDEA_ICONS[f.icon] + '</span>' +
+      '<span class="idea-pick-txt"><span class="idea-pick-t">' + f.title + '</span>' +
+      '<span class="idea-pick-s">' + f.sub + '</span></span>';
+    b.addEventListener('click', () => ideaRun(key));
+    grid.appendChild(b);
+  });
+}
+
+function ideaRun(key) {
+  const flow = (IDEA_FLOWS[currentLang] || IDEA_FLOWS.en)[key];
+  let i = 0;
+  const answers = [];
+
+  function step() {
+    if (i >= flow.qs.length) return done();
+    const stage = ideaStage();
+    if (!stage) return;
+    const total = flow.qs.length;
+    const bars = flow.qs.map((_, n) => '<div class="idea-bar' + (n <= i ? ' on' : '') + '"></div>').join('');
+    stage.innerHTML =
+      '<div class="idea-bars">' + bars + '</div>' +
+      '<div class="idea-meta">' + t('ideas.step.have') + ' ' + flow.label + ' · ' + t('ideas.step.q') + ' ' + (i + 1) + ' / ' + total + '</div>' +
+      '<div class="idea-question">' + flow.qs[i] + '</div>' +
+      '<textarea class="idea-answer" id="idea-answer" rows="3" placeholder="' + t('ideas.answer.placeholder') + '"></textarea>' +
+      '<div class="idea-actions">' +
+        (i > 0 ? '<button class="idea-ghost" id="idea-back">' + t('ideas.back') + '</button>' : '') +
+        '<div class="idea-spacer"></div>' +
+        '<button class="idea-ghost" id="idea-skip">' + t('ideas.skip') + '</button>' +
+        '<button class="idea-next" id="idea-next">' + t('ideas.next') + '</button>' +
+      '</div>';
+    const ta = stage.querySelector('#idea-answer');
+    ta.value = answers[i] || '';
+    ta.focus();
+    stage.querySelector('#idea-next').addEventListener('click', () => { answers[i] = ta.value.trim(); i++; step(); });
+    stage.querySelector('#idea-skip').addEventListener('click', () => { answers[i] = ''; i++; step(); });
+    const back = stage.querySelector('#idea-back');
+    if (back) back.addEventListener('click', () => { answers[i] = ta.value.trim(); i--; step(); });
+  }
+
+  function done() {
+    const stage = ideaStage();
+    if (!stage) return;
+    const bullets = flow.qs.map((q, n) => answers[n]
+      ? '<div class="idea-bullet"><span class="idea-bullet-q">' + ideaEsc(q) + '</span>' + ideaEsc(answers[n]) + '</div>'
+      : '').join('');
+    stage.innerHTML =
+      '<div class="idea-done-tag">' + t('ideas.done') + '</div>' +
+      '<div class="idea-close">' + flow.close + '</div>' +
+      (bullets || '<div class="idea-meta">' + t('ideas.done.empty') + '</div>') +
+      '<div class="idea-actions idea-actions-end">' +
+        '<button class="idea-next" id="idea-to-brain">' + t('ideas.to.brainstorm') + '</button>' +
+        '<button class="idea-ghost" id="idea-to-notes">' + t('ideas.to.notes') + '</button>' +
+        '<button class="idea-ghost" id="idea-restart">' + t('ideas.restart') + '</button>' +
+      '</div>';
+    stage.querySelector('#idea-restart').addEventListener('click', ideaHome);
+    stage.querySelector('#idea-to-brain').addEventListener('click', () => ideaSendToBrainstorm(flow, answers));
+    stage.querySelector('#idea-to-notes').addEventListener('click', () => ideaSendToNotes(answers));
+  }
+
+  step();
+}
+
+// Funnel the collected answers into the tools that already exist.
+function ideaSendToBrainstorm(flow, answers) {
+  const rootId = ideaGenId();
+  ideaMap.nodes.push({ id: rootId, parentId: null, type: 'root', text: flow.close, prompt: null });
+  flow.qs.forEach((q, n) => {
+    if (!answers[n]) return;
+    ideaMap.nodes.push({ id: ideaGenId(), parentId: rootId, type: 'and-then', text: answers[n], prompt: null });
+  });
+  saveProject();
+  switchPage('brainstorming');
+}
+
+function ideaSendToNotes(answers) {
+  let y = 40, ci = 0;
+  answers.forEach((a, n) => {
+    if (!a) return;
+    brainstorm.notes.push({
+      id: Date.now() + n,
+      x: 40, y,
+      text: a,
+      color: IDEA_NOTE_COLORS[ci++ % IDEA_NOTE_COLORS.length],
+    });
+    y += 130;
+  });
+  saveProject();
+  switchPage('brainstorm');
 }
 
 // ── Brainstorming (idea tree) ──
@@ -889,6 +1098,7 @@ function switchPage(page) {
   if (page === 'stats') renderStats();
   if (page === 'worldbuilding') renderWorldbuilding();
   if (page === 'brainstorming') renderBrainstorming();
+  if (page === 'ideas') renderIdeas();
   if (page === 'theme') renderTheme();
   if (page === 'brainstorm') requestAnimationFrame(() => { bsCanvas.querySelectorAll('.bs-note-text').forEach(autoResize); expandCanvas(); });
 }
