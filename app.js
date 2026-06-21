@@ -6,7 +6,7 @@ const LS_CURRENT = 'inktink.current';
 const LS_PROJECTS = 'inktink.projects'; // { [name]: { data, modified } }
 
 function collectProjectData() {
-  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, storyTheme };
+  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, storyTheme, ideaWorkshops };
 }
 
 function readProjectsStore() {
@@ -155,6 +155,57 @@ let selectedStructure = null;
 let worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
 let ideaMap = { nodes: [] };
 let storyTheme = { statement: '', question: '', claim: '', lesson: '', belief: '', motif: '', message: '' };
+// Each guided workshop ("develop", "char") is a fixed sequence of fields, worked
+// through in any order, each pairing free notes with a conclusion. Some fields are
+// "structured": instead of one conclusion textarea they show a few labelled
+// sub-textareas (e.g. lie/fear/false want/hidden need) that get combined into the
+// conclusion automatically. WORKSHOP_SHAPES describes that structure per language-
+// independent field index so saved data can be migrated/defaulted without
+// depending on the (language-specific) content in IDEA_WORKSHOP_FIELDS.
+const WORKSHOP_SHAPES = {
+  develop: [
+    { structured: false },
+    { structured: false },
+    { structured: false },
+    { structured: true, partKeys: ['beginning', 'middle', 'end'] },
+  ],
+  char: [
+    { structured: false },
+    { structured: true, partKeys: ['lie', 'fear', 'falseWant', 'hiddenNeed'] },
+    { structured: false },
+    { structured: false },
+  ],
+};
+
+function ideaWorkshopDefault(name) {
+  return { step: 0, fields: WORKSHOP_SHAPES[name].map(s => ({
+    notes: '', conclusion: '',
+    ...(s.structured ? { parts: Object.fromEntries(s.partKeys.map(k => [k, ''])) } : {}),
+  })) };
+}
+
+function ideaWorkshopFromData(saved, name) {
+  const def = ideaWorkshopDefault(name);
+  if (!saved || !Array.isArray(saved.fields) || saved.fields.length !== def.fields.length) return def;
+  const shape = WORKSHOP_SHAPES[name];
+  const fields = saved.fields.map((f, i) => {
+    const base = { notes: f.notes || '', conclusion: f.conclusion || '' };
+    if (shape[i].structured) base.parts = { ...def.fields[i].parts, ...(f.parts || {}) };
+    return base;
+  });
+  return { step: saved.step || 0, fields };
+}
+
+// Builds the combined "conclusion" text for a structured field so the sidebar
+// summary and send-to-brainstorm/notes actions keep working unchanged.
+function ideaWorkshopCombineParts(field, parts) {
+  return field.parts
+    .filter(p => (parts[p.key] || '').trim())
+    .map(p => p.label + ': ' + parts[p.key].trim())
+    .join('\n');
+}
+
+let ideaWorkshops = { develop: ideaWorkshopDefault('develop'), char: ideaWorkshopDefault('char') };
 
 const BS2_COLORS = [
   { main: '#e07a5f', dim: 'rgba(224,122,95,0.15)'  },  // terracotta
@@ -251,7 +302,7 @@ const TR = {
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
     'nav.writing': 'Writing', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Find Ideas', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Find & Develop Ideas', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'New task + Enter', 'sidebar.insp.empty': 'Add images as inspiration (+)',
@@ -375,13 +426,16 @@ const TR = {
     'home.tagline': 'Your creative writing workspace', 'home.recent': 'Recent projects',
     'load.modal.title': 'Load project', 'load.modal.empty': 'No saved projects found.',
     'new.modal.title': 'New project', 'new.modal.confirm': 'Unsaved changes will be lost. Continue?',
-    'ideas.tagline': 'Stuck? Start with whatever you already have — one question at a time leads you to the rest.',
+    'ideas.tagline': 'Find the minimum structure you need to start writing — without sinking too much time into planning.',
     'ideas.have.title': 'What do you already have?',
     'ideas.step.have': 'You have', 'ideas.step.q': 'Question',
     'ideas.answer.placeholder': 'Write freely — even half a thought counts.',
     'ideas.back': '← Back', 'ideas.skip': "Don't know — skip", 'ideas.next': 'Next',
     'ideas.done': 'Done', 'ideas.done.empty': 'Nothing noted yet — go back and fill in a few answers.',
     'ideas.to.brainstorm': 'Send to Brainstorming', 'ideas.to.notes': 'Send to Notes', 'ideas.restart': 'Another starting point',
+    'ideas.develop.field': 'Field', 'ideas.develop.finish': 'Finish',
+    'ideas.develop.sidebar.title': 'Conclusions so far',
+    'ideas.develop.empty': 'Not written yet.',
     'new.modal.create': 'Create new project', 'btn.cancel': 'Cancel',
   },
   de: {
@@ -391,7 +445,7 @@ const TR = {
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
     'nav.writing': 'Schreiben', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Ideen finden', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Ideen finden und entwickeln', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'Neue Aufgabe + Enter', 'sidebar.insp.empty': 'Bilder als Inspiration hinzufügen (+)',
@@ -512,13 +566,16 @@ const TR = {
     'home.tagline': 'Dein kreatives Schreibwerkzeug', 'home.recent': 'Zuletzt geöffnet',
     'load.modal.title': 'Projekt laden', 'load.modal.empty': 'Keine gespeicherten Projekte vorhanden.',
     'new.modal.title': 'Neues Projekt', 'new.modal.confirm': 'Nicht gespeicherte Änderungen gehen verloren. Trotzdem fortfahren?',
-    'ideas.tagline': 'Festgefahren? Fang mit dem an, was du schon hast — Frage für Frage führt dich zum Rest.',
+    'ideas.tagline': 'Finde die minimale Struktur, die du zum Losschreiben brauchst — ohne zu viel Zeit in die Planung zu stecken.',
     'ideas.have.title': 'Was hast du schon?',
     'ideas.step.have': 'Du hast', 'ideas.step.q': 'Frage',
     'ideas.answer.placeholder': 'Schreib frei — auch ein halber Gedanke zählt.',
     'ideas.back': '← Zurück', 'ideas.skip': 'Weiß nicht — überspringen', 'ideas.next': 'Weiter',
     'ideas.done': 'Geschafft', 'ideas.done.empty': 'Noch nichts notiert — geh zurück und füll ein paar Antworten aus.',
     'ideas.to.brainstorm': 'An Brainstorming schicken', 'ideas.to.notes': 'An Notizen schicken', 'ideas.restart': 'Anderer Startpunkt',
+    'ideas.develop.field': 'Feld', 'ideas.develop.finish': 'Abschließen',
+    'ideas.develop.sidebar.title': 'Bisherige Conclusions',
+    'ideas.develop.empty': 'Noch nicht ausgefüllt.',
     'new.modal.create': 'Neues Projekt erstellen', 'btn.cancel': 'Abbrechen',
   },
 };
@@ -565,71 +622,191 @@ function setLang(lang) {
 // here (not in TR) so each language's flow reads as a whole.
 const IDEA_ICONS = {
   user:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-  cloud:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
-  map:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
-  bulb:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+  spark:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>',
 };
 
-const IDEA_STARTERS = ['char', 'vibe', 'setting', 'theme'];
+const IDEA_STARTERS = ['develop', 'char'];
 
-const IDEA_FLOWS = {
+// Metadata for the two guided workshops, shown as cards on the "Find & Develop
+// Ideas" home screen. The actual field content lives in IDEA_WORKSHOP_FIELDS.
+const IDEA_WORKSHOP_META = {
   en: {
-    char: { icon: 'user', label: 'a character', title: 'Just a character', sub: 'A person, but no plot',
-      qs: [
-        'What does this character want most — out loud?',
-        "And what do they secretly want, that they won't admit to themselves?",
-        'What stands between them and that want?',
-        'What would they never do — and what situation forces them to do exactly that?',
-      ], close: "That's your conflict core. A single character has become a movement." },
-    vibe: { icon: 'cloud', label: 'a mood', title: 'Just a mood', sub: 'A feeling, an image, a tone',
-      qs: [
-        'Describe the feeling in one word. What colour is it?',
-        'Where does this mood live most strongly?',
-        'Who feels least at home in that place?',
-        'What happens that shatters the mood?',
-      ], close: 'A vibe has become a place, a person, and a crack running through it.' },
-    setting: { icon: 'map', label: 'a setting', title: 'Just a setting', sub: 'A world, but no one in it',
-      qs: [
-        'Who holds power in this world — and who does not?',
-        'Which rule of this world is deeply unfair?',
-        'Who benefits from that rule without noticing?',
-        'Who would break it — and what does it cost them?',
-      ], close: 'A world has become a conflict with two sides.' },
-    theme: { icon: 'bulb', label: 'a theme', title: 'Just a theme', sub: 'Something you want to say',
-      qs: [
-        'Phrase your theme as a claim someone believes.',
-        'Who in your story believes the opposite?',
-        'Which single scene would prove your claim wrong?',
-      ], close: 'A theme has become two characters and a key scene.' },
+    develop: { icon: 'spark', title: 'Develop the Initial Idea', sub: 'Turn scattered notes into a workable foundation',
+      doneClose: 'You have worked your initial idea into a premise, a moodboard-driven set of ideas, your main characters, and a structure with rising stakes.' },
+    char: { icon: 'user', title: 'Who Is My Character', sub: 'What drives the character',
+      doneClose: 'You have worked out what set your character\'s story in motion, what holds them in place, what they\'re already up against, and why we\'d follow them.' },
   },
   de: {
-    char: { icon: 'user', label: 'einen Charakter', title: 'Nur einen Charakter', sub: 'Eine Person, aber keine Handlung',
-      qs: [
-        'Was will diese Figur am meisten — laut ausgesprochen?',
-        'Und was will sie insgeheim, das sie sich selbst nicht eingesteht?',
-        'Was steht zwischen ihr und diesem Wunsch?',
-        'Was würde sie niemals tun — und welche Situation zwingt sie genau dazu?',
-      ], close: 'Das ist dein Konfliktkern. Aus einem Charakter ist eine Bewegung geworden.' },
-    vibe: { icon: 'cloud', label: 'eine Stimmung', title: 'Nur eine Stimmung', sub: 'Ein Gefühl, ein Bild, ein Ton',
-      qs: [
-        'Beschreib das Gefühl in einem Wort. Welche Farbe hat es?',
-        'An welchem Ort lebt diese Stimmung am stärksten?',
-        'Wer fühlt sich an diesem Ort am wenigsten zuhause?',
-        'Was passiert, das die Stimmung zerbricht?',
-      ], close: 'Aus einem Vibe ist ein Ort mit einer Person und einem Riss geworden.' },
-    setting: { icon: 'map', label: 'ein Setting', title: 'Nur ein Setting', sub: 'Eine Welt, aber niemand drin',
-      qs: [
-        'Wer hat in dieser Welt Macht — und wer nicht?',
-        'Welche Regel dieser Welt ist zutiefst ungerecht?',
-        'Wer profitiert von dieser Regel, ohne es zu merken?',
-        'Wer würde sie brechen — und was kostet es ihn?',
-      ], close: 'Aus einer Welt ist ein Konflikt mit zwei Seiten geworden.' },
-    theme: { icon: 'bulb', label: 'ein Thema', title: 'Nur ein Thema', sub: 'Etwas, das du sagen willst',
-      qs: [
-        'Formulier dein Thema als Behauptung, an die jemand glaubt.',
-        'Wer in deiner Geschichte glaubt das Gegenteil?',
-        'Welche eine Szene würde deine Behauptung widerlegen?',
-      ], close: 'Aus einem Thema sind zwei Figuren und eine Schlüsselszene geworden.' },
+    develop: { icon: 'spark', title: 'Erste Idee ausarbeiten', sub: 'Mach aus verstreuten Notizen ein tragfähiges Fundament',
+      doneClose: 'Aus deiner ersten Idee sind eine Prämisse, vom Moodboard inspirierte Ideen, deine Hauptcharaktere und eine Struktur mit steigendem Konflikt geworden.' },
+    char: { icon: 'user', title: 'Wer ist mein Charakter', sub: 'Was den Charakter antreibt',
+      doneClose: 'Du hast herausgearbeitet, was die Geschichte deines Charakters ins Rollen brachte, was ihn in der Patt-Situation hält, womit er bereits zu kämpfen hat und warum wir ihn begleiten wollen.' },
+  },
+};
+
+// Each workshop is a fixed sequence of fields, worked through in any order.
+// Field types: "structured" shows a few labelled sub-textareas that combine into
+// the conclusion (see WORKSHOP_SHAPES); "simple" is a single textarea that IS the
+// conclusion; otherwise the field pairs free bullet notes with a conclusion
+// textarea. Conclusions stay visible in the sidebar the whole time.
+const IDEA_WORKSHOP_FIELDS = {
+  develop: {
+    en: [
+      { title: 'What I Love in Other Stories',
+        instructions: [
+          'Jot down bullet points: tropes, archetypes, settings — anything you love.',
+          'Then combine your bullets into a Premise — a few sentences that capture the spirit of the story.',
+        ],
+        notesPlaceholder: 'Tropes, archetypes, settings, ...',
+        conclusionLabel: 'Premise',
+        conclusionPlaceholder: 'A few sentences that capture the spirit of your story...' },
+      { title: 'Vibes, Aesthetics & (Recurring) Symbols & Imagery',
+        instructions: [
+          'Make a moodboard — images, music, quotes, whatever works for you. This might happen on another platform.',
+          'Look at your moodboard and write down everything that catches your eye: character traits, scenes, objects...',
+          'Group them (e.g. by symbols, setting, characters...) and add new points as you come up with them.',
+          'Develop ideas from each group below. Setting, characters, and plot are groups that often make sense.',
+        ],
+        notesPlaceholder: 'Everything that catches your eye, grouped...',
+        conclusionLabel: 'Ideas developed from the groups',
+        conclusionPlaceholder: 'What ideas grew out of each group...' },
+      { title: 'Set Up Main Characters',
+        instructions: [
+          'Note the most important characters you know about in your story so far.',
+          'Add a few very short notes about each one — who they are, in a sentence or so.',
+        ],
+        notesPlaceholder: 'List your characters and anything you know about them...',
+        conclusionLabel: 'Short character notes',
+        conclusionPlaceholder: 'Name — who they are, in one short sentence...' },
+      { title: 'Add Structure with Conflict & Stakes',
+        instructions: [
+          'Work through the beginning, the middle, and the end one at a time below.',
+          'Most important: every time you write something down, go back over it and try to raise the stakes.',
+        ],
+        structured: true,
+        parts: [
+          { key: 'beginning', label: 'Beginning', hint: 'How and in what situation are the main characters at the start?', placeholder: 'The situation and the characters at the beginning...' },
+          { key: 'middle', label: 'Middle', hint: 'What turns the situation up? Add any loose ideas or scene snippets you have here too.', placeholder: 'What happens in the middle, building the conflict — loose ideas and scene snippets welcome...' },
+          { key: 'end', label: 'End', hint: 'How do the situation and the changed characters look at the end?', placeholder: 'The situation and the changed characters at the end...' },
+        ],
+        stakesPrompt: 'Raise the stakes: go back over what you just wrote — what makes it cost more, hurt more, or matter more?',
+        conclusionLabel: 'Beginning – Middle – End' },
+    ],
+    de: [
+      { title: 'Was ich an anderen Geschichten liebe',
+        instructions: [
+          'Sammle stichpunktartig: Tropes, Archetypen, Settings — alles, was du liebst.',
+          'Verwandle deine Stichpunkte dann in eine Prämisse — ein paar Sätze, die den Spirit der Geschichte einfangen.',
+        ],
+        notesPlaceholder: 'Tropes, Archetypen, Settings, ...',
+        conclusionLabel: 'Prämisse',
+        conclusionPlaceholder: 'Ein paar Sätze, die den Spirit deiner Geschichte einfangen...' },
+      { title: 'Vibes, Ästhetik & (wiederkehrende) Symbole & Bildsprache',
+        instructions: [
+          'Erstelle ein Moodboard — Bilder, Musik, Zitate, was auch immer für dich funktioniert. Das kann auch auf einer anderen Plattform passieren.',
+          'Schau dir dein Moodboard an und notiere alles, was dir auffällt: bestimmte Charaktereigenschaften, Szenen, Objekte...',
+          'Gruppiere sie (z. B. nach Symbolen, Setting, Charakteren...) und füge neue Punkte hinzu, wenn dir welche einfallen.',
+          'Entwickle aus jeder Gruppe Ideen — Setting, Charaktere und Plot sind oft sinnvolle Gruppen.',
+        ],
+        notesPlaceholder: 'Alles, was dir auffällt, gruppiert...',
+        conclusionLabel: 'Aus den Gruppen entwickelte Ideen',
+        conclusionPlaceholder: 'Welche Ideen sich aus jeder Gruppe ergeben haben...' },
+      { title: 'Hauptcharaktere festlegen',
+        instructions: [
+          'Notiere die wichtigsten Charaktere, die du bisher in deiner Geschichte kennst.',
+          'Füge ein paar ganz kurze Infos zu jedem hinzu — wer sie sind, in etwa einem Satz.',
+        ],
+        notesPlaceholder: 'Liste deine Charaktere und was du bisher über sie weißt...',
+        conclusionLabel: 'Kurze Charakterinfos',
+        conclusionPlaceholder: 'Name — wer sie sind, in einem kurzen Satz...' },
+      { title: 'Struktur mit Konflikt & Stakes hinzufügen',
+        instructions: [
+          'Arbeite unten Anfang, Mitte und Ende einzeln nacheinander durch.',
+          'Das Wichtigste: Immer wenn du etwas aufschreibst, geh noch einmal darüber und versuche, den Konflikt zu erhöhen (raising the stakes).',
+        ],
+        structured: true,
+        parts: [
+          { key: 'beginning', label: 'Anfang', hint: 'Wie und in welcher Situation sind die Hauptcharaktere am Anfang?', placeholder: 'Die Situation und die Charaktere am Anfang...' },
+          { key: 'middle', label: 'Mitte', hint: 'Was treibt die Situation an? Füge hier auch gerne lose Ideen oder Szenenfragmente hinzu.', placeholder: 'Was in der Mitte passiert und den Konflikt aufbaut — lose Ideen und Szenenfragmente willkommen...' },
+          { key: 'end', label: 'Ende', hint: 'Wie sehen die Situation und die veränderten Charaktere am Ende aus?', placeholder: 'Die Situation und die veränderten Charaktere am Ende...' },
+        ],
+        stakesPrompt: 'Konflikt erhöhen: Geh noch einmal über das, was du gerade geschrieben hast — was macht es teurer, schmerzhafter oder bedeutsamer?',
+        conclusionLabel: 'Anfang – Mitte – Ende' },
+    ],
+  },
+  char: {
+    en: [
+      { title: 'Inciting Incident (Before the Story Starts)',
+        instructions: [
+          'Something happens — often before the story begins — which, if it didn\'t happen, would prevent the story as it exists from ever coming to be.',
+        ],
+        simple: true,
+        conclusionLabel: 'Inciting Incident',
+        conclusionPlaceholder: 'What happened before the story started that set everything in motion...' },
+      { title: 'Stalemate Situation',
+        instructions: [
+          'Your character begins the story in a less-than-ideal situation they would like to change but seemingly cannot.',
+          'What holds them there is usually a lie they believe, the fear that protects it, a false want it points them toward, and a hidden need they don\'t yet see.',
+        ],
+        structured: true,
+        parts: [
+          { key: 'lie', label: 'Lie', hint: 'What false belief does this character live by — the one that shapes every decision they make?', placeholder: 'The false belief they hold...' },
+          { key: 'fear', label: 'Fear', hint: 'What fear keeps that lie in place? What do they think would happen if they let it go?', placeholder: 'The fear protecting the lie...' },
+          { key: 'falseWant', label: 'False Want', hint: 'What do they think will make them happy — the thing they chase that their fear keeps just out of reach?', placeholder: 'The thing they chase instead...' },
+          { key: 'hiddenNeed', label: 'Hidden Need', hint: 'What do they actually need? (They won\'t know it until they gain or lose it at the very end.)', placeholder: 'What they actually need...' },
+        ],
+        conclusionLabel: 'Lie, Fear, False Want & Hidden Need' },
+      { title: 'Pre-Existing Conflict',
+        instructions: [
+          'When the story begins, the character is already dealing with personal conflicts as well as the conflicts of the world at large.',
+        ],
+        simple: true,
+        conclusionLabel: 'Pre-Existing Conflict',
+        conclusionPlaceholder: 'The personal conflicts and the conflicts of the wider world already in motion when the story begins...' },
+      { title: 'Likability & Empathy Factors',
+        instructions: [
+          'The character is shown to be someone the audience would like to see succeed, or would be willing to follow on the journey of the story.',
+        ],
+        simple: true,
+        conclusionLabel: 'Likability & Empathy Factors',
+        conclusionPlaceholder: 'What makes the audience want to root for this character...' },
+    ],
+    de: [
+      { title: 'Auslösendes Ereignis (vor Beginn der Geschichte)',
+        instructions: [
+          'Etwas geschieht — oft noch bevor die Geschichte beginnt —, das, wenn es nicht passiert wäre, die Geschichte in dieser Form verhindert hätte.',
+        ],
+        simple: true,
+        conclusionLabel: 'Auslösendes Ereignis',
+        conclusionPlaceholder: 'Was vor Beginn der Geschichte geschah und alles ins Rollen brachte...' },
+      { title: 'Patt-Situation',
+        instructions: [
+          'Dein Charakter beginnt die Geschichte in einer wenig idealen Situation, die er ändern möchte, aber scheinbar nicht kann.',
+          'Was ihn dort hält, ist meist eine Lüge, an die er glaubt, die Angst, die diese Lüge schützt, ein falscher Wunsch, den sie weckt, und ein verborgenes Bedürfnis, das er noch nicht erkennt.',
+        ],
+        structured: true,
+        parts: [
+          { key: 'lie', label: 'Lüge', hint: 'Welche falsche Überzeugung lebt diese Figur — die, die jede ihrer Entscheidungen prägt?', placeholder: 'Die falsche Überzeugung, die sie hat...' },
+          { key: 'fear', label: 'Angst', hint: 'Welche Angst hält diese Lüge aufrecht? Was glaubt sie, würde passieren, wenn sie loslässt?', placeholder: 'Die Angst, die die Lüge schützt...' },
+          { key: 'falseWant', label: 'Falscher Wunsch', hint: 'Was glaubt sie, würde sie glücklich machen — das Ziel, das ihre Angst immer unerreichbar hält?', placeholder: 'Das Ziel, dem sie stattdessen nachjagt...' },
+          { key: 'hiddenNeed', label: 'Verborgenes Bedürfnis', hint: 'Was braucht sie wirklich? (Wird ihr erst am Ende klar, wenn sie es gewinnt oder verliert.)', placeholder: 'Was sie wirklich braucht...' },
+        ],
+        conclusionLabel: 'Lüge, Angst, falscher Wunsch & verborgenes Bedürfnis' },
+      { title: 'Bereits bestehender Konflikt',
+        instructions: [
+          'Wenn die Geschichte beginnt, steckt der Charakter bereits in persönlichen Konflikten sowie in den Konflikten der Welt um ihn herum.',
+        ],
+        simple: true,
+        conclusionLabel: 'Bereits bestehender Konflikt',
+        conclusionPlaceholder: 'Die persönlichen Konflikte und die Konflikte der Welt, die beim Start der Geschichte schon bestehen...' },
+      { title: 'Sympathie- & Empathiefaktoren',
+        instructions: [
+          'Der Charakter wird so gezeigt, dass das Publikum ihm Erfolg wünscht oder ihn gerne auf seiner Reise durch die Geschichte begleitet.',
+        ],
+        simple: true,
+        conclusionLabel: 'Sympathie- & Empathiefaktoren',
+        conclusionPlaceholder: 'Was das Publikum dazu bringt, diesem Charakter die Daumen zu drücken...' },
+    ],
   },
 };
 
@@ -650,7 +827,7 @@ function renderIdeas() {
 }
 
 function ideaHome() {
-  const flows = IDEA_FLOWS[currentLang] || IDEA_FLOWS.en;
+  const meta = IDEA_WORKSHOP_META[currentLang] || IDEA_WORKSHOP_META.en;
   const stage = ideaStage();
   if (!stage) return;
   stage.innerHTML =
@@ -658,94 +835,178 @@ function ideaHome() {
     '<div class="idea-pick-grid" id="idea-pick-grid"></div>';
   const grid = stage.querySelector('#idea-pick-grid');
   IDEA_STARTERS.forEach(key => {
-    const f = flows[key];
+    const m = meta[key];
     const b = document.createElement('button');
     b.className = 'idea-pick';
     b.innerHTML =
-      '<span class="idea-pick-ic">' + IDEA_ICONS[f.icon] + '</span>' +
-      '<span class="idea-pick-txt"><span class="idea-pick-t">' + f.title + '</span>' +
-      '<span class="idea-pick-s">' + f.sub + '</span></span>';
-    b.addEventListener('click', () => ideaRun(key));
+      '<span class="idea-pick-ic">' + IDEA_ICONS[m.icon] + '</span>' +
+      '<span class="idea-pick-txt"><span class="idea-pick-t">' + m.title + '</span>' +
+      '<span class="idea-pick-s">' + m.sub + '</span></span>';
+    b.addEventListener('click', () => ideaWorkshopRender(key));
     grid.appendChild(b);
   });
 }
 
-function ideaRun(key) {
-  const flow = (IDEA_FLOWS[currentLang] || IDEA_FLOWS.en)[key];
-  let i = 0;
-  const answers = [];
+// ── Guided workshops ("Develop the Initial Idea", "Who Is My Character") ──
+function ideaWorkshopRender(name) {
+  const fields = IDEA_WORKSHOP_FIELDS[name][currentLang] || IDEA_WORKSHOP_FIELDS[name].en;
+  const stage = ideaStage();
+  if (!stage) return;
+  const ws = ideaWorkshops[name];
+  const step = ws.step;
+  const f = fields[step];
+  const fd = ws.fields[step];
 
-  function step() {
-    if (i >= flow.qs.length) return done();
-    const stage = ideaStage();
-    if (!stage) return;
-    const total = flow.qs.length;
-    const bars = flow.qs.map((_, n) => '<div class="idea-bar' + (n <= i ? ' on' : '') + '"></div>').join('');
-    stage.innerHTML =
-      '<div class="idea-bars">' + bars + '</div>' +
-      '<div class="idea-meta">' + t('ideas.step.have') + ' ' + flow.label + ' · ' + t('ideas.step.q') + ' ' + (i + 1) + ' / ' + total + '</div>' +
-      '<div class="idea-question">' + flow.qs[i] + '</div>' +
-      '<textarea class="idea-answer" id="idea-answer" rows="3" placeholder="' + t('ideas.answer.placeholder') + '"></textarea>' +
-      '<div class="idea-actions">' +
-        (i > 0 ? '<button class="idea-ghost" id="idea-back">' + t('ideas.back') + '</button>' : '') +
-        '<div class="idea-spacer"></div>' +
-        '<button class="idea-ghost" id="idea-skip">' + t('ideas.skip') + '</button>' +
-        '<button class="idea-next" id="idea-next">' + t('ideas.next') + '</button>' +
-      '</div>';
-    const ta = stage.querySelector('#idea-answer');
-    ta.value = answers[i] || '';
-    ta.focus();
-    stage.querySelector('#idea-next').addEventListener('click', () => { answers[i] = ta.value.trim(); i++; step(); });
-    stage.querySelector('#idea-skip').addEventListener('click', () => { answers[i] = ''; i++; step(); });
-    const back = stage.querySelector('#idea-back');
-    if (back) back.addEventListener('click', () => { answers[i] = ta.value.trim(); i--; step(); });
+  const tabs = fields.map((field, i) => {
+    const filled = ws.fields[i].conclusion.trim() || ws.fields[i].notes.trim();
+    return '<button class="idea-dev-tab' + (i === step ? ' on' : '') + (filled ? ' filled' : '') + '" data-i="' + i + '">' + (i + 1) + '</button>';
+  }).join('');
+
+  const sidebarItems = fields.map((field, i) => {
+    const c = ws.fields[i].conclusion.trim();
+    return '<div class="idea-dev-sum-item' + (i === step ? ' active' : '') + '">' +
+      '<div class="idea-dev-sum-num">' + (i + 1) + '</div>' +
+      '<div class="idea-dev-sum-body">' +
+        '<div class="idea-dev-sum-title">' + ideaEsc(field.conclusionLabel) + '</div>' +
+        '<div class="idea-dev-sum-text" id="idea-dev-sum-text-' + i + '">' +
+          (c ? ideaEsc(c) : '<span class="idea-dev-sum-empty">' + t('ideas.develop.empty') + '</span>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const bodyHtml = f.structured
+    ? '<div class="idea-dev-bme">' +
+        f.parts.map(p => (
+          '<div class="idea-dev-bme-col">' +
+            '<div class="idea-dev-bme-label">' + ideaEsc(p.label) + '</div>' +
+            '<div class="idea-dev-bme-hint">' + ideaEsc(p.hint) + '</div>' +
+            '<textarea class="idea-answer idea-dev-bme-area" data-part="' + p.key + '" rows="5" placeholder="' + ideaEsc(p.placeholder) + '">' + ideaEsc(fd.parts[p.key] || '') + '</textarea>' +
+          '</div>'
+        )).join('') +
+      '</div>' +
+      (f.stakesPrompt ? '<div class="idea-dev-stakes">' + ideaEsc(f.stakesPrompt) + '</div>' : '')
+    : f.simple
+    ? '<textarea class="idea-answer idea-dev-conclusion" id="idea-dev-conclusion" rows="6" placeholder="' + ideaEsc(f.conclusionPlaceholder) + '">' + ideaEsc(fd.conclusion) + '</textarea>'
+    : '<textarea class="idea-answer idea-dev-notes" id="idea-dev-notes" rows="4" placeholder="' + ideaEsc(f.notesPlaceholder) + '">' + ideaEsc(fd.notes) + '</textarea>' +
+      '<div class="idea-dev-conclusion-label">' + ideaEsc(f.conclusionLabel) + '</div>' +
+      '<textarea class="idea-answer idea-dev-conclusion" id="idea-dev-conclusion" rows="3" placeholder="' + ideaEsc(f.conclusionPlaceholder) + '">' + ideaEsc(fd.conclusion) + '</textarea>';
+
+  stage.innerHTML =
+    '<div class="idea-dev-layout">' +
+      '<div class="idea-dev-main">' +
+        '<div class="idea-dev-tabs">' + tabs + '</div>' +
+        '<div class="idea-dev-field-title">' + t('ideas.develop.field') + ' ' + (step + 1) + ': ' + ideaEsc(f.title) + '</div>' +
+        '<div class="idea-dev-instructions">' + f.instructions.map(p => '<p>' + ideaEsc(p) + '</p>').join('') + '</div>' +
+        bodyHtml +
+        '<div class="idea-actions">' +
+          (step > 0
+            ? '<button class="idea-ghost" id="idea-dev-back">' + t('ideas.back') + '</button>'
+            : '<button class="idea-ghost" id="idea-dev-home">' + t('ideas.restart') + '</button>') +
+          '<div class="idea-spacer"></div>' +
+          (step < fields.length - 1
+            ? '<button class="idea-next" id="idea-dev-next">' + t('ideas.next') + '</button>'
+            : '<button class="idea-next" id="idea-dev-finish">' + t('ideas.develop.finish') + '</button>') +
+        '</div>' +
+      '</div>' +
+      '<div class="idea-dev-sidebar">' +
+        '<div class="idea-dev-sidebar-title">' + t('ideas.develop.sidebar.title') + '</div>' +
+        sidebarItems +
+      '</div>' +
+    '</div>';
+
+  const notesEl = stage.querySelector('#idea-dev-notes');
+  if (notesEl) {
+    autoResize(notesEl);
+    notesEl.addEventListener('input', () => { fd.notes = notesEl.value; autoResize(notesEl); saveProjectDebounced(); });
   }
 
-  function done() {
-    const stage = ideaStage();
-    if (!stage) return;
-    const bullets = flow.qs.map((q, n) => answers[n]
-      ? '<div class="idea-bullet"><span class="idea-bullet-q">' + ideaEsc(q) + '</span>' + ideaEsc(answers[n]) + '</div>'
-      : '').join('');
-    stage.innerHTML =
-      '<div class="idea-done-tag">' + t('ideas.done') + '</div>' +
-      '<div class="idea-close">' + flow.close + '</div>' +
-      (bullets || '<div class="idea-meta">' + t('ideas.done.empty') + '</div>') +
-      '<div class="idea-actions idea-actions-end">' +
-        '<button class="idea-next" id="idea-to-brain">' + t('ideas.to.brainstorm') + '</button>' +
-        '<button class="idea-ghost" id="idea-to-notes">' + t('ideas.to.notes') + '</button>' +
-        '<button class="idea-ghost" id="idea-restart">' + t('ideas.restart') + '</button>' +
-      '</div>';
-    stage.querySelector('#idea-restart').addEventListener('click', ideaHome);
-    stage.querySelector('#idea-to-brain').addEventListener('click', () => ideaSendToBrainstorm(flow, answers));
-    stage.querySelector('#idea-to-notes').addEventListener('click', () => ideaSendToNotes(answers));
+  const refreshSummary = () => {
+    const sumText = stage.querySelector('#idea-dev-sum-text-' + step);
+    if (sumText) sumText.innerHTML = fd.conclusion.trim() ? ideaEsc(fd.conclusion) : '<span class="idea-dev-sum-empty">' + t('ideas.develop.empty') + '</span>';
+    const tab = stage.querySelector('.idea-dev-tab[data-i="' + step + '"]');
+    if (tab) tab.classList.toggle('filled', !!(fd.conclusion.trim() || fd.notes.trim()));
+  };
+
+  if (f.structured) {
+    stage.querySelectorAll('.idea-dev-bme-area').forEach(area => {
+      autoResize(area);
+      area.addEventListener('input', () => {
+        fd.parts[area.dataset.part] = area.value;
+        fd.conclusion = ideaWorkshopCombineParts(f, fd.parts);
+        autoResize(area);
+        saveProjectDebounced();
+        refreshSummary();
+      });
+    });
+  } else {
+    const conclEl = stage.querySelector('#idea-dev-conclusion');
+    autoResize(conclEl);
+    conclEl.addEventListener('input', () => {
+      fd.conclusion = conclEl.value;
+      autoResize(conclEl);
+      saveProjectDebounced();
+      refreshSummary();
+    });
   }
 
-  step();
+  stage.querySelectorAll('.idea-dev-tab').forEach(btn => {
+    btn.addEventListener('click', () => { ws.step = parseInt(btn.dataset.i, 10); saveProjectDebounced(); ideaWorkshopRender(name); });
+  });
+  const backBtn = stage.querySelector('#idea-dev-back');
+  if (backBtn) backBtn.addEventListener('click', () => { ws.step--; saveProjectDebounced(); ideaWorkshopRender(name); });
+  const homeBtn = stage.querySelector('#idea-dev-home');
+  if (homeBtn) homeBtn.addEventListener('click', ideaHome);
+  const nextBtn = stage.querySelector('#idea-dev-next');
+  if (nextBtn) nextBtn.addEventListener('click', () => { ws.step++; saveProjectDebounced(); ideaWorkshopRender(name); });
+  const finishBtn = stage.querySelector('#idea-dev-finish');
+  if (finishBtn) finishBtn.addEventListener('click', () => ideaWorkshopFinish(name));
 }
 
-// Funnel the collected answers into the tools that already exist.
-function ideaSendToBrainstorm(flow, answers) {
+function ideaWorkshopFinish(name) {
+  const fields = IDEA_WORKSHOP_FIELDS[name][currentLang] || IDEA_WORKSHOP_FIELDS[name].en;
+  const meta = (IDEA_WORKSHOP_META[currentLang] || IDEA_WORKSHOP_META.en)[name];
+  const ws = ideaWorkshops[name];
+  const stage = ideaStage();
+  if (!stage) return;
+  const bullets = fields.map((f, i) => {
+    const c = ws.fields[i].conclusion.trim();
+    return c ? '<div class="idea-bullet"><span class="idea-bullet-q">' + ideaEsc(f.conclusionLabel) + '</span>' + ideaEsc(c) + '</div>' : '';
+  }).join('');
+  stage.innerHTML =
+    '<div class="idea-done-tag">' + t('ideas.done') + '</div>' +
+    '<div class="idea-close">' + ideaEsc(meta.doneClose) + '</div>' +
+    (bullets || '<div class="idea-meta">' + t('ideas.done.empty') + '</div>') +
+    '<div class="idea-actions idea-actions-end">' +
+      '<button class="idea-next" id="idea-dev-to-brain">' + t('ideas.to.brainstorm') + '</button>' +
+      '<button class="idea-ghost" id="idea-dev-to-notes">' + t('ideas.to.notes') + '</button>' +
+      '<button class="idea-ghost" id="idea-dev-restart">' + t('ideas.restart') + '</button>' +
+    '</div>';
+  stage.querySelector('#idea-dev-restart').addEventListener('click', ideaHome);
+  stage.querySelector('#idea-dev-to-brain').addEventListener('click', () => ideaWorkshopSendToBrainstorm(name, fields, meta));
+  stage.querySelector('#idea-dev-to-notes').addEventListener('click', () => ideaWorkshopSendToNotes(name, fields));
+}
+
+function ideaWorkshopSendToBrainstorm(name, fields, meta) {
+  const ws = ideaWorkshops[name];
   const rootId = ideaGenId();
-  ideaMap.nodes.push({ id: rootId, parentId: null, type: 'root', text: flow.close, prompt: null });
-  flow.qs.forEach((q, n) => {
-    if (!answers[n]) return;
-    ideaMap.nodes.push({ id: ideaGenId(), parentId: rootId, type: 'and-then', text: answers[n], prompt: null });
+  ideaMap.nodes.push({ id: rootId, parentId: null, type: 'root', text: meta.title, prompt: null });
+  fields.forEach((f, i) => {
+    const c = ws.fields[i].conclusion.trim();
+    if (!c) return;
+    ideaMap.nodes.push({ id: ideaGenId(), parentId: rootId, type: 'and-then', text: c, prompt: null });
   });
   saveProject();
   switchPage('brainstorming');
 }
 
-function ideaSendToNotes(answers) {
+function ideaWorkshopSendToNotes(name, fields) {
+  const ws = ideaWorkshops[name];
   let y = 40, ci = 0;
-  answers.forEach((a, n) => {
-    if (!a) return;
-    brainstorm.notes.push({
-      id: Date.now() + n,
-      x: 40, y,
-      text: a,
-      color: IDEA_NOTE_COLORS[ci++ % IDEA_NOTE_COLORS.length],
-    });
+  fields.forEach((f, i) => {
+    const c = ws.fields[i].conclusion.trim();
+    if (!c) return;
+    brainstorm.notes.push({ id: Date.now() + i, x: 40, y, text: c, color: IDEA_NOTE_COLORS[ci++ % IDEA_NOTE_COLORS.length] });
     y += 130;
   });
   saveProject();
@@ -2989,6 +3250,10 @@ function applyProjectData(data) {
     : { entries: [], customCategories: [], hiddenBuiltins: [] };
   wbFilter = 'Alle';
   ideaMap = data.ideaMap && Array.isArray(data.ideaMap.nodes) ? data.ideaMap : { nodes: [] };
+  ideaWorkshops = {
+    develop: ideaWorkshopFromData((data.ideaWorkshops || {}).develop || data.ideaDevelop, 'develop'),
+    char: ideaWorkshopFromData((data.ideaWorkshops || {}).char, 'char'),
+  };
   storyTheme = data.storyTheme && typeof data.storyTheme === 'object'
     ? { statement: '', question: '', claim: '', lesson: '', belief: '', motif: '', message: '', ...data.storyTheme }
     : { statement: '', question: '', claim: '', lesson: '', belief: '', motif: '', message: '' };
@@ -3134,6 +3399,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
     selectedStructure = null;
     worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
     ideaMap = { nodes: [] };
+    ideaWorkshops = { develop: ideaWorkshopDefault('develop'), char: ideaWorkshopDefault('char') };
     wbFilter = 'Alle';
     structureSelect.value = '';
     currentProjectName = null;
