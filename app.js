@@ -432,7 +432,7 @@ const TR = {
     'ideas.answer.placeholder': 'Write freely — even half a thought counts.',
     'ideas.back': '← Back', 'ideas.skip': "Don't know — skip", 'ideas.next': 'Next',
     'ideas.done': 'Done', 'ideas.done.empty': 'Nothing noted yet — go back and fill in a few answers.',
-    'ideas.to.brainstorm': 'Send to Brainstorming', 'ideas.to.notes': 'Send to Notes', 'ideas.restart': 'Another starting point',
+    'ideas.to.notes': 'Send to Notes', 'ideas.to.character': 'Save as Character Entry', 'ideas.restart': 'Another starting point',
     'ideas.develop.field': 'Field', 'ideas.develop.finish': 'Finish',
     'ideas.develop.sidebar.title': 'Conclusions so far',
     'ideas.develop.empty': 'Not written yet.',
@@ -572,7 +572,7 @@ const TR = {
     'ideas.answer.placeholder': 'Schreib frei — auch ein halber Gedanke zählt.',
     'ideas.back': '← Zurück', 'ideas.skip': 'Weiß nicht — überspringen', 'ideas.next': 'Weiter',
     'ideas.done': 'Geschafft', 'ideas.done.empty': 'Noch nichts notiert — geh zurück und füll ein paar Antworten aus.',
-    'ideas.to.brainstorm': 'An Brainstorming schicken', 'ideas.to.notes': 'An Notizen schicken', 'ideas.restart': 'Anderer Startpunkt',
+    'ideas.to.notes': 'An Notizen schicken', 'ideas.to.character': 'Als Charaktereintrag speichern', 'ideas.restart': 'Anderer Startpunkt',
     'ideas.develop.field': 'Feld', 'ideas.develop.finish': 'Abschließen',
     'ideas.develop.sidebar.title': 'Bisherige Conclusions',
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
@@ -978,26 +978,14 @@ function ideaWorkshopFinish(name) {
     '<div class="idea-close">' + ideaEsc(meta.doneClose) + '</div>' +
     (bullets || '<div class="idea-meta">' + t('ideas.done.empty') + '</div>') +
     '<div class="idea-actions idea-actions-end">' +
-      '<button class="idea-next" id="idea-dev-to-brain">' + t('ideas.to.brainstorm') + '</button>' +
+      (name === 'char' ? '<button class="idea-next" id="idea-dev-to-char">' + t('ideas.to.character') + '</button>' : '') +
       '<button class="idea-ghost" id="idea-dev-to-notes">' + t('ideas.to.notes') + '</button>' +
       '<button class="idea-ghost" id="idea-dev-restart">' + t('ideas.restart') + '</button>' +
     '</div>';
   stage.querySelector('#idea-dev-restart').addEventListener('click', ideaHome);
-  stage.querySelector('#idea-dev-to-brain').addEventListener('click', () => ideaWorkshopSendToBrainstorm(name, fields, meta));
   stage.querySelector('#idea-dev-to-notes').addEventListener('click', () => ideaWorkshopSendToNotes(name, fields));
-}
-
-function ideaWorkshopSendToBrainstorm(name, fields, meta) {
-  const ws = ideaWorkshops[name];
-  const rootId = ideaGenId();
-  ideaMap.nodes.push({ id: rootId, parentId: null, type: 'root', text: meta.title, prompt: null });
-  fields.forEach((f, i) => {
-    const c = ws.fields[i].conclusion.trim();
-    if (!c) return;
-    ideaMap.nodes.push({ id: ideaGenId(), parentId: rootId, type: 'and-then', text: c, prompt: null });
-  });
-  saveProject();
-  switchPage('brainstorming');
+  const toCharBtn = stage.querySelector('#idea-dev-to-char');
+  if (toCharBtn) toCharBtn.addEventListener('click', () => ideaWorkshopSaveAsCharacter(fields));
 }
 
 function ideaWorkshopSendToNotes(name, fields) {
@@ -1010,7 +998,22 @@ function ideaWorkshopSendToNotes(name, fields) {
     y += 130;
   });
   saveProject();
+  renderBrainstorm();
   switchPage('brainstorm');
+}
+
+// Turns the char workshop's conclusions into a new Characters page entry, so the
+// writer doesn't have to retype what they just worked out.
+function ideaWorkshopSaveAsCharacter(fields) {
+  const ws = ideaWorkshops.char;
+  const description = fields
+    .map((f, i) => ws.fields[i].conclusion.trim())
+    .filter(Boolean)
+    .join('\n\n');
+  characters.push({ id: Date.now(), name: '', description, image: null });
+  saveProject();
+  renderCharacters();
+  switchPage('characters');
 }
 
 // ── Brainstorming (idea tree) ──
