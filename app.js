@@ -302,7 +302,7 @@ const TR = {
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
     'nav.writing': 'Writing', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Find & Develop Ideas', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Get Unstuck', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'New task + Enter', 'sidebar.insp.empty': 'Add images as inspiration (+)',
@@ -436,6 +436,25 @@ const TR = {
     'ideas.develop.field': 'Field', 'ideas.develop.finish': 'Finish',
     'ideas.develop.sidebar.title': 'Conclusions so far',
     'ideas.develop.empty': 'Not written yet.',
+    'ideas.section.find': 'Find & Develop Ideas', 'ideas.section.flow': 'Get Words Flowing',
+    'flow.tagline': 'You don\'t need a finished idea or your "real" style to start. These are just for loosening up — nothing here has to be good.',
+    'flow.home.title': 'Pick a way in',
+    'flow.back': '← Home',
+    'flow.min': 'min', 'flow.shuffle': 'New prompt', 'flow.words': 'words',
+    'flow.start': 'Start', 'flow.pause': 'Pause', 'flow.done': 'Done', 'flow.again': 'Try another',
+    'flow.freewrite.title': 'Freewrite Timer', 'flow.freewrite.sub': 'Set a timer, get a prompt, and just keep writing — no editing, no judging.',
+    'flow.freewrite.placeholder': "Don't stop to fix anything. Keep going, even if it's bad — especially if it's bad.",
+    'flow.freewrite.done.msg': "Time's up. However many words that was, you proved you can start without a plan — that's the whole point.",
+    'flow.badly.title': 'Write It Badly First', 'flow.badly.sub': 'Deliberately write the worst version of a scene. It removes the pressure to be good.',
+    'flow.badly.instr1': 'Write the worst, most clichéd version of this scene you can manage. Lean into every cliché — overwrought, melodramatic, cringe. That is the goal here.',
+    'flow.badly.instr2': 'Now write it again — just a little less bad this time. Keep one thing from your first try that you secretly liked.',
+    'flow.badly.placeholder': 'Go on, make it terrible...',
+    'flow.badly.next': 'Now, slightly less bad →',
+    'flow.badly.done.msg': "Two drafts in, and the second one already has more of you in it than a blank page ever could. That's how style actually shows up — through bad first drafts, not around them.",
+    'flow.style.title': 'Style Sampler', 'flow.style.sub': 'See the same short scene written in a few different voices — then try one of your own.',
+    'flow.style.scene': 'Scene', 'flow.style.reveal': 'Show me the voices',
+    'flow.style.yourturn': 'Your turn — write your own version',
+    'flow.style.placeholder': "Borrow a voice that pulled at you, or land somewhere between two of them...",
     'new.modal.create': 'Create new project', 'btn.cancel': 'Cancel',
   },
   de: {
@@ -445,7 +464,7 @@ const TR = {
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
     'nav.writing': 'Schreiben', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Ideen finden und entwickeln', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Nicht mehr feststecken', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'Neue Aufgabe + Enter', 'sidebar.insp.empty': 'Bilder als Inspiration hinzufügen (+)',
@@ -576,6 +595,25 @@ const TR = {
     'ideas.develop.field': 'Feld', 'ideas.develop.finish': 'Abschließen',
     'ideas.develop.sidebar.title': 'Bisherige Conclusions',
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
+    'ideas.section.find': 'Ideen finden und entwickeln', 'ideas.section.flow': 'Ins Schreiben kommen',
+    'flow.tagline': 'Du brauchst weder eine fertige Idee noch deinen "echten" Stil, um anzufangen. Das hier ist nur zum Lockern — nichts davon muss gut sein.',
+    'flow.home.title': 'Wähl dir einen Einstieg',
+    'flow.back': '← Zurück',
+    'flow.min': 'Min', 'flow.shuffle': 'Neuer Impuls', 'flow.words': 'Wörter',
+    'flow.start': 'Start', 'flow.pause': 'Pause', 'flow.done': 'Geschafft', 'flow.again': 'Nochmal',
+    'flow.freewrite.title': 'Freewrite-Timer', 'flow.freewrite.sub': 'Stell einen Timer, bekomm einen Impuls und schreib einfach weiter — ohne zu redigieren, ohne zu urteilen.',
+    'flow.freewrite.placeholder': 'Hör nicht auf, um etwas zu verbessern. Schreib weiter, auch wenn es schlecht ist — vor allem dann.',
+    'flow.freewrite.done.msg': 'Zeit abgelaufen. Egal wie viele Wörter es waren — du hast bewiesen, dass du ohne Plan anfangen kannst. Genau darum geht es.',
+    'flow.badly.title': 'Erst bewusst schlecht schreiben', 'flow.badly.sub': 'Schreib absichtlich die schlechteste Version einer Szene. Das nimmt den Druck, gut sein zu müssen.',
+    'flow.badly.instr1': 'Schreib die schlechteste, klischeehafteste Version dieser Szene, die du schaffst. Geh voll in jedes Klischee rein — überzogen, melodramatisch, peinlich. Genau das ist hier das Ziel.',
+    'flow.badly.instr2': 'Schreib sie jetzt noch einmal — diesmal nur ein bisschen weniger schlecht. Behalte eine Sache aus deinem ersten Versuch, die dir heimlich gefallen hat.',
+    'flow.badly.placeholder': 'Los, mach es furchtbar...',
+    'flow.badly.next': 'Jetzt etwas weniger schlecht →',
+    'flow.badly.done.msg': 'Zwei Entwürfe weiter, und im zweiten steckt schon mehr von dir als ein leeres Blatt je hätte zeigen können. So zeigt sich Stil tatsächlich — durch schlechte erste Entwürfe, nicht um sie herum.',
+    'flow.style.title': 'Stil-Sampler', 'flow.style.sub': 'Sieh dieselbe kurze Szene in ein paar unterschiedlichen Stimmen geschrieben — und probier dann deine eigene.',
+    'flow.style.scene': 'Szene', 'flow.style.reveal': 'Zeig mir die Stimmen',
+    'flow.style.yourturn': 'Du bist dran — schreib deine eigene Version',
+    'flow.style.placeholder': 'Leih dir eine Stimme, die dich angesprochen hat, oder finde etwas dazwischen...',
     'new.modal.create': 'Neues Projekt erstellen', 'btn.cancel': 'Abbrechen',
   },
 };
@@ -819,8 +857,25 @@ function ideaStage() { return document.getElementById('idea-stage'); }
 function renderIdeas() {
   const page = document.getElementById('page-ideas');
   if (!page) return;
+  flowClearTimer();
   page.innerHTML =
     '<div class="page-header"><h1>' + t('nav.ideas') + '</h1></div>' +
+    '<div class="idea-section">' +
+      '<h2 class="idea-section-title">' + t('ideas.section.find') + '</h2>' +
+      '<div id="idea-section-body"></div>' +
+    '</div>' +
+    '<div class="idea-section">' +
+      '<h2 class="idea-section-title">' + t('ideas.section.flow') + '</h2>' +
+      '<div id="flow-section-body"></div>' +
+    '</div>';
+  renderIdeasFind();
+  renderFlow();
+}
+
+function renderIdeasFind() {
+  const body = document.getElementById('idea-section-body');
+  if (!body) return;
+  body.innerHTML =
     '<div class="idea-intro">' + t('ideas.tagline') + '</div>' +
     '<div class="idea-stage" id="idea-stage"></div>';
   ideaHome();
@@ -1014,6 +1069,403 @@ function ideaWorkshopSaveAsCharacter(fields) {
   saveProject();
   renderCharacters();
   switchPage('characters');
+}
+
+// ══════════════════════════════════
+// ── GET WORDS FLOWING (low-stakes warm-up exercises) ──
+// ══════════════════════════════════
+// Pure practice — nothing here is saved to the project. The point is to lower
+// the stakes of starting, so state resets each visit on purpose.
+const FLOW_PROMPTS = {
+  en: [
+    "Someone is waiting for a bus that isn't coming.",
+    'A character finds a key that doesn\'t open anything they own.',
+    'Two people are stuck in an elevator, and one of them starts laughing.',
+    'Someone is rehearsing what they\'re about to say, out loud, alone.',
+    'A character is the last one to leave a party.',
+    'Someone reads a text message three times before replying.',
+    'A character is packing a bag and can\'t decide what matters.',
+    'Two strangers recognize each other from somewhere, but can\'t place it.',
+  ],
+  de: [
+    'Jemand wartet auf einen Bus, der nicht kommt.',
+    'Eine Figur findet einen Schlüssel, der zu nichts passt, das sie besitzt.',
+    'Zwei Menschen stecken im Aufzug fest, und einer fängt an zu lachen.',
+    'Jemand probt allein und laut, was er gleich sagen will.',
+    'Eine Figur ist die letzte Person, die eine Party verlässt.',
+    'Jemand liest eine Nachricht dreimal, bevor er antwortet.',
+    'Eine Figur packt eine Tasche und kann sich nicht entscheiden, was wichtig ist.',
+    'Zwei Fremde erkennen sich von irgendwoher, können es aber nicht einordnen.',
+  ],
+};
+
+// Each scene is described in four contrasting "voices", named by how the prose
+// feels rather than after any author. All content here is original.
+//   Tactile & Tender   — craft, texture, emotion carried by small made things
+//   Breathless & Defiant — clipped, high-pressure, first-person nerve under fire
+//   Deadpan & Theatrical — dry narrator wit, gothic-comic, stylish timing
+//   Caustic & Candid   — opinionated first-person rant, world explained while annoyed
+const WRITING_STYLE_SCENES = {
+  en: [
+    {
+      base: 'A duel against a rival as the great hall burns around them.',
+      voices: [
+        { label: 'Tactile & Tender', text: "Her grandmother had woven the coat-lining with copper thread, one careful row a night, for exactly this — and now the rival's fire-spell slid off it like rain off oilcloth. Eivor felt each stitch hold. She set her boots in the ash, raised the blade her own hands had ground thin, and let the work her family had made for her do what love does: keep her standing one more breath." },
+        { label: 'Breathless & Defiant', text: "He swung. I dropped. The rafters came down where my head had been. Heat everywhere. He grinned like he'd already won — so I let him think it, then drove my shoulder into his ribs. We don't both walk out of here. Fine by me. I am Not the one who falls." },
+        { label: 'Deadpan & Theatrical', text: "The hall was on fire, which Castan felt was a bit much, even for his rival. \"You've redecorated,\" he observed, parrying a blow that would have removed his face. The man snarled something about destiny. Castan had never met a destiny worth shouting about, and said so, mostly to watch the vein in his opponent's forehead do its impressive little dance." },
+        { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. You can't see, you can't breathe, and your supposedly noble rival is using a forbidden ember-rite that'll cost him his soul in about a decade — not that he's thinking that far ahead, the showoff. I had roughly four seconds before the ceiling decided the fight for both of us. So I stopped fencing and started cheating." },
+      ],
+    },
+    {
+      base: 'A rope bridge gives way over a deep gorge — she catches the last plank.',
+      voices: [
+        { label: 'Tactile & Tender', text: "The plank was old cedar, worn smooth by a hundred years of crossing hands, and it was the smoothness that nearly killed her — then saved her, because she knew this grain. She'd helped re-bind these ropes as a child, learned which knot was her father's. Her fingers found his knot now, the clumsy strong one, and held it the way you hold a hand." },
+        { label: 'Breathless & Defiant', text: "The bridge went. Just — gone, under me. I grabbed. Wood tore my palms open and I did not care. Below me the gorge wanted me and the wind agreed with it. No. Not today. I got one knee up. Then the other. I climbed my own scream back to the ledge." },
+        { label: 'Deadpan & Theatrical', text: "The bridge collapsed with the enthusiasm of something that had been waiting all week. Mirelle found herself dangling from a single plank over a drop generously described as fatal. \"Well,\" she told the gorge, which did not answer, being a gorge. She decided, on balance, that she would prefer to live, and began the tedious business of not letting go." },
+        { label: 'Caustic & Candid', text: "Here's the thing nobody tells you about ancient rope bridges: they're maintained by exactly nobody, blessed by priests who haven't visited in a generation, and held together mostly by tradition and optimism. So when it dropped me, I wasn't surprised. Furious, dangling, bleeding — but not surprised. I caught the last plank purely out of spite, and spite, it turns out, has an excellent grip." },
+      ],
+    },
+    {
+      base: 'Two of them pick the same lock in the dark, shoulders touching.',
+      voices: [
+        { label: 'Tactile & Tender', text: "Their hands kept meeting on the lockpick — his calloused at the thumb, hers ink-stained — and neither of them pulled away as fast as they should have. The tumblers were brass, warm now from being worked. \"You're doing it wrong,\" she murmured, and guided his fingers a half-turn, and felt the lock give the same moment her breath did." },
+        { label: 'Breathless & Defiant', text: "\"Move over.\" \"I had it.\" \"You did not have it.\" His shoulder was against mine, warm, distracting, deeply unfair. The lock clicked. We both froze — too close, both grinning, neither admitting it. \"See,\" he breathed. \"Teamwork.\" I told him to shut up. I did not move away." },
+        { label: 'Deadpan & Theatrical', text: "\"You're breathing on my neck,\" Soraya noted. \"I'm concentrating,\" said the thief, who was very obviously not concentrating. They were crammed into a doorway built for one repentant monk, picking a lock that required four hands and considerably less tension between the two attached to them. The lock surrendered before either of them did, which Soraya considered a tactical loss." },
+        { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew the trick to this mechanism — left, left, hard right — and I could've done it in three seconds alone. I took thirty. Sue me. He smelled like rain and bad decisions, and I have always been weak for both." },
+      ],
+    },
+    {
+      base: 'After the battle, a friend sits down and splits the last ration.',
+      voices: [
+        { label: 'Tactile & Tender', text: "Bren broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like small forgivenesses. He didn't say anything about the fight, or the ones who weren't sitting with them. He just pressed the bigger half into Talia's hand, closed her fingers around it, and let the warmth of his palm say the rest." },
+        { label: 'Breathless & Defiant', text: "We were both still shaking. Didn't matter. He dropped down beside me, tore the last ration in two, shoved half at my chest. \"Eat.\" \"You eat.\" \"Eat, or I'll sit on you.\" I ate. He watched me do it like it was the only order that had gone right all day. Maybe it was." },
+        { label: 'Deadpan & Theatrical', text: "\"I saved you the bigger piece,\" said Aldous, which was a lie; the pieces were identical and he had measured them with the grim precision of a man who'd nearly died and intended to be petty about smaller things now. They sat in the wreckage, sharing stale bread like it was a feast. It was, a bit. They were both still breathing, which was more than the architecture could say." },
+        { label: 'Caustic & Candid', text: "People think friendship in wartime is all noble speeches. It's not. It's your idiot best friend splitting one sad heel of bread with you and insisting his half is smaller when it obviously isn't. I let him win that argument. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the not-being-alone-with-it — this one I lose on purpose, every time." },
+      ],
+    },
+    {
+      base: 'Alone on the night watch at the top of the tower.',
+      voices: [
+        { label: 'Tactile & Tender', text: "She had her mother's woolen scarf wound twice around her throat, and she kept finding the place where the dye had run, a small map of an old rainstorm. The tower was cold and the stars were far and the watch was hers alone, but her fingers worked the familiar weave, and for a while the wool remembered warmth even where her hands had stopped believing in it." },
+        { label: 'Breathless & Defiant', text: "Just me up here. Me, the wind, the dark, and whatever the dark is hiding tonight. Fine. I can do alone. I've done alone. I plant my feet, set my back to the cold stone, and stare the night down like it owes me money. It does not blink. Neither do I." },
+        { label: 'Deadpan & Theatrical', text: "The night watch, Corwin had decided, was a magnificent way to be reminded that one was deeply unimportant to the universe. The stars ignored him. The wind ignored him with real commitment. Somewhere below, the whole sleeping keep ignored him most of all. He saluted the darkness anyway. Standards, after all, were standards." },
+        { label: 'Caustic & Candid', text: "Night watch is punishment duty dressed up as honor, and everyone above me knows it. You stand at the top of a freezing tower for six hours so that if something terrible comes, you can scream about it slightly before it kills everyone. That's the whole job. So there I was, alone, cold, gloriously expendable — and, fine, yes, looking at the stars, because nobody warns you that the view up here is unfair." },
+      ],
+    },
+    {
+      base: 'Holding a dying companion as the snow falls.',
+      voices: [
+        { label: 'Tactile & Tender', text: "Yusa had whittled the little wooden bird in her pocket on a hundred easier nights, and she pressed it into Doren's failing hand now because she had nothing else to give him that her own fingers had made. The snow settled on his hair and did not melt. She kept carving the air with her thumb against his knuckle, the old whittling motion, as if she could shape one more morning out of nothing." },
+        { label: 'Breathless & Defiant', text: "Stay. Stay with me. I'm ordering you. The snow was coming down and his blood was so warm against it and I pressed both hands to the wound like I could hold him in by force. \"Don't,\" I said. \"Don't you dare.\" He smiled. That was the worst part. He smiled like it was all right. It was not all right." },
+        { label: 'Deadpan & Theatrical', text: "\"This is embarrassing,\" Kestrel managed, with blood on his teeth and snow in his lashes. \"Dying. In winter. So dramatic.\" Marn told him to save his breath, and he said breath was rather the issue, wasn't it. The snow kept falling, indifferent and clean, dressing the whole ruined field in white. He made one more joke. He did not make a second." },
+        { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life my friend was bleeding into the snow and apologizing — apologizing, the maddening fool — for getting blood on my sleeve. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
+      ],
+    },
+  ],
+  de: [
+    {
+      base: 'Ein Duell gegen einen Rivalen, während die große Halle ringsum brennt.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Ihre Großmutter hatte das Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und nun glitt der Feuerzauber des Rivalen daran ab wie Regen von Öltuch. Eivor spürte jeden Stich halten. Sie stellte die Stiefel in die Asche, hob die Klinge, die ihre eigenen Hände dünn geschliffen hatten, und ließ das, was ihre Familie für sie gemacht hatte, das tun, was Liebe tut: sie einen Atemzug länger aufrecht halten." },
+        { label: 'Atemlos & trotzig', text: "Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Überall Hitze. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide hier raus. Mir recht. Ich bin nicht die, die fällt." },
+        { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Castan selbst für seinen Rivalen ein wenig übertrieben fand. „Du hast neu dekoriert“, bemerkte er und parierte einen Hieb, der ihm das Gesicht abgenommen hätte. Der Mann knurrte etwas von Bestimmung. Castan hatte noch keine Bestimmung getroffen, über die zu brüllen sich lohnte, und sagte das auch — vor allem, um zuzusehen, wie die Ader auf der Stirn seines Gegners ihr beeindruckendes kleines Tänzchen aufführte." },
+        { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Du siehst nichts, du atmest nicht, und dein angeblich edler Rivale benutzt einen verbotenen Glutritus, der ihn in etwa einem Jahrzehnt die Seele kostet — nicht, dass er so weit dächte, der Angeber. Mir blieben ungefähr vier Sekunden, bevor die Decke den Kampf für uns beide entscheiden würde. Also hörte ich auf zu fechten und fing an zu betrügen." },
+      ],
+    },
+    {
+      base: 'Eine Seilbrücke reißt über einer tiefen Schlucht — sie fängt die letzte Planke.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn sie kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden, hatte gelernt, welcher Knoten der ihres Vaters war. Jetzt fanden ihre Finger seinen Knoten, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält." },
+        { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich griff zu. Holz riss mir die Handflächen auf, und es war mir egal. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ich brachte ein Knie hoch. Dann das andere. Ich kletterte meinen eigenen Schrei zurück auf den Sims." },
+        { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Mirelle fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Alles in allem, entschied sie, würde sie das Leben vorziehen, und machte sich an das mühsame Geschäft, nicht loszulassen." },
+        { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet, gesegnet von Priestern, die seit einer Generation nicht mehr vorbeigeschaut haben, und zusammengehalten hauptsächlich von Tradition und Optimismus. Als sie mich also fallen ließ, war ich nicht überrascht. Wütend, baumelnd, blutend — aber nicht überrascht. Ich fing die letzte Planke aus reinem Trotz, und Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
+      ],
+    },
+    {
+      base: 'Zu zweit knacken sie dasselbe Schloss im Dunkeln, Schulter an Schulter.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Ihre Hände trafen sich immer wieder am Dietrich — seine am Daumen schwielig, ihre tintenfleckig — und keiner zog so schnell zurück, wie er sollte. Die Zuhaltungen waren aus Messing, warm jetzt vom Arbeiten. „Du machst es falsch“, murmelte sie, führte seine Finger eine halbe Drehung, und spürte das Schloss im selben Moment nachgeben wie ihren Atem." },
+        { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Seine Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
+        { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Soraya fest. „Ich konzentriere mich“, sagte der Dieb, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, und knackten ein Schloss, das vier Hände verlangte und deutlich weniger Spannung zwischen den beiden, die daran hingen. Das Schloss kapitulierte, bevor einer von ihnen es tat, was Soraya als taktische Niederlage verbuchte." },
+        { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte den Trick zu diesem Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Ich brauchte dreißig. Verklag mich. Er roch nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach." },
+      ],
+    },
+    {
+      base: 'Nach der Schlacht setzt sich ein Freund hin und teilt die letzte Ration.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Bren brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er sagte nichts über den Kampf oder über die, die nicht mit ihnen saßen. Er drückte Talia nur die größere Hälfte in die Hand, schloss ihre Finger darum und ließ die Wärme seiner Handfläche den Rest sagen." },
+        { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Er ließ sich neben mir fallen, riss die letzte Ration entzwei, drückte mir die Hälfte gegen die Brust. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Vielleicht war er das." },
+        { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Aldous, was eine Lüge war; die Stücke waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Sie saßen im Trümmerfeld und teilten altes Brot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
+        { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus deinem trotteligen besten Freund, der einen traurigen Brotkanten mit dir teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihn diesen Streit gewinnen. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Nicht-allein-damit-Sein — den verliere ich mit Absicht, jedes Mal." },
+      ],
+    },
+    {
+      base: 'Allein auf der Nachtwache hoch oben auf dem Turm.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Sie hatte den Wollschal ihrer Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt und die Sterne fern und die Wache ganz allein ihre, doch ihre Finger arbeiteten das vertraute Gewebe, und eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo ihre Hände nicht mehr daran glaubten." },
+        { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Gut. Allein kann ich. Allein hab ich schon hinter mir. Ich stelle die Füße fest, lehne den Rücken an den kalten Stein und starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
+        { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Corwin beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Irgendwo unten ignorierte ihn die ganze schlafende Festung am allermeisten. Er salutierte der Dunkelheit trotzdem. Prinzipien waren schließlich Prinzipien." },
+        { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da, allein, kalt, herrlich entbehrlich — und, ja, gut, sah zu den Sternen, weil dich niemand warnt, dass die Aussicht hier oben ungerecht ist." },
+      ],
+    },
+    {
+      base: 'Einen sterbenden Gefährten halten, während der Schnee fällt.',
+      voices: [
+        { label: 'Sinnlich & zärtlich', text: "Yusa hatte den kleinen Holzvogel in ihrer Tasche an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Dorens versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Der Schnee legte sich auf sein Haar und schmolz nicht. Sie schnitzte weiter in die Luft, den Daumen an seinem Knöchel, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen formen." },
+        { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte. Das war das Schlimmste. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
+        { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Kestrel hervor, Blut auf den Zähnen, Schnee in den Wimpern. „Sterben. Im Winter. So dramatisch.“ Marn sagte ihm, er solle seinen Atem sparen, und er sagte, der Atem sei ja genau das Problem, nicht wahr. Der Schnee fiel weiter, gleichgültig und rein, und kleidete das ganze verwüstete Feld in Weiß. Er machte noch einen Witz. Einen zweiten machte er nicht." },
+        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete mein Freund im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — dafür, dass er mir Blut auf den Ärmel gemacht hatte. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
+      ],
+    },
+  ],
+};
+
+let flowState = {
+  freewrite: { duration: 300, remaining: 300, timerId: null, running: false, prompt: '', text: '' },
+  badly: { prompt: '', bad: '', less: '', phase: 'bad' },
+  style: { sceneIdx: 0, shown: false, attempt: '' },
+};
+
+function flowWordCount(text) { const m = (text || '').trim().match(/\S+/g); return m ? m.length : 0; }
+
+function flowRandomPrompt(exclude) {
+  const list = FLOW_PROMPTS[currentLang] || FLOW_PROMPTS.en;
+  if (list.length === 1) return list[0];
+  let p;
+  do { p = list[Math.floor(Math.random() * list.length)]; } while (p === exclude);
+  return p;
+}
+
+function flowClearTimer() {
+  if (flowState.freewrite.timerId) { clearInterval(flowState.freewrite.timerId); flowState.freewrite.timerId = null; }
+}
+
+function flowStageEl() { return document.getElementById('flow-stage'); }
+
+function renderFlow() {
+  flowClearTimer();
+  const body = document.getElementById('flow-section-body');
+  if (!body) return;
+  body.innerHTML =
+    '<div class="idea-intro">' + t('flow.tagline') + '</div>' +
+    '<div class="idea-stage" id="flow-stage"></div>';
+  flowHome();
+}
+
+function flowHome() {
+  flowClearTimer();
+  const stage = flowStageEl();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div class="idea-lead">' + t('flow.home.title') + '</div>' +
+    '<div class="idea-pick-grid" id="flow-pick-grid"></div>';
+  const grid = stage.querySelector('#flow-pick-grid');
+  [
+    { key: 'freewrite', title: t('flow.freewrite.title'), sub: t('flow.freewrite.sub'), go: flowFreewriteStart },
+    { key: 'badly', title: t('flow.badly.title'), sub: t('flow.badly.sub'), go: flowBadlyStart },
+    { key: 'style', title: t('flow.style.title'), sub: t('flow.style.sub'), go: flowStyleStart },
+  ].forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'idea-pick';
+    b.innerHTML = '<span class="idea-pick-txt"><span class="idea-pick-t">' + ideaEsc(o.title) + '</span><span class="idea-pick-s">' + ideaEsc(o.sub) + '</span></span>';
+    b.addEventListener('click', o.go);
+    grid.appendChild(b);
+  });
+}
+
+// ── Freewrite Timer ──
+function flowFreewriteStart() {
+  const fw = flowState.freewrite;
+  fw.prompt = flowRandomPrompt();
+  fw.duration = fw.duration || 300;
+  fw.remaining = fw.duration;
+  fw.running = false;
+  fw.text = '';
+  flowRenderFreewrite();
+}
+
+function flowRenderFreewrite() {
+  const stage = flowStageEl();
+  if (!stage) return;
+  const fw = flowState.freewrite;
+  const mins = Math.floor(fw.remaining / 60), secs = fw.remaining % 60;
+  const timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
+  stage.innerHTML =
+    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
+    '<div class="idea-lead">' + t('flow.freewrite.title') + '</div>' +
+    '<div class="flow-duration-row">' +
+      [300, 600, 900].map(d => '<button class="flow-dur-btn' + (fw.duration === d ? ' on' : '') + '" data-d="' + d + '">' + (d / 60) + ' ' + t('flow.min') + '</button>').join('') +
+    '</div>' +
+    '<div class="flow-prompt-row">' +
+      '<div class="flow-prompt">' + ideaEsc(fw.prompt) + '</div>' +
+      '<button class="idea-ghost flow-shuffle" id="flow-shuffle-btn" title="' + ideaEsc(t('flow.shuffle')) + '">&#10227;</button>' +
+    '</div>' +
+    '<textarea class="idea-answer flow-freewrite-area" id="flow-freewrite-area" rows="10" placeholder="' + ideaEsc(t('flow.freewrite.placeholder')) + '">' + ideaEsc(fw.text) + '</textarea>' +
+    '<div class="flow-timer-row">' +
+      '<div class="flow-timer" id="flow-timer">' + timeStr + '</div>' +
+      '<div class="flow-wordcount" id="flow-wordcount">' + flowWordCount(fw.text) + ' ' + t('flow.words') + '</div>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-next" id="flow-start-btn">' + (fw.running ? t('flow.pause') : t('flow.start')) + '</button>' +
+    '</div>';
+
+  stage.querySelector('#flow-home-btn').addEventListener('click', () => { flowClearTimer(); flowHome(); });
+  stage.querySelectorAll('.flow-dur-btn').forEach(btn => btn.addEventListener('click', () => {
+    if (fw.running) return;
+    fw.duration = parseInt(btn.dataset.d, 10);
+    fw.remaining = fw.duration;
+    flowRenderFreewrite();
+  }));
+  stage.querySelector('#flow-shuffle-btn').addEventListener('click', () => { fw.prompt = flowRandomPrompt(fw.prompt); flowRenderFreewrite(); });
+  const area = stage.querySelector('#flow-freewrite-area');
+  autoResize(area);
+  area.addEventListener('input', () => {
+    fw.text = area.value;
+    autoResize(area);
+    const wc = stage.querySelector('#flow-wordcount');
+    if (wc) wc.textContent = flowWordCount(fw.text) + ' ' + t('flow.words');
+  });
+  stage.querySelector('#flow-start-btn').addEventListener('click', flowToggleTimer);
+}
+
+function flowToggleTimer() {
+  const fw = flowState.freewrite;
+  if (fw.running) {
+    flowClearTimer();
+    fw.running = false;
+    flowRenderFreewrite();
+    return;
+  }
+  fw.running = true;
+  fw.timerId = setInterval(() => {
+    fw.remaining--;
+    const timerEl = document.getElementById('flow-timer');
+    if (timerEl) {
+      const m = Math.floor(fw.remaining / 60), s = fw.remaining % 60;
+      timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    }
+    if (fw.remaining <= 0) {
+      flowClearTimer();
+      fw.running = false;
+      flowFreewriteDone();
+    }
+  }, 1000);
+  flowRenderFreewrite();
+}
+
+function flowFreewriteDone() {
+  const stage = flowStageEl();
+  if (!stage) return;
+  const fw = flowState.freewrite;
+  stage.innerHTML =
+    '<div class="idea-done-tag">' + t('flow.done') + '</div>' +
+    '<div class="idea-close">' + ideaEsc(t('flow.freewrite.done.msg')) + ' (' + flowWordCount(fw.text) + ' ' + t('flow.words') + ')</div>' +
+    '<div class="idea-actions idea-actions-end">' +
+      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
+      '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
+    '</div>';
+  stage.querySelector('#flow-again-btn').addEventListener('click', flowFreewriteStart);
+  stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
+}
+
+// ── Write It Badly First ──
+function flowBadlyStart() {
+  const b = flowState.badly;
+  b.prompt = flowRandomPrompt();
+  b.bad = '';
+  b.less = '';
+  b.phase = 'bad';
+  flowRenderBadly();
+}
+
+function flowRenderBadly() {
+  const stage = flowStageEl();
+  if (!stage) return;
+  const b = flowState.badly;
+  const isBad = b.phase === 'bad';
+  stage.innerHTML =
+    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
+    '<div class="idea-lead">' + t('flow.badly.title') + '</div>' +
+    '<div class="flow-prompt-row">' +
+      '<div class="flow-prompt">' + ideaEsc(b.prompt) + '</div>' +
+      (isBad ? '<button class="idea-ghost flow-shuffle" id="flow-shuffle-btn" title="' + ideaEsc(t('flow.shuffle')) + '">&#10227;</button>' : '') +
+    '</div>' +
+    '<div class="idea-dev-instructions"><p>' + ideaEsc(isBad ? t('flow.badly.instr1') : t('flow.badly.instr2')) + '</p></div>' +
+    '<textarea class="idea-answer" id="flow-badly-area" rows="8" placeholder="' + ideaEsc(t('flow.badly.placeholder')) + '">' + ideaEsc(isBad ? b.bad : b.less) + '</textarea>' +
+    '<div class="idea-actions">' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-next" id="flow-badly-next">' + (isBad ? t('flow.badly.next') : t('flow.done')) + '</button>' +
+    '</div>';
+
+  stage.querySelector('#flow-home-btn').addEventListener('click', flowHome);
+  const shuffleBtn = stage.querySelector('#flow-shuffle-btn');
+  if (shuffleBtn) shuffleBtn.addEventListener('click', () => { b.prompt = flowRandomPrompt(b.prompt); flowRenderBadly(); });
+  const area = stage.querySelector('#flow-badly-area');
+  autoResize(area);
+  area.addEventListener('input', () => {
+    if (isBad) b.bad = area.value; else b.less = area.value;
+    autoResize(area);
+  });
+  stage.querySelector('#flow-badly-next').addEventListener('click', () => {
+    if (isBad) { b.phase = 'less'; flowRenderBadly(); } else { flowBadlyDone(); }
+  });
+}
+
+function flowBadlyDone() {
+  const stage = flowStageEl();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div class="idea-done-tag">' + t('flow.done') + '</div>' +
+    '<div class="idea-close">' + ideaEsc(t('flow.badly.done.msg')) + '</div>' +
+    '<div class="idea-actions idea-actions-end">' +
+      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
+      '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
+    '</div>';
+  stage.querySelector('#flow-again-btn').addEventListener('click', flowBadlyStart);
+  stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
+}
+
+// ── Style Sampler (hardcoded scenes — static site, no generated text) ──
+function flowStyleStart() {
+  const s = flowState.style;
+  s.sceneIdx = 0;
+  s.shown = false;
+  s.attempt = '';
+  flowRenderStyle();
+}
+
+function flowRenderStyle() {
+  const stage = flowStageEl();
+  if (!stage) return;
+  const scenes = WRITING_STYLE_SCENES[currentLang] || WRITING_STYLE_SCENES.en;
+  const s = flowState.style;
+  const scene = scenes[s.sceneIdx];
+  stage.innerHTML =
+    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
+    '<div class="idea-lead">' + t('flow.style.title') + '</div>' +
+    '<div class="flow-scene-picker">' +
+      scenes.map((sc, i) => '<button class="flow-scene-btn' + (i === s.sceneIdx ? ' on' : '') + '" data-i="' + i + '">' + t('flow.style.scene') + ' ' + (i + 1) + '</button>').join('') +
+    '</div>' +
+    '<div class="flow-scene-base">' + ideaEsc(scene.base) + '</div>' +
+    (s.shown
+      ? '<div class="flow-voices">' + scene.voices.map(v => '<div class="flow-voice"><div class="flow-voice-label">' + ideaEsc(v.label) + '</div><div class="flow-voice-text">' + ideaEsc(v.text) + '</div></div>').join('') + '</div>' +
+        '<div class="idea-dev-conclusion-label">' + t('flow.style.yourturn') + '</div>' +
+        '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>'
+      : '<button class="idea-next" id="flow-style-reveal">' + t('flow.style.reveal') + '</button>');
+
+  stage.querySelector('#flow-home-btn').addEventListener('click', flowHome);
+  stage.querySelectorAll('.flow-scene-btn').forEach(btn => btn.addEventListener('click', () => {
+    s.sceneIdx = parseInt(btn.dataset.i, 10);
+    s.shown = false;
+    s.attempt = '';
+    flowRenderStyle();
+  }));
+  const revealBtn = stage.querySelector('#flow-style-reveal');
+  if (revealBtn) revealBtn.addEventListener('click', () => { s.shown = true; flowRenderStyle(); });
+  const area = stage.querySelector('#flow-style-area');
+  if (area) {
+    autoResize(area);
+    area.addEventListener('input', () => { s.attempt = area.value; autoResize(area); });
+  }
 }
 
 // ── Brainstorming (idea tree) ──
@@ -1352,6 +1804,7 @@ function renderWorldbuilding() {
 // ── Navigation (icon sidebar) ──
 function switchPage(page) {
   if (typeof flushEditor === 'function') { flushEditor(); saveProject(); }
+  if (page !== 'ideas' && typeof flowClearTimer === 'function') flowClearTimer();
   document.querySelectorAll('.icon-nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const btn = document.querySelector(`.icon-nav-btn[data-page="${page}"]`);

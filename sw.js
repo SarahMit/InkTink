@@ -1,6 +1,13 @@
 // InkTink service worker — caches the app shell so it loads offline.
-// Bump CACHE version whenever app.js / style.css / index.html change.
-const CACHE = 'inktink-v1';
+//
+// Strategy: network-first for the app shell (HTML/JS/CSS). When online the user
+// always gets the latest files, so shipping changes needs NO manual version
+// bump. When offline we fall back to the last cached copy. Other static assets
+// (images, manifest, fonts) use cache-first since they rarely change.
+//
+// CACHE is only a storage namespace now; bump it only if you ever need to force
+// a hard wipe of every client's cache.
+const CACHE = 'inktink-v3';
 const ASSETS = [
   '.',
   'index.html',
@@ -9,6 +16,19 @@ const ASSETS = [
   'manifest.json',
   'assets/Logo.svg'
 ];
+
+// Files that make up the app shell — these must stay fresh, so we prefer the
+// network and only use the cache as an offline fallback.
+const SHELL = new Set(['', 'index.html', 'app.js', 'style.css']);
+
+function isShellRequest(request) {
+  if (request.mode === 'navigate') return true;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  // Path relative to the SW scope, e.g. "app.js" or "" for the root.
+  const path = url.pathname.replace(self.registration.scope.replace(self.location.origin, ''), '');
+  return SHELL.has(path);
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -24,9 +44,24 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Cache-first for app shell; fall back to network for everything else.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  if (isShellRequest(event.request)) {
+    // Network-first: fetch fresh, cache the new copy, fall back to cache offline.
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('index.html')))
+    );
+    return;
+  }
+
+  // Cache-first for everything else (images, manifest, fonts…).
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );

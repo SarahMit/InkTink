@@ -3534,3 +3534,44 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   .idea-dev-layout { grid-template-columns: 1fr; }
   .idea-dev-sidebar { position: static; }
 }
+
+/* ── Ideas page sections (Find Ideas / Get Words Flowing, stacked) ── */
+.idea-section { margin-bottom: 44px; }
+.idea-section:last-child { margin-bottom: 0; }
+.idea-section-title {
+  font-family: var(--font-head); font-size: 22px; margin: 0 0 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+
+/* ── Get Words Flowing (warm-up exercises) ── */
+.flow-back-row { margin-bottom: 14px; }
+.flow-duration-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.flow-dur-btn {
+  border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text);
+  border-radius: var(--radius-sm); padding: 7px 13px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.flow-dur-btn:hover { border-color: var(--accent); }
+.flow-dur-btn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.flow-prompt-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.flow-prompt { font-family: var(--font-head); font-size: 18px; line-height: 1.4; flex: 1; }
+.flow-shuffle { flex: none; padding: 8px 11px; font-size: 16px; line-height: 1; }
+.flow-freewrite-area { min-height: 220px; margin-bottom: 12px; }
+.flow-timer-row { display: flex; align-items: center; gap: 16px; }
+.flow-timer { font-family: var(--font-head); font-size: 22px; min-width: 56px; }
+.flow-wordcount { font-size: 13px; color: var(--text-muted); }
+
+.flow-scene-picker { display: flex; gap: 8px; margin-bottom: 14px; }
+.flow-scene-btn {
+  border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text);
+  border-radius: var(--radius-sm); padding: 7px 13px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.flow-scene-btn:hover { border-color: var(--accent); }
+.flow-scene-btn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.flow-scene-base { font-family: var(--font-head); font-size: 17px; line-height: 1.4; margin-bottom: 16px; color: var(--text-muted); font-style: italic; }
+.flow-voices { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+.flow-voice {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.flow-voice-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 5px; font-weight: 600; }
+.flow-voice-text { font-size: 14px; line-height: 1.55; }
