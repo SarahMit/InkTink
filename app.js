@@ -452,7 +452,7 @@ const TR = {
     'flow.badly.next': 'Now, slightly less bad →',
     'flow.badly.done.msg': "Two drafts in, and the second one already has more of you in it than a blank page ever could. That's how style actually shows up — through bad first drafts, not around them.",
     'flow.style.title': 'Style Sampler', 'flow.style.sub': 'See the same short scene written in a few different voices — then try one of your own.',
-    'flow.style.scene': 'Scene', 'flow.style.reveal': 'Show me the voices',
+    'flow.style.scene': 'Scene',
     'flow.style.yourturn': 'Your turn — write your own version',
     'flow.style.placeholder': "Borrow a voice that pulled at you, or land somewhere between two of them...",
     'new.modal.create': 'Create new project', 'btn.cancel': 'Cancel',
@@ -596,22 +596,22 @@ const TR = {
     'ideas.develop.sidebar.title': 'Bisherige Conclusions',
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
     'ideas.section.find': 'Ideen finden und entwickeln', 'ideas.section.flow': 'Ins Schreiben kommen',
-    'flow.tagline': 'Du brauchst weder eine fertige Idee noch deinen "echten" Stil, um anzufangen. Das hier ist nur zum Lockern — nichts davon muss gut sein.',
+    'flow.tagline': 'Du brauchst weder eine fertige Idee noch deinen „echten“ Stil, um anzufangen. Das hier ist nur zum Lockern — nichts davon muss gut sein.',
     'flow.home.title': 'Wähl dir einen Einstieg',
     'flow.back': '← Zurück',
     'flow.min': 'Min', 'flow.shuffle': 'Neuer Impuls', 'flow.words': 'Wörter',
     'flow.start': 'Start', 'flow.pause': 'Pause', 'flow.done': 'Geschafft', 'flow.again': 'Nochmal',
     'flow.freewrite.title': 'Freewrite-Timer', 'flow.freewrite.sub': 'Stell einen Timer, bekomm einen Impuls und schreib einfach weiter — ohne zu redigieren, ohne zu urteilen.',
-    'flow.freewrite.placeholder': 'Hör nicht auf, um etwas zu verbessern. Schreib weiter, auch wenn es schlecht ist — vor allem dann.',
+    'flow.freewrite.placeholder': 'Hör nicht auf zu schreiben, um etwas zu verbessern. Schreib weiter, auch wenn es schlecht ist — vor allem dann.',
     'flow.freewrite.done.msg': 'Zeit abgelaufen. Egal wie viele Wörter es waren — du hast bewiesen, dass du ohne Plan anfangen kannst. Genau darum geht es.',
     'flow.badly.title': 'Erst bewusst schlecht schreiben', 'flow.badly.sub': 'Schreib absichtlich die schlechteste Version einer Szene. Das nimmt den Druck, gut sein zu müssen.',
     'flow.badly.instr1': 'Schreib die schlechteste, klischeehafteste Version dieser Szene, die du schaffst. Geh voll in jedes Klischee rein — überzogen, melodramatisch, peinlich. Genau das ist hier das Ziel.',
     'flow.badly.instr2': 'Schreib sie jetzt noch einmal — diesmal nur ein bisschen weniger schlecht. Behalte eine Sache aus deinem ersten Versuch, die dir heimlich gefallen hat.',
     'flow.badly.placeholder': 'Los, mach es furchtbar...',
     'flow.badly.next': 'Jetzt etwas weniger schlecht →',
-    'flow.badly.done.msg': 'Zwei Entwürfe weiter, und im zweiten steckt schon mehr von dir als ein leeres Blatt je hätte zeigen können. So zeigt sich Stil tatsächlich — durch schlechte erste Entwürfe, nicht um sie herum.',
+    'flow.badly.done.msg': 'Zwei Entwürfe weiter, und im zweiten steckt schon mehr von dir als ein leeres Blatt je hätte zeigen können. So zeigt sich Stil tatsächlich — durch schlechte erste Entwürfe, nicht trotz ihnen.',
     'flow.style.title': 'Stil-Sampler', 'flow.style.sub': 'Sieh dieselbe kurze Szene in ein paar unterschiedlichen Stimmen geschrieben — und probier dann deine eigene.',
-    'flow.style.scene': 'Szene', 'flow.style.reveal': 'Zeig mir die Stimmen',
+    'flow.style.scene': 'Szene',
     'flow.style.yourturn': 'Du bist dran — schreib deine eigene Version',
     'flow.style.placeholder': 'Leih dir eine Stimme, die dich angesprochen hat, oder finde etwas dazwischen...',
     'new.modal.create': 'Neues Projekt erstellen', 'btn.cancel': 'Abbrechen',
@@ -854,22 +854,23 @@ function ideaEsc(s) { return (s || '').replace(/</g, '&lt;'); }
 function ideaGenId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function ideaStage() { return document.getElementById('idea-stage'); }
 
+let ideaSection = 'find'; // 'find' | 'flow'
+
 function renderIdeas() {
   const page = document.getElementById('page-ideas');
   if (!page) return;
   flowClearTimer();
   page.innerHTML =
     '<div class="page-header"><h1>' + t('nav.ideas') + '</h1></div>' +
-    '<div class="idea-section">' +
-      '<h2 class="idea-section-title">' + t('ideas.section.find') + '</h2>' +
-      '<div id="idea-section-body"></div>' +
+    '<div class="idea-section-tabs">' +
+      '<button class="idea-section-tab' + (ideaSection === 'find' ? ' on' : '') + '" data-sec="find">' + t('ideas.section.find') + '</button>' +
+      '<button class="idea-section-tab' + (ideaSection === 'flow' ? ' on' : '') + '" data-sec="flow">' + t('ideas.section.flow') + '</button>' +
     '</div>' +
-    '<div class="idea-section">' +
-      '<h2 class="idea-section-title">' + t('ideas.section.flow') + '</h2>' +
-      '<div id="flow-section-body"></div>' +
-    '</div>';
-  renderIdeasFind();
-  renderFlow();
+    '<div id="idea-section-body"></div>';
+  page.querySelectorAll('.idea-section-tab').forEach(btn => {
+    btn.addEventListener('click', () => { ideaSection = btn.dataset.sec; renderIdeas(); });
+  });
+  if (ideaSection === 'flow') renderFlow(); else renderIdeasFind();
 }
 
 function renderIdeasFind() {
@@ -1108,113 +1109,113 @@ const FLOW_PROMPTS = {
 const WRITING_STYLE_SCENES = {
   en: [
     {
-      base: 'A duel against a rival as the great hall burns around them.',
+      base: 'Eivor duels her rival Castan as the great hall burns around them.',
       voices: [
-        { label: 'Tactile & Tender', text: "Her grandmother had woven the coat-lining with copper thread, one careful row a night, for exactly this — and now the rival's fire-spell slid off it like rain off oilcloth. Eivor felt each stitch hold. She set her boots in the ash, raised the blade her own hands had ground thin, and let the work her family had made for her do what love does: keep her standing one more breath." },
-        { label: 'Breathless & Defiant', text: "He swung. I dropped. The rafters came down where my head had been. Heat everywhere. He grinned like he'd already won — so I let him think it, then drove my shoulder into his ribs. We don't both walk out of here. Fine by me. I am Not the one who falls." },
-        { label: 'Deadpan & Theatrical', text: "The hall was on fire, which Castan felt was a bit much, even for his rival. \"You've redecorated,\" he observed, parrying a blow that would have removed his face. The man snarled something about destiny. Castan had never met a destiny worth shouting about, and said so, mostly to watch the vein in his opponent's forehead do its impressive little dance." },
-        { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. You can't see, you can't breathe, and your supposedly noble rival is using a forbidden ember-rite that'll cost him his soul in about a decade — not that he's thinking that far ahead, the showoff. I had roughly four seconds before the ceiling decided the fight for both of us. So I stopped fencing and started cheating." },
+        { label: 'Tactile & Tender', text: "Eivor's grandmother had woven her coat-lining with copper thread, one careful row a night, for exactly this — and when Castan's fire-spell broke against her, it slid off the weave like rain off oilcloth. She felt every stitch hold. A rafter came down where her head had been, and she was already inside his reach, driving her shoulder into his ribs. He had grinned like the duel was won. The work her family made for her did what love does: it kept her standing one more breath." },
+        { label: 'Breathless & Defiant', text: "Castan threw fire. It broke on my coat and slid off — thank you, Grandmother. He swung. I dropped. The rafter came down where my head had been. He grinned like he'd already won, so I let him think it, then drove my shoulder into his ribs. We don't both walk out of this hall. Fine. I am Not the one who falls." },
+        { label: 'Deadpan & Theatrical', text: "The hall was on fire, which Eivor felt was a bit much, even for Castan. His fire-spell slid off her copper-threaded coat and accomplished nothing but ruining the curtains. \"You've redecorated,\" she observed, ducking a blow as a rafter obligingly fell where her head had been. Castan snarled something about destiny. She drove her shoulder into his ribs, mostly to make him stop talking." },
+        { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. Castan was flinging a forbidden fire-rite that'll cost him his soul in a decade — not that the showoff thinks that far ahead — and it slid right off the coat my grandmother threaded with copper. A rafter nearly settled the matter for both of us. So I quit fencing like a gentlewoman and drove my shoulder into his ribs instead." },
       ],
     },
     {
-      base: 'A rope bridge gives way over a deep gorge — she catches the last plank.',
+      base: 'The rope bridge gives way over the gorge — Mira catches the last plank.',
       voices: [
-        { label: 'Tactile & Tender', text: "The plank was old cedar, worn smooth by a hundred years of crossing hands, and it was the smoothness that nearly killed her — then saved her, because she knew this grain. She'd helped re-bind these ropes as a child, learned which knot was her father's. Her fingers found his knot now, the clumsy strong one, and held it the way you hold a hand." },
-        { label: 'Breathless & Defiant', text: "The bridge went. Just — gone, under me. I grabbed. Wood tore my palms open and I did not care. Below me the gorge wanted me and the wind agreed with it. No. Not today. I got one knee up. Then the other. I climbed my own scream back to the ledge." },
-        { label: 'Deadpan & Theatrical', text: "The bridge collapsed with the enthusiasm of something that had been waiting all week. Mirelle found herself dangling from a single plank over a drop generously described as fatal. \"Well,\" she told the gorge, which did not answer, being a gorge. She decided, on balance, that she would prefer to live, and began the tedious business of not letting go." },
-        { label: 'Caustic & Candid', text: "Here's the thing nobody tells you about ancient rope bridges: they're maintained by exactly nobody, blessed by priests who haven't visited in a generation, and held together mostly by tradition and optimism. So when it dropped me, I wasn't surprised. Furious, dangling, bleeding — but not surprised. I caught the last plank purely out of spite, and spite, it turns out, has an excellent grip." },
+        { label: 'Tactile & Tender', text: "The plank was old cedar, worn smooth by a hundred years of crossing hands, and the smoothness nearly killed her — then saved her, because Mira knew this grain. She'd helped re-bind these ropes as a child; her fingers found her father's knot now, the clumsy strong one, and held it the way you hold a hand. The wood tore her palms open. She got one knee up, then the other, and climbed back to the ledge." },
+        { label: 'Breathless & Defiant', text: "The bridge went. Just — gone, under me. I grabbed the last plank and the wood tore my palms open and I did not care. My father re-bound these ropes; I knew his knot by feel. Below me the gorge wanted me and the wind agreed. No. Not today. One knee up. Then the other. I climbed my own scream back to the ledge." },
+        { label: 'Deadpan & Theatrical', text: "The bridge collapsed with the enthusiasm of something that had been waiting all week. Mira found herself dangling from a single plank over a drop generously described as fatal, palms torn, recognizing — of all things — her father's knotwork. \"Well,\" she told the gorge, which did not answer, being a gorge. She got one knee up, then the other, and undertook the tedious business of not dying." },
+        { label: 'Caustic & Candid', text: "Here's what nobody tells you about ancient rope bridges: they're maintained by exactly nobody and held together by tradition and optimism. So when it dropped me, I wasn't surprised — furious, dangling, palms bleeding, but not surprised. The one mercy was the rope: my father re-bound these knots, and his held. I got one knee up, then the other, purely out of spite. Spite, it turns out, has an excellent grip." },
       ],
     },
     {
-      base: 'Two of them pick the same lock in the dark, shoulders touching.',
+      base: 'Soraya and Rook pick the same lock in the dark, shoulders touching.',
       voices: [
-        { label: 'Tactile & Tender', text: "Their hands kept meeting on the lockpick — his calloused at the thumb, hers ink-stained — and neither of them pulled away as fast as they should have. The tumblers were brass, warm now from being worked. \"You're doing it wrong,\" she murmured, and guided his fingers a half-turn, and felt the lock give the same moment her breath did." },
-        { label: 'Breathless & Defiant', text: "\"Move over.\" \"I had it.\" \"You did not have it.\" His shoulder was against mine, warm, distracting, deeply unfair. The lock clicked. We both froze — too close, both grinning, neither admitting it. \"See,\" he breathed. \"Teamwork.\" I told him to shut up. I did not move away." },
-        { label: 'Deadpan & Theatrical', text: "\"You're breathing on my neck,\" Soraya noted. \"I'm concentrating,\" said the thief, who was very obviously not concentrating. They were crammed into a doorway built for one repentant monk, picking a lock that required four hands and considerably less tension between the two attached to them. The lock surrendered before either of them did, which Soraya considered a tactical loss." },
-        { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew the trick to this mechanism — left, left, hard right — and I could've done it in three seconds alone. I took thirty. Sue me. He smelled like rain and bad decisions, and I have always been weak for both." },
+        { label: 'Tactile & Tender', text: "Their hands kept meeting on the lockpick — Rook's calloused at the thumb, Soraya's ink-stained — and neither pulled away as fast as they should have. The tumblers were brass, warm now from being worked, their shoulders pressed together in a doorway built for one. \"You're doing it wrong,\" she murmured, guiding his fingers a half-turn. The lock gave the same moment her breath did. \"Teamwork,\" he whispered, and she did not move away." },
+        { label: 'Breathless & Defiant', text: "\"Move over.\" \"I had it.\" \"You did not have it.\" Rook's shoulder was against mine, warm, distracting, deeply unfair. Our hands kept colliding on the pick. The lock clicked. We both froze — too close, both grinning, neither admitting it. \"See,\" he breathed. \"Teamwork.\" I told him to shut up. I did not move away." },
+        { label: 'Deadpan & Theatrical', text: "\"You're breathing on my neck,\" Soraya noted. \"I'm concentrating,\" said Rook, who was very obviously not concentrating. They were crammed into a doorway built for one repentant monk, hands knocking together on a single pick, working a lock that required considerably less tension between the two people attached to it. The lock surrendered first. \"Teamwork,\" Rook said. Soraya counted it a tactical loss and did not move away." },
+        { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew this mechanism — left, left, hard right — and could've done it alone in three seconds. With Rook's shoulder against mine I took thirty. The thing clicked; he grinned and said \"teamwork.\" I told him to shut up. He smells like rain and bad decisions, and I've always been weak for both — so no, I didn't move away." },
       ],
     },
     {
-      base: 'After the battle, a friend sits down and splits the last ration.',
+      base: 'After the battle, Bren sits down beside Talia and splits the last ration.',
       voices: [
-        { label: 'Tactile & Tender', text: "Bren broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like small forgivenesses. He didn't say anything about the fight, or the ones who weren't sitting with them. He just pressed the bigger half into Talia's hand, closed her fingers around it, and let the warmth of his palm say the rest." },
-        { label: 'Breathless & Defiant', text: "We were both still shaking. Didn't matter. He dropped down beside me, tore the last ration in two, shoved half at my chest. \"Eat.\" \"You eat.\" \"Eat, or I'll sit on you.\" I ate. He watched me do it like it was the only order that had gone right all day. Maybe it was." },
-        { label: 'Deadpan & Theatrical', text: "\"I saved you the bigger piece,\" said Aldous, which was a lie; the pieces were identical and he had measured them with the grim precision of a man who'd nearly died and intended to be petty about smaller things now. They sat in the wreckage, sharing stale bread like it was a feast. It was, a bit. They were both still breathing, which was more than the architecture could say." },
-        { label: 'Caustic & Candid', text: "People think friendship in wartime is all noble speeches. It's not. It's your idiot best friend splitting one sad heel of bread with you and insisting his half is smaller when it obviously isn't. I let him win that argument. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the not-being-alone-with-it — this one I lose on purpose, every time." },
+        { label: 'Tactile & Tender', text: "Bren broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like small forgivenesses. He pressed the bigger half into Talia's hand — \"they're the same,\" he lied — and closed her fingers around it. He said nothing about the battle, or the ones not sitting with them. He just let the warmth of his palm say the rest, and they breathed, which was more than some could." },
+        { label: 'Breathless & Defiant', text: "We were both still shaking. Didn't matter. Bren dropped down beside me, tore the last waybread in two, shoved the bigger half at my chest. \"They're the same,\" he lied. \"Eat.\" \"You eat.\" \"Eat, or I'll sit on you.\" I ate. He watched me do it like it was the only order that had gone right all day. We were both still breathing. Maybe that was enough." },
+        { label: 'Deadpan & Theatrical', text: "\"I saved you the bigger piece,\" said Bren, which was a lie; the halves were identical and he had measured them with the grim precision of a man who'd nearly died and intended to be petty about smaller things now. He pressed it on Talia until she ate. They sat in the wreckage, sharing stale waybread like it was a feast. It was, a bit. They were both still breathing, which was more than the architecture could say." },
+        { label: 'Caustic & Candid', text: "People think wartime friendship is all noble speeches. It's not. It's Bren, your idiot best friend, splitting one sad heel of waybread and insisting his half is smaller when it obviously isn't. I let him win that lie. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the both-of-us-still-breathing — this one I lose on purpose, every time." },
       ],
     },
     {
-      base: 'Alone on the night watch at the top of the tower.',
+      base: 'Corwin stands the night watch alone, at the top of the tower.',
       voices: [
-        { label: 'Tactile & Tender', text: "She had her mother's woolen scarf wound twice around her throat, and she kept finding the place where the dye had run, a small map of an old rainstorm. The tower was cold and the stars were far and the watch was hers alone, but her fingers worked the familiar weave, and for a while the wool remembered warmth even where her hands had stopped believing in it." },
-        { label: 'Breathless & Defiant', text: "Just me up here. Me, the wind, the dark, and whatever the dark is hiding tonight. Fine. I can do alone. I've done alone. I plant my feet, set my back to the cold stone, and stare the night down like it owes me money. It does not blink. Neither do I." },
-        { label: 'Deadpan & Theatrical', text: "The night watch, Corwin had decided, was a magnificent way to be reminded that one was deeply unimportant to the universe. The stars ignored him. The wind ignored him with real commitment. Somewhere below, the whole sleeping keep ignored him most of all. He saluted the darkness anyway. Standards, after all, were standards." },
-        { label: 'Caustic & Candid', text: "Night watch is punishment duty dressed up as honor, and everyone above me knows it. You stand at the top of a freezing tower for six hours so that if something terrible comes, you can scream about it slightly before it kills everyone. That's the whole job. So there I was, alone, cold, gloriously expendable — and, fine, yes, looking at the stars, because nobody warns you that the view up here is unfair." },
+        { label: 'Tactile & Tender', text: "Corwin had his mother's woolen scarf wound twice around his throat, and he kept finding the place where the dye had run, a small map of an old rainstorm. The tower was cold, the stars far, the watch his alone. He set his back to the stone and looked up. For a while the wool remembered warmth even where his hands had stopped believing in it, and the far stars did not seem quite so far." },
+        { label: 'Breathless & Defiant', text: "Just me up here. Me, the wind, the dark, and whatever the dark is hiding tonight. My mother's scarf is wound twice at my throat and it'll have to be enough. I set my back to the cold stone and look up. Fine. I can do alone — I've done alone. I stare the night down like it owes me money. It does not blink. Neither do I." },
+        { label: 'Deadpan & Theatrical', text: "The night watch, Corwin had decided, was a magnificent way to be reminded that one was deeply unimportant to the universe. The stars ignored him. The wind ignored him with real commitment. He tugged his mother's scarf higher, set his back to the cold stone, and looked up at them anyway. He saluted the darkness. Standards, after all, were standards." },
+        { label: 'Caustic & Candid', text: "Night watch is punishment duty dressed up as honor, and everyone above me knows it. You stand six hours on a freezing tower so that if something terrible comes, you can scream about it slightly before it kills everyone. That's the whole job. So there I was — my mother's scarf doubled at my throat, back to the cold stone, gloriously expendable — and, fine, yes, looking up, because nobody warns you how unfair the stars are from up here." },
       ],
     },
     {
-      base: 'Holding a dying companion as the snow falls.',
+      base: 'Yusa holds Doren as he dies, while the snow falls.',
       voices: [
-        { label: 'Tactile & Tender', text: "Yusa had whittled the little wooden bird in her pocket on a hundred easier nights, and she pressed it into Doren's failing hand now because she had nothing else to give him that her own fingers had made. The snow settled on his hair and did not melt. She kept carving the air with her thumb against his knuckle, the old whittling motion, as if she could shape one more morning out of nothing." },
-        { label: 'Breathless & Defiant', text: "Stay. Stay with me. I'm ordering you. The snow was coming down and his blood was so warm against it and I pressed both hands to the wound like I could hold him in by force. \"Don't,\" I said. \"Don't you dare.\" He smiled. That was the worst part. He smiled like it was all right. It was not all right." },
-        { label: 'Deadpan & Theatrical', text: "\"This is embarrassing,\" Kestrel managed, with blood on his teeth and snow in his lashes. \"Dying. In winter. So dramatic.\" Marn told him to save his breath, and he said breath was rather the issue, wasn't it. The snow kept falling, indifferent and clean, dressing the whole ruined field in white. He made one more joke. He did not make a second." },
-        { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life my friend was bleeding into the snow and apologizing — apologizing, the maddening fool — for getting blood on my sleeve. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
+        { label: 'Tactile & Tender', text: "Yusa had whittled the little wooden bird on a hundred easier nights, and she pressed it into Doren's failing hand now because she had nothing else to give that her own fingers had made. Her other hand stayed on the wound. The snow settled on his hair and did not melt. He apologized — for the blood on her sleeve, the fool — and smiled like it was all right. She kept her thumb moving against his knuckle, the old whittling motion, as if she could carve one more morning out of nothing." },
+        { label: 'Breathless & Defiant', text: "Stay. Stay with me, Doren. I'm ordering you. The snow came down and his blood was so warm against it, and I pressed both hands to the wound like I could hold him in by force. The little bird I'd carved was still in his hand. \"Don't,\" I said. \"Don't you dare.\" He smiled — that was the worst part — and apologized for my sleeve. He smiled like it was all right. It was not all right." },
+        { label: 'Deadpan & Theatrical', text: "\"This is embarrassing,\" Doren managed, blood on his teeth, snow in his lashes, the little carved bird loose in his palm. \"Dying. In winter. So dramatic.\" Yusa told him to save his breath and pressed harder on the wound; he said breath was rather the issue, wasn't it, and apologized for her sleeve. The snow kept falling, indifferent and clean. He made one more joke. He did not make a second." },
+        { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life Doren was bleeding into the snow and apologizing — apologizing, the maddening fool — for the blood on my sleeve, the carved bird I'd given him still in his fist. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
       ],
     },
   ],
   de: [
     {
-      base: 'Ein Duell gegen einen Rivalen, während die große Halle ringsum brennt.',
+      base: 'Eivor duelliert sich mit ihrem Rivalen Castan, während die große Halle ringsum brennt.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Ihre Großmutter hatte das Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und nun glitt der Feuerzauber des Rivalen daran ab wie Regen von Öltuch. Eivor spürte jeden Stich halten. Sie stellte die Stiefel in die Asche, hob die Klinge, die ihre eigenen Hände dünn geschliffen hatten, und ließ das, was ihre Familie für sie gemacht hatte, das tun, was Liebe tut: sie einen Atemzug länger aufrecht halten." },
-        { label: 'Atemlos & trotzig', text: "Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Überall Hitze. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide hier raus. Mir recht. Ich bin nicht die, die fällt." },
-        { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Castan selbst für seinen Rivalen ein wenig übertrieben fand. „Du hast neu dekoriert“, bemerkte er und parierte einen Hieb, der ihm das Gesicht abgenommen hätte. Der Mann knurrte etwas von Bestimmung. Castan hatte noch keine Bestimmung getroffen, über die zu brüllen sich lohnte, und sagte das auch — vor allem, um zuzusehen, wie die Ader auf der Stirn seines Gegners ihr beeindruckendes kleines Tänzchen aufführte." },
-        { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Du siehst nichts, du atmest nicht, und dein angeblich edler Rivale benutzt einen verbotenen Glutritus, der ihn in etwa einem Jahrzehnt die Seele kostet — nicht, dass er so weit dächte, der Angeber. Mir blieben ungefähr vier Sekunden, bevor die Decke den Kampf für uns beide entscheiden würde. Also hörte ich auf zu fechten und fing an zu betrügen." },
+        { label: 'Sinnlich & zärtlich', text: "Eivors Großmutter hatte ihr Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und als Castans Feuerzauber an ihr zerbrach, glitt er an dem Gewebe ab wie Regen von Öltuch. Sie spürte jeden Stich halten. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war, und da war sie ihm schon zu nah und rammte ihm die Schulter in die Rippen. Er hatte gegrinst, als wäre das Duell gewonnen. Was ihre Familie für sie gemacht hatte, tat, was Liebe tut: Es hielt sie einen Atemzug länger aufrecht." },
+        { label: 'Atemlos & trotzig', text: "Castan schleuderte Feuer. Es zerbrach an meinem Mantel und glitt ab — danke, Großmutter. Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide aus dieser Halle. Gut. Ich bin nicht die, die fällt." },
+        { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Eivor selbst für Castan ein wenig übertrieben fand. Sein Feuerzauber glitt an ihrem kupferdurchwirkten Mantel ab und brachte nichts zustande außer ruinierten Vorhängen. „Du hast neu dekoriert“, bemerkte sie und duckte sich unter einem Hieb, während ein Dachbalken gefällig dorthin fiel, wo eben ihr Kopf gewesen war. Castan knurrte etwas von Bestimmung. Sie rammte ihm die Schulter in die Rippen, vor allem, um ihn zum Schweigen zu bringen." },
+        { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Castan schleuderte einen verbotenen Feuerritus, der ihn in einem Jahrzehnt die Seele kostet — nicht, dass der Angeber so weit dächte —, und der glitt einfach an dem Mantel ab, den meine Großmutter mit Kupfer durchwirkt hatte. Ein Dachbalken hätte die Sache fast für uns beide entschieden. Also hörte ich auf, wie eine Dame zu fechten, und rammte ihm stattdessen die Schulter in die Rippen." },
       ],
     },
     {
-      base: 'Eine Seilbrücke reißt über einer tiefen Schlucht — sie fängt die letzte Planke.',
+      base: 'Die Seilbrücke reißt über der Schlucht — Mira fängt die letzte Planke.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn sie kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden, hatte gelernt, welcher Knoten der ihres Vaters war. Jetzt fanden ihre Finger seinen Knoten, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält." },
-        { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich griff zu. Holz riss mir die Handflächen auf, und es war mir egal. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ich brachte ein Knie hoch. Dann das andere. Ich kletterte meinen eigenen Schrei zurück auf den Sims." },
-        { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Mirelle fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Alles in allem, entschied sie, würde sie das Leben vorziehen, und machte sich an das mühsame Geschäft, nicht loszulassen." },
-        { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet, gesegnet von Priestern, die seit einer Generation nicht mehr vorbeigeschaut haben, und zusammengehalten hauptsächlich von Tradition und Optimismus. Als sie mich also fallen ließ, war ich nicht überrascht. Wütend, baumelnd, blutend — aber nicht überrascht. Ich fing die letzte Planke aus reinem Trotz, und Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
+        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn Mira kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden; jetzt fanden ihre Finger den Knoten ihres Vaters, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält. Das Holz riss ihr die Handflächen auf. Sie brachte ein Knie hoch, dann das andere, und kletterte zurück auf den Sims." },
+        { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich packte die letzte Planke, und das Holz riss mir die Handflächen auf, und es war mir egal. Mein Vater hatte diese Seile neu gebunden; ich kannte seinen Knoten am Griff. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ein Knie hoch. Dann das andere. Ich kletterte meinen eigenen Schrei zurück auf den Sims." },
+        { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Mira fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte, die Handflächen aufgerissen — und erkannte ausgerechnet das Knotenwerk ihres Vaters. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Sie brachte ein Knie hoch, dann das andere, und machte sich an das mühsame Geschäft, nicht zu sterben." },
+        { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet und nur von Tradition und Optimismus zusammengehalten. Als sie mich also fallen ließ, war ich nicht überrascht — wütend, baumelnd, mit blutenden Handflächen, aber nicht überrascht. Die einzige Gnade war das Seil: Mein Vater hatte diese Knoten neu gebunden, und seiner hielt. Ich brachte ein Knie hoch, dann das andere, aus reinem Trotz. Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
       ],
     },
     {
-      base: 'Zu zweit knacken sie dasselbe Schloss im Dunkeln, Schulter an Schulter.',
+      base: 'Soraya und Rook knacken dasselbe Schloss im Dunkeln, Schulter an Schulter.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Ihre Hände trafen sich immer wieder am Dietrich — seine am Daumen schwielig, ihre tintenfleckig — und keiner zog so schnell zurück, wie er sollte. Die Zuhaltungen waren aus Messing, warm jetzt vom Arbeiten. „Du machst es falsch“, murmelte sie, führte seine Finger eine halbe Drehung, und spürte das Schloss im selben Moment nachgeben wie ihren Atem." },
-        { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Seine Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
-        { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Soraya fest. „Ich konzentriere mich“, sagte der Dieb, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, und knackten ein Schloss, das vier Hände verlangte und deutlich weniger Spannung zwischen den beiden, die daran hingen. Das Schloss kapitulierte, bevor einer von ihnen es tat, was Soraya als taktische Niederlage verbuchte." },
-        { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte den Trick zu diesem Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Ich brauchte dreißig. Verklag mich. Er roch nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach." },
+        { label: 'Sinnlich & zärtlich', text: "Ihre Hände trafen sich immer wieder am Dietrich — Rooks am Daumen schwielig, Sorayas tintenfleckig — und keiner zog so schnell zurück, wie er sollte. Die Zuhaltungen waren aus Messing, warm jetzt vom Arbeiten, ihre Schultern aneinandergedrängt in einem Türrahmen, der für einen gebaut war. „Du machst es falsch“, murmelte sie und führte seine Finger eine halbe Drehung. Das Schloss gab im selben Moment nach wie ihr Atem. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
+        { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Rooks Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Unsere Hände stießen ständig am Dietrich zusammen. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
+        { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Soraya fest. „Ich konzentriere mich“, sagte Rook, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, die Hände aneinanderstoßend an einem einzigen Dietrich, und arbeiteten an einem Schloss, das deutlich weniger Spannung zwischen den beiden verlangte, die daran hingen. Das Schloss kapitulierte zuerst. „Teamwork“, sagte Rook. Soraya verbuchte es als taktische Niederlage und rückte nicht weg." },
+        { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte diesen Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Mit Rooks Schulter an meiner brauchte ich dreißig. Das Ding klickte; er grinste und sagte „Teamwork“. Ich sagte ihm, er solle den Mund halten. Er riecht nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach — also nein, ich rückte nicht weg." },
       ],
     },
     {
-      base: 'Nach der Schlacht setzt sich ein Freund hin und teilt die letzte Ration.',
+      base: 'Nach der Schlacht setzt sich Bren neben Talia und teilt die letzte Ration.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Bren brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er sagte nichts über den Kampf oder über die, die nicht mit ihnen saßen. Er drückte Talia nur die größere Hälfte in die Hand, schloss ihre Finger darum und ließ die Wärme seiner Handfläche den Rest sagen." },
-        { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Er ließ sich neben mir fallen, riss die letzte Ration entzwei, drückte mir die Hälfte gegen die Brust. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Vielleicht war er das." },
-        { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Aldous, was eine Lüge war; die Stücke waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Sie saßen im Trümmerfeld und teilten altes Brot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
-        { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus deinem trotteligen besten Freund, der einen traurigen Brotkanten mit dir teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihn diesen Streit gewinnen. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Nicht-allein-damit-Sein — den verliere ich mit Absicht, jedes Mal." },
+        { label: 'Sinnlich & zärtlich', text: "Bren brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er drückte Talia die größere Hälfte in die Hand — „die sind gleich groß“, log er — und schloss ihre Finger darum. Er sagte nichts über die Schlacht oder über die, die nicht mit ihnen saßen. Er ließ nur die Wärme seiner Handfläche den Rest sagen, und sie atmeten beide, was mehr war, als manche konnten." },
+        { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Bren ließ sich neben mir fallen, riss das letzte Wegbrot entzwei, drückte mir die größere Hälfte gegen die Brust. „Die sind gleich groß“, log er. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Wir atmeten beide noch. Vielleicht war das genug." },
+        { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Bren, was eine Lüge war; die Hälften waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Er drängte es Talia auf, bis sie aß. Sie saßen im Trümmerfeld und teilten altes Wegbrot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
+        { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus Bren, deinem trotteligen besten Freund, der einen traurigen Wegbrotkanten teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihm diese Lüge. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Wir-beide-atmen-noch — den verliere ich mit Absicht, jedes Mal." },
       ],
     },
     {
-      base: 'Allein auf der Nachtwache hoch oben auf dem Turm.',
+      base: 'Corwin steht allein die Nachtwache, hoch oben auf dem Turm.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Sie hatte den Wollschal ihrer Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt und die Sterne fern und die Wache ganz allein ihre, doch ihre Finger arbeiteten das vertraute Gewebe, und eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo ihre Hände nicht mehr daran glaubten." },
-        { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Gut. Allein kann ich. Allein hab ich schon hinter mir. Ich stelle die Füße fest, lehne den Rücken an den kalten Stein und starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
-        { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Corwin beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Irgendwo unten ignorierte ihn die ganze schlafende Festung am allermeisten. Er salutierte der Dunkelheit trotzdem. Prinzipien waren schließlich Prinzipien." },
-        { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da, allein, kalt, herrlich entbehrlich — und, ja, gut, sah zu den Sternen, weil dich niemand warnt, dass die Aussicht hier oben ungerecht ist." },
+        { label: 'Sinnlich & zärtlich', text: "Corwin hatte den Wollschal seiner Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt, die Sterne fern, die Wache ganz allein seine. Er lehnte den Rücken an den Stein und sah hinauf. Eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo seine Hände nicht mehr daran glaubten, und die fernen Sterne schienen gar nicht mehr so fern." },
+        { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er muss reichen. Ich lehne den Rücken an den kalten Stein und sehe hinauf. Gut. Allein kann ich — allein hab ich schon hinter mir. Ich starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
+        { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Corwin beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Er zog den Schal seiner Mutter höher, lehnte den Rücken an den kalten Stein und sah trotzdem zu ihnen hinauf. Er salutierte der Dunkelheit. Prinzipien waren schließlich Prinzipien." },
+        { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da — den Schal meiner Mutter doppelt um den Hals, den Rücken am kalten Stein, herrlich entbehrlich — und, ja, gut, sah hinauf, weil dir niemand sagt, wie ungerecht die Sterne von hier oben sind." },
       ],
     },
     {
-      base: 'Einen sterbenden Gefährten halten, während der Schnee fällt.',
+      base: 'Yusa hält Doren, während er stirbt und der Schnee fällt.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Yusa hatte den kleinen Holzvogel in ihrer Tasche an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Dorens versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Der Schnee legte sich auf sein Haar und schmolz nicht. Sie schnitzte weiter in die Luft, den Daumen an seinem Knöchel, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen formen." },
-        { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte. Das war das Schlimmste. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
-        { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Kestrel hervor, Blut auf den Zähnen, Schnee in den Wimpern. „Sterben. Im Winter. So dramatisch.“ Marn sagte ihm, er solle seinen Atem sparen, und er sagte, der Atem sei ja genau das Problem, nicht wahr. Der Schnee fiel weiter, gleichgültig und rein, und kleidete das ganze verwüstete Feld in Weiß. Er machte noch einen Witz. Einen zweiten machte er nicht." },
-        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete mein Freund im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — dafür, dass er mir Blut auf den Ärmel gemacht hatte. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
+        { label: 'Sinnlich & zärtlich', text: "Yusa hatte den kleinen Holzvogel an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Dorens versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Ihre andere Hand blieb auf der Wunde. Der Schnee legte sich auf sein Haar und schmolz nicht. Er entschuldigte sich — für das Blut auf ihrem Ärmel, der Narr — und lächelte, als wäre alles in Ordnung. Sie hielt den Daumen an seinem Knöchel in Bewegung, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen schnitzen." },
+        { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir, Doren. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. Der kleine Vogel, den ich geschnitzt hatte, lag noch in seiner Hand. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte — das war das Schlimmste — und entschuldigte sich für meinen Ärmel. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
+        { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Doren hervor, Blut auf den Zähnen, Schnee in den Wimpern, der kleine geschnitzte Vogel lose in seiner Hand. „Sterben. Im Winter. So dramatisch.“ Yusa sagte ihm, er solle seinen Atem sparen, und drückte fester auf die Wunde; er sagte, der Atem sei ja genau das Problem, nicht wahr, und entschuldigte sich für ihren Ärmel. Der Schnee fiel weiter, gleichgültig und rein. Er machte noch einen Witz. Einen zweiten machte er nicht." },
+        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Doren im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
       ],
     },
   ],
@@ -1223,7 +1224,7 @@ const WRITING_STYLE_SCENES = {
 let flowState = {
   freewrite: { duration: 300, remaining: 300, timerId: null, running: false, prompt: '', text: '' },
   badly: { prompt: '', bad: '', less: '', phase: 'bad' },
-  style: { sceneIdx: 0, shown: false, attempt: '' },
+  style: { sceneIdx: 0, attempt: '' },
 };
 
 function flowWordCount(text) { const m = (text || '').trim().match(/\S+/g); return m ? m.length : 0; }
@@ -1244,7 +1245,7 @@ function flowStageEl() { return document.getElementById('flow-stage'); }
 
 function renderFlow() {
   flowClearTimer();
-  const body = document.getElementById('flow-section-body');
+  const body = document.getElementById('idea-section-body');
   if (!body) return;
   body.innerHTML =
     '<div class="idea-intro">' + t('flow.tagline') + '</div>' +
@@ -1428,7 +1429,6 @@ function flowBadlyDone() {
 function flowStyleStart() {
   const s = flowState.style;
   s.sceneIdx = 0;
-  s.shown = false;
   s.attempt = '';
   flowRenderStyle();
 }
@@ -1446,21 +1446,16 @@ function flowRenderStyle() {
       scenes.map((sc, i) => '<button class="flow-scene-btn' + (i === s.sceneIdx ? ' on' : '') + '" data-i="' + i + '">' + t('flow.style.scene') + ' ' + (i + 1) + '</button>').join('') +
     '</div>' +
     '<div class="flow-scene-base">' + ideaEsc(scene.base) + '</div>' +
-    (s.shown
-      ? '<div class="flow-voices">' + scene.voices.map(v => '<div class="flow-voice"><div class="flow-voice-label">' + ideaEsc(v.label) + '</div><div class="flow-voice-text">' + ideaEsc(v.text) + '</div></div>').join('') + '</div>' +
-        '<div class="idea-dev-conclusion-label">' + t('flow.style.yourturn') + '</div>' +
-        '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>'
-      : '<button class="idea-next" id="flow-style-reveal">' + t('flow.style.reveal') + '</button>');
+    '<div class="flow-voices">' + scene.voices.map(v => '<div class="flow-voice"><div class="flow-voice-label">' + ideaEsc(v.label) + '</div><div class="flow-voice-text">' + ideaEsc(v.text) + '</div></div>').join('') + '</div>' +
+    '<div class="idea-dev-conclusion-label">' + t('flow.style.yourturn') + '</div>' +
+    '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>';
 
   stage.querySelector('#flow-home-btn').addEventListener('click', flowHome);
   stage.querySelectorAll('.flow-scene-btn').forEach(btn => btn.addEventListener('click', () => {
     s.sceneIdx = parseInt(btn.dataset.i, 10);
-    s.shown = false;
     s.attempt = '';
     flowRenderStyle();
   }));
-  const revealBtn = stage.querySelector('#flow-style-reveal');
-  if (revealBtn) revealBtn.addEventListener('click', () => { s.shown = true; flowRenderStyle(); });
   const area = stage.querySelector('#flow-style-area');
   if (area) {
     autoResize(area);
