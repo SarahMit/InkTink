@@ -455,7 +455,9 @@ const TR = {
     'popover.placeholder': 'Note...', 'popover.delete': 'Delete', 'popover.done': 'Done',
     'save.modal.title': 'Save project', 'save.modal.label': 'Project name',
     'save.placeholder': 'e.g. My Novel', 'save.btn': 'Save', 'save.saving': 'Saving…', 'save.error': 'Error: Server not reachable. Is the server running?',
-    'home.tagline': 'Your creative writing workspace', 'home.recent': 'Recent projects',
+    'home.tagline': 'A creative writing workspace', 'home.recent': 'Recent projects',
+    'home.recent.hint': 'Stored in this browser only — not your exported files. Use Export to save a copy you can keep, move, or back up.',
+    'home.note.label': 'Hi!', 'home.note.text': "This is a hobby project I build in my free time, purely for fun. So it's not professional software, and there may always be the occasional bug or quirk hiding somewhere. InkTink includes features that I feel support my own creative process. That said, I'd be genuinely happy if others find InkTink useful too and want to use it! Your data stays completely with you (i.e. in your browser) — I obviously never see anything from your projects!", 'home.note.sign': '— Sarah',
     'load.modal.title': 'Load project', 'load.modal.empty': 'No saved projects found.',
     'new.modal.title': 'New project', 'new.modal.confirm': 'Unsaved changes will be lost. Continue?',
     'ideas.tagline': 'Find the minimum structure you need to start writing — without sinking too much time into planning.',
@@ -646,7 +648,9 @@ const TR = {
     'popover.placeholder': 'Notiz...', 'popover.delete': 'Löschen', 'popover.done': 'Fertig',
     'save.modal.title': 'Projekt speichern', 'save.modal.label': 'Projektname',
     'save.placeholder': 'z.B. Mein Roman', 'save.btn': 'Speichern', 'save.saving': 'Speichert…', 'save.error': 'Fehler: Server nicht erreichbar. Läuft der Server noch?',
-    'home.tagline': 'Dein kreatives Schreibwerkzeug', 'home.recent': 'Zuletzt geöffnet',
+    'home.tagline': 'Ein kreatives Schreibwerkzeug', 'home.recent': 'Zuletzt geöffnet',
+    'home.recent.hint': 'Nur in diesem Browser gespeichert — nicht deine exportierten Dateien. Nutze Export, um eine Kopie zu sichern, die du behalten, verschieben oder sichern kannst.',
+    'home.note.label': 'Hi!', 'home.note.text': 'Dies ist ein Hobbyprojekt, welches ich in meiner Freizeit rein zum Spaß entwickle. Dementsprechend ist dies kein professionelles Programm und es können sich immer mal Fehler oder Eigenarten verstecken. InkTink beinhaltet Funktionen, von denen ich denke, dass sie meinen persönlichen kreativen Prozess unterstützen. Ich freue mich allerdings total, wenn andere InkTink auch hilfreich finden und es nutzen! Eure Daten bleiben komplett bei euch (bzw. in eurem Browser), d.h. ich sehe von euren Projekten natürlich nichts!', 'home.note.sign': '— Sarah',
     'load.modal.title': 'Projekt laden', 'load.modal.empty': 'Keine gespeicherten Projekte vorhanden.',
     'new.modal.title': 'Neues Projekt', 'new.modal.confirm': 'Nicht gespeicherte Änderungen gehen verloren. Trotzdem fortfahren?',
     'ideas.tagline': 'Finde die minimale Struktur, die du zum Losschreiben brauchst — ohne zu viel Zeit in die Planung zu stecken.',
@@ -1956,6 +1960,11 @@ async function renderHome() {
   label.className = 'home-recent-label';
   label.textContent = t('home.recent');
   container.appendChild(label);
+
+  const hint = document.createElement('div');
+  hint.className = 'home-recent-hint';
+  hint.textContent = t('home.recent.hint');
+  container.appendChild(hint);
 
   const grid = document.createElement('div');
   grid.className = 'home-projects-grid';

@@ -2945,7 +2945,41 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.home-recent-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
   margin-bottom: 14px;
+}
+
+.home-note {
+  width: 100%;
+  max-width: 540px;
+  margin: 40px auto 0;
+  padding-left: 18px;
+  border-left: 2px solid var(--border-strong);
+  text-align: left;
+}
+.home-note-label {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.home-note-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+.home-note-sign {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .home-projects-grid {
