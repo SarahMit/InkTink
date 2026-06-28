@@ -301,9 +301,41 @@ const TR = {
     'btn.export.title': 'Download this project as a .json file',
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
-    'nav.writing': 'Writing', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Get Unstuck', 'nav.beats': 'Story Beats',
+    'nav.writing': 'Manuscript', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
+    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Spark', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
+    'nav.ideapool': 'Idea Pool',
+    'ideapool.tagline': 'A home for every idea, so none of them has to live rent-free in your head. Capture them, see which ones fit together, and pick one to focus on next.',
+    'ideapool.capture.placeholder': 'New project idea — press Enter',
+    'ideapool.add': '+ Add',
+    'ideapool.focus.label': 'Your focus right now',
+    'ideapool.focus.none': 'No focus chosen yet. When a new idea pulls at you, drop it above — then pick one idea as your focus and let the rest rest.',
+    'ideapool.focus.set': 'Make this my focus',
+    'ideapool.focus.clear': 'Release focus',
+    'ideapool.focus.parked': 'Parked while you focus — still here when you want it.',
+    'ideapool.sort.label': 'Sort:',
+    'ideapool.sort.created': 'Newest',
+    'ideapool.sort.spark': 'Most exciting',
+    'ideapool.sort.ready': 'Most ready',
+    'ideapool.sort.sweet': 'Ready & exciting',
+    'ideapool.pick': '🎲 Decide for me',
+    'ideapool.suggest': 'How about this one? Make it your focus, or roll again.',
+    'ideapool.combine': '⊕ Combine',
+    'ideapool.combine.hint': 'Pick two or more ideas, then merge them into a new one.',
+    'ideapool.combine.do': 'Merge selected',
+    'ideapool.combine.cancel': 'Cancel',
+    'ideapool.combined.from': 'Combined from:',
+    'ideapool.spark': 'Excitement',
+    'ideapool.ready': 'Ready to start',
+    'ideapool.title.placeholder': 'Idea title',
+    'ideapool.note.placeholder': 'Notes, fragments, why it pulls at you…',
+    'ideapool.delete': 'Delete idea',
+    'ideapool.empty': 'No ideas yet — capture your first one above.',
+    'ideapool.toproject': '→ Start as project',
+    'ideapool.toproject.title': 'Start as a new project',
+    'ideapool.toproject.confirm': 'Start this idea as a new project? Its note becomes the project description. Unsaved changes to the current project will be lost.',
+    'ideapool.toproject.go': 'Create project',
+    'ideapool.toproject.keep': 'Keep idea in pool too',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'New task + Enter', 'sidebar.insp.empty': 'Add images as inspiration (+)',
     'project.untitled': 'Untitled Project', 'project.blurb.placeholder': "What's it about? A short description of your project...",
@@ -463,9 +495,41 @@ const TR = {
     'btn.export.title': 'Dieses Projekt als .json-Datei herunterladen',
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
-    'nav.writing': 'Schreiben', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Nicht mehr feststecken', 'nav.beats': 'Story Beats',
+    'nav.writing': 'Manuskript', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
+    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Impulse', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
+    'nav.ideapool': 'Ideen-Pool',
+    'ideapool.tagline': 'Ein Zuhause für jede Idee, damit keine mehr in deinem Kopf herumspukt. Sammle sie, schau welche zusammenpassen, und wähle eine zum Weitermachen aus.',
+    'ideapool.capture.placeholder': 'Neue Projektidee — Enter drücken',
+    'ideapool.add': '+ Hinzufügen',
+    'ideapool.focus.label': 'Dein Fokus gerade',
+    'ideapool.focus.none': 'Noch kein Fokus gewählt. Wenn dich eine neue Idee zieht, wirf sie oben rein — wähle dann eine Idee als Fokus und lass die anderen ruhen.',
+    'ideapool.focus.set': 'Das ist mein Fokus',
+    'ideapool.focus.clear': 'Fokus aufheben',
+    'ideapool.focus.parked': 'Geparkt, während du dich konzentrierst — wartet hier auf dich.',
+    'ideapool.sort.label': 'Sortieren:',
+    'ideapool.sort.created': 'Neueste',
+    'ideapool.sort.spark': 'Spannendste',
+    'ideapool.sort.ready': 'Startklarste',
+    'ideapool.sort.sweet': 'Startklar & spannend',
+    'ideapool.pick': '🎲 Entscheide für mich',
+    'ideapool.suggest': 'Wie wäre es mit der hier? Mach sie zum Fokus, oder würfle nochmal.',
+    'ideapool.combine': '⊕ Kombinieren',
+    'ideapool.combine.hint': 'Wähle zwei oder mehr Ideen und füge sie zu einer neuen zusammen.',
+    'ideapool.combine.do': 'Auswahl zusammenführen',
+    'ideapool.combine.cancel': 'Abbrechen',
+    'ideapool.combined.from': 'Kombiniert aus:',
+    'ideapool.spark': 'Lust darauf',
+    'ideapool.ready': 'Startklar',
+    'ideapool.title.placeholder': 'Titel der Idee',
+    'ideapool.note.placeholder': 'Notizen, Fragmente, warum sie dich reizt…',
+    'ideapool.delete': 'Idee löschen',
+    'ideapool.empty': 'Noch keine Ideen — fang oben mit der ersten an.',
+    'ideapool.toproject': '→ Als Projekt starten',
+    'ideapool.toproject.title': 'Als neues Projekt starten',
+    'ideapool.toproject.confirm': 'Diese Idee als neues Projekt starten? Ihre Notiz wird zur Projektbeschreibung. Nicht gespeicherte Änderungen am aktuellen Projekt gehen verloren.',
+    'ideapool.toproject.go': 'Projekt erstellen',
+    'ideapool.toproject.keep': 'Idee im Pool behalten',
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'Neue Aufgabe + Enter', 'sidebar.insp.empty': 'Bilder als Inspiration hinzufügen (+)',
     'project.untitled': 'Unbenanntes Projekt', 'project.blurb.placeholder': "Worum geht's? Kurze Beschreibung deines Projekts...",
@@ -661,24 +725,33 @@ function setLang(lang) {
 const IDEA_ICONS = {
   user:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   spark:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>',
+  layers:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  tree:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
 };
 
-const IDEA_STARTERS = ['develop', 'char'];
+// 'ideapool' and 'brainstorming' are handled specially in ideaHome() — they
+// open inline tools instead of a guided workshop — but ride along on the same
+// starter card grid and icon/meta lookup as 'develop' and 'char'.
+const IDEA_STARTERS = ['develop', 'char', 'brainstorming', 'ideapool'];
 
-// Metadata for the two guided workshops, shown as cards on the "Find & Develop
-// Ideas" home screen. The actual field content lives in IDEA_WORKSHOP_FIELDS.
+// Metadata for the starter cards on the "Find & Develop Ideas" home screen.
+// The actual field content for the two guided workshops lives in IDEA_WORKSHOP_FIELDS.
 const IDEA_WORKSHOP_META = {
   en: {
     develop: { icon: 'spark', title: 'Develop the Initial Idea', sub: 'Turn scattered notes into a workable foundation',
       doneClose: 'You have worked your initial idea into a premise, a moodboard-driven set of ideas, your main characters, and a structure with rising stakes.' },
     char: { icon: 'user', title: 'Who Is My Character', sub: 'What drives the character',
       doneClose: 'You have worked out what set your character\'s story in motion, what holds them in place, what they\'re already up against, and why we\'d follow them.' },
+    ideapool: { icon: 'layers', title: 'Idea Pool', sub: 'Too many project ideas at once? Collect, combine, and choose what to focus on' },
+    brainstorming: { icon: 'tree', title: 'Brainstorming', sub: 'Branch out from one idea with Why?, What if…, and And then?' },
   },
   de: {
     develop: { icon: 'spark', title: 'Erste Idee ausarbeiten', sub: 'Mach aus verstreuten Notizen ein tragfähiges Fundament',
       doneClose: 'Aus deiner ersten Idee sind eine Prämisse, vom Moodboard inspirierte Ideen, deine Hauptcharaktere und eine Struktur mit steigendem Konflikt geworden.' },
     char: { icon: 'user', title: 'Wer ist mein Charakter', sub: 'Was den Charakter antreibt',
       doneClose: 'Du hast herausgearbeitet, was die Geschichte deines Charakters ins Rollen brachte, was ihn in der Patt-Situation hält, womit er bereits zu kämpfen hat und warum wir ihn begleiten wollen.' },
+    ideapool: { icon: 'layers', title: 'Ideen-Pool', sub: 'Zu viele Projektideen im Kopf? Sammeln, kombinieren und wählen, worauf du dich konzentrierst' },
+    brainstorming: { icon: 'tree', title: 'Brainstorming', sub: 'Von einer Idee aus verzweigen mit Warum?, Was wäre wenn… und Und dann?' },
   },
 };
 
@@ -898,9 +971,52 @@ function ideaHome() {
       '<span class="idea-pick-ic">' + IDEA_ICONS[m.icon] + '</span>' +
       '<span class="idea-pick-txt"><span class="idea-pick-t">' + m.title + '</span>' +
       '<span class="idea-pick-s">' + m.sub + '</span></span>';
-    b.addEventListener('click', () => ideaWorkshopRender(key));
+    b.addEventListener('click', () => {
+      if (key === 'ideapool') ideaPoolStageRender();
+      else if (key === 'brainstorming') ideaBrainstormingStageRender();
+      else ideaWorkshopRender(key);
+    });
     grid.appendChild(b);
   });
+}
+
+// Brainstorming idea tree, inline within the "Find & Develop Ideas" stage —
+// same back-button pattern (bottom-left) as the other starter cards.
+function ideaBrainstormingStageRender() {
+  const stage = ideaStage();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div class="idea-lead-row">' +
+      '<div class="idea-lead">' + t('nav.brainstorming') + '</div>' +
+      '<button class="btn-primary" id="bs2-add-root">' + t('brainstorming.add') + '</button>' +
+    '</div>' +
+    '<div class="bs2-tree" id="bs2-tree"></div>' +
+    '<div class="idea-actions"><button class="idea-ghost" id="idea-bs2-back">' + t('ideas.back') + '</button></div>';
+  stage.querySelector('#idea-bs2-back').addEventListener('click', ideaHome);
+  stage.querySelector('#bs2-add-root').addEventListener('click', () => {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    ideaMap.nodes.push({ id, parentId: null, type: 'root', text: '', prompt: null });
+    saveProject();
+    renderBrainstorming();
+    const newText = document.querySelector(`#bs2-tree [data-node-id="${id}"] .bs2-text`);
+    if (newText) newText.focus();
+  });
+  renderBrainstorming();
+}
+
+// Idea Pool, inline within the "Find & Develop Ideas" stage: a back button
+// (same pattern as the guided workshops) plus the pool itself rendered into
+// a sub-container.
+function ideaPoolStageRender() {
+  const stage = ideaStage();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div id="idea-pool-inline"></div>' +
+    '<div class="idea-actions idea-pool-stage-foot">' +
+      '<button class="idea-ghost" id="idea-pool-back">' + t('ideas.back') + '</button>' +
+    '</div>';
+  stage.querySelector('#idea-pool-back').addEventListener('click', ideaHome);
+  renderIdeaPool(stage.querySelector('#idea-pool-inline'));
 }
 
 // ── Guided workshops ("Develop the Initial Idea", "Who Is My Character") ──
@@ -958,7 +1074,7 @@ function ideaWorkshopRender(name) {
         '<div class="idea-actions">' +
           (step > 0
             ? '<button class="idea-ghost" id="idea-dev-back">' + t('ideas.back') + '</button>'
-            : '<button class="idea-ghost" id="idea-dev-home">' + t('ideas.restart') + '</button>') +
+            : '<button class="idea-ghost" id="idea-dev-home">' + t('ideas.back') + '</button>') +
           '<div class="idea-spacer"></div>' +
           (step < fields.length - 1
             ? '<button class="idea-next" id="idea-dev-next">' + t('ideas.next') + '</button>'
@@ -1109,135 +1225,135 @@ const FLOW_PROMPTS = {
 const WRITING_STYLE_SCENES = {
   en: [
     {
-      base: 'Lena duels her rival Jonas as the great hall burns around them.',
+      base: 'Nora duels her rival Zane as the great hall burns around them.',
       voices: [
-        { label: 'Tactile & Tender', text: "Lena's grandmother had woven her coat-lining with copper thread, one careful row a night, for exactly this — and when Jonas's fire-spell broke against her, it slid off the weave like rain off oilcloth. She felt every stitch hold. A rafter came down where her head had been, and she was already inside his reach, driving her shoulder into his ribs. He had grinned like the duel was won. The work her family made for her did what love does: it kept her standing one more breath." },
-        { label: 'Breathless & Defiant', text: "Jonas threw fire. It broke on my coat and slid off — thank you, Grandmother. He swung. I dropped. The rafter came down where my head had been. He grinned like he'd already won, so I let him think it, then drove my shoulder into his ribs. We don't both walk out of this hall. Fine. I am Not the one who falls." },
-        { label: 'Deadpan & Theatrical', text: "The hall was on fire, which Lena felt was a bit much, even for Jonas. His fire-spell slid off her copper-threaded coat and accomplished nothing but ruining the curtains. \"You've redecorated,\" she observed, ducking a blow as a rafter obligingly fell where her head had been. Jonas snarled something about destiny. She drove her shoulder into his ribs, mostly to make him stop talking." },
-        { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. Jonas was flinging a forbidden fire-rite that'll cost him his soul in a decade — not that the showoff thinks that far ahead — and it slid right off the coat my grandmother threaded with copper. A rafter nearly settled the matter for both of us. So I quit fencing like a gentlewoman and drove my shoulder into his ribs instead." },
-        { label: 'Storybook & Atmospheric', text: "The fire bloomed against the high windows like a second, hungrier sunset, and for a heartbeat the burning hall was almost beautiful. Jonas's spell rushed at Lena — and slid from the copper her grandmother had threaded into her coat, one patient row each winter evening, as if the old woman's hands were still keeping her warm. A rafter fell where her head had been, trailing sparks like startled fireflies. He smiled, certain. Lena stepped inside that certainty and drove her shoulder into his ribs." },
-        { label: 'Cheeky & Warm', text: "So the great hall was on fire, which — dramatic, Jonas, really. He flung a fire-spell at me with this insufferably smug little flourish, and it just... slid off my coat. Thanks, Grandma, and your nine hundred hours of copper thread. A rafter came down exactly where my head used to be, which I chose not to think about. He grinned like he'd already won. Cute. I put my shoulder into his ribs and wiped the grin right off." },
+        { label: 'Tactile & Tender', text: "Nora's grandmother had woven her coat-lining with copper thread, one careful row a night, for exactly this — and when Zane's fire-spell broke against her, it slid off the weave like rain off oilcloth. She felt every stitch hold. A rafter came down where her head had been, and she was already inside his reach, driving her shoulder into his ribs. He had grinned like the duel was won. The work her family made for her did what love does: it kept her standing one more breath." },
+        { label: 'Breathless & Defiant', text: "Zane threw fire. It broke on my coat and slid off — thank you, Grandmother. He swung. I dropped. The rafter came down where my head had been. He grinned like he'd already won, so I let him think it, then drove my shoulder into his ribs. We don't both walk out of this hall. Fine. I am Not the one who falls." },
+        { label: 'Deadpan & Theatrical', text: "The hall was on fire, which Nora felt was a bit much, even for Zane. His fire-spell slid off her copper-threaded coat and accomplished nothing but ruining the curtains. \"You've redecorated,\" she observed, ducking a blow as a rafter obligingly fell where her head had been. Zane snarled something about destiny. She drove her shoulder into his ribs, mostly to make him stop talking." },
+        { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. Zane was flinging a forbidden fire-rite that'll cost him his soul in a decade — not that the showoff thinks that far ahead — and it slid right off the coat my grandmother threaded with copper. A rafter nearly settled the matter for both of us. So I quit fencing like a gentlewoman and drove my shoulder into his ribs instead." },
+        { label: 'Storybook & Atmospheric', text: "The fire bloomed against the high windows like a second, hungrier sunset, and for a heartbeat the burning hall was almost beautiful. Zane's spell rushed at Nora — and slid from the copper her grandmother had threaded into her coat, one patient row each winter evening, as if the old woman's hands were still keeping her warm. A rafter fell where her head had been, trailing sparks like startled fireflies. He smiled, certain. Nora stepped inside that certainty and drove her shoulder into his ribs." },
+        { label: 'Cheeky & Warm', text: "So the great hall was on fire, which — dramatic, Zane, really. He flung a fire-spell at me with this insufferably smug little flourish, and it just... slid off my coat. Thanks, Grandma, and your nine hundred hours of copper thread. A rafter came down exactly where my head used to be, which I chose not to think about. He grinned like he'd already won. Cute. I put my shoulder into his ribs and wiped the grin right off." },
       ],
     },
     {
-      base: 'The rope bridge gives way over the gorge — Mara catches the last plank.',
+      base: 'The rope bridge gives way over the gorge — Nora catches the last plank.',
       voices: [
-        { label: 'Tactile & Tender', text: "The plank was old cedar, worn smooth by a hundred years of crossing hands, and the smoothness nearly killed her — then saved her, because Mara knew this grain. She'd helped re-bind these ropes as a child; her fingers found her father's knot now, the clumsy strong one, and held it the way you hold a hand. The wood tore her palms open. She got one knee up, then the other, and climbed back to the ledge." },
+        { label: 'Tactile & Tender', text: "The plank was old cedar, worn smooth by a hundred years of crossing hands, and the smoothness nearly killed her — then saved her, because Nora knew this grain. She'd helped re-bind these ropes as a child; her fingers found her father's knot now, the clumsy strong one, and held it the way you hold a hand. The wood tore her palms open. She got one knee up, then the other, and climbed back to the ledge." },
         { label: 'Breathless & Defiant', text: "The bridge went. Just — gone, under me. I grabbed the last plank and the wood tore my palms open and I did not care. My father re-bound these ropes; I knew his knot by feel. Below me the gorge wanted me and the wind agreed. No. Not today. One knee up. Then the other. I climbed my own scream back to the ledge." },
-        { label: 'Deadpan & Theatrical', text: "The bridge collapsed with the enthusiasm of something that had been waiting all week. Mara found herself dangling from a single plank over a drop generously described as fatal, palms torn, recognizing — of all things — her father's knotwork. \"Well,\" she told the gorge, which did not answer, being a gorge. She got one knee up, then the other, and undertook the tedious business of not dying." },
+        { label: 'Deadpan & Theatrical', text: "The bridge collapsed with the enthusiasm of something that had been waiting all week. Nora found herself dangling from a single plank over a drop generously described as fatal, palms torn, recognizing — of all things — her father's knotwork. \"Well,\" she told the gorge, which did not answer, being a gorge. She got one knee up, then the other, and undertook the tedious business of not dying." },
         { label: 'Caustic & Candid', text: "Here's what nobody tells you about ancient rope bridges: they're maintained by exactly nobody and held together by tradition and optimism. So when it dropped me, I wasn't surprised — furious, dangling, palms bleeding, but not surprised. The one mercy was the rope: my father re-bound these knots, and his held. I got one knee up, then the other, purely out of spite. Spite, it turns out, has an excellent grip." },
-        { label: 'Storybook & Atmospheric', text: "The bridge gave way beneath Mara like a held breath finally let go, and the gorge opened its long blue throat below her. Her hands found the last plank — old cedar, smooth as a story told too many times — and the wood bit her palms even as it saved her. Her father had re-bound these ropes; she knew his clumsy, faithful knot the way one knows a voice in the dark. One knee, then the other, and she climbed back into the living world." },
+        { label: 'Storybook & Atmospheric', text: "The bridge gave way beneath Nora like a held breath finally let go, and the gorge opened its long blue throat below her. Her hands found the last plank — old cedar, smooth as a story told too many times — and the wood bit her palms even as it saved her. Her father had re-bound these ropes; she knew his clumsy, faithful knot the way one knows a voice in the dark. One knee, then the other, and she climbed back into the living world." },
         { label: 'Cheeky & Warm', text: "The bridge just... left. One second a bridge, next second a strongly worded suggestion that I learn to fly. I grabbed the last plank — wood, splinters, blood, the works — and honestly? Rude. But my dad re-bound these ropes when I was small, and I'd know his lumpy knot anywhere. Below me the gorge made its case. I declined. One knee up, then the other, and I hauled myself back to the ledge, swearing the entire way." },
       ],
     },
     {
-      base: 'Nora and Finn pick the same lock in the dark, shoulders touching.',
+      base: 'Nora and Zane pick the same lock in the dark, shoulders touching.',
       voices: [
-        { label: 'Tactile & Tender', text: "Their hands kept meeting on the lockpick — Finn's calloused at the thumb, Nora's ink-stained — and neither pulled away as fast as they should have. The tumblers were brass, warm now from being worked, their shoulders pressed together in a doorway built for one. \"You're doing it wrong,\" she murmured, guiding his fingers a half-turn. The lock gave the same moment her breath did. \"Teamwork,\" he whispered, and she did not move away." },
-        { label: 'Breathless & Defiant', text: "\"Move over.\" \"I had it.\" \"You did not have it.\" Finn's shoulder was against mine, warm, distracting, deeply unfair. Our hands kept colliding on the pick. The lock clicked. We both froze — too close, both grinning, neither admitting it. \"See,\" he breathed. \"Teamwork.\" I told him to shut up. I did not move away." },
-        { label: 'Deadpan & Theatrical', text: "\"You're breathing on my neck,\" Nora noted. \"I'm concentrating,\" said Finn, who was very obviously not concentrating. They were crammed into a doorway built for one repentant monk, hands knocking together on a single pick, working a lock that required considerably less tension between the two people attached to it. The lock surrendered first. \"Teamwork,\" Finn said. Nora counted it a tactical loss and did not move away." },
-        { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew this mechanism — left, left, hard right — and could've done it alone in three seconds. With Finn's shoulder against mine I took thirty. The thing clicked; he grinned and said \"teamwork.\" I told him to shut up. He smells like rain and bad decisions, and I've always been weak for both — so no, I didn't move away." },
-        { label: 'Storybook & Atmospheric', text: "The doorway was built for one repentant monk and held two thieves instead, shoulder warm against shoulder in the dark. Their hands kept meeting on the pick like moths at the same small flame; the brass tumblers had gone warm beneath their fingers. \"You're doing it wrong,\" Nora breathed, and turned Finn's hand a half-turn, and the lock sighed open at the very moment she forgot to breathe. \"Teamwork,\" he whispered, and she did not move away." },
-        { label: 'Cheeky & Warm', text: "Okay, picture it: one doorway, built for a single very small monk, and somehow both of us in it, shoulder to shoulder, way too close. Our hands kept bumping on the pick and I was Not Going To Think About That. \"You're doing it wrong.\" \"I had it.\" \"You absolutely did not have it.\" The lock clicked. We froze — grinning like idiots, neither admitting anything. \"Teamwork,\" Finn breathed. I told him to shut up. And no, I did not move away." },
+        { label: 'Tactile & Tender', text: "Their hands kept meeting on the lockpick — Zane's calloused at the thumb, Nora's ink-stained — and neither pulled away as fast as they should have. The tumblers were brass, warm now from being worked, their shoulders pressed together in a doorway built for one. \"You're doing it wrong,\" she murmured, guiding his fingers a half-turn. The lock gave the same moment her breath did. \"Teamwork,\" he whispered, and she did not move away." },
+        { label: 'Breathless & Defiant', text: "\"Move over.\" \"I had it.\" \"You did not have it.\" Zane's shoulder was against mine, warm, distracting, deeply unfair. Our hands kept colliding on the pick. The lock clicked. We both froze — too close, both grinning, neither admitting it. \"See,\" he breathed. \"Teamwork.\" I told him to shut up. I did not move away." },
+        { label: 'Deadpan & Theatrical', text: "\"You're breathing on my neck,\" Nora noted. \"I'm concentrating,\" said Zane, who was very obviously not concentrating. They were crammed into a doorway built for one repentant monk, hands knocking together on a single pick, working a lock that required considerably less tension between the two people attached to it. The lock surrendered first. \"Teamwork,\" Zane said. Nora counted it a tactical loss and did not move away." },
+        { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew this mechanism — left, left, hard right — and could've done it alone in three seconds. With Zane's shoulder against mine I took thirty. The thing clicked; he grinned and said \"teamwork.\" I told him to shut up. He smells like rain and bad decisions, and I've always been weak for both — so no, I didn't move away." },
+        { label: 'Storybook & Atmospheric', text: "The doorway was built for one repentant monk and held two thieves instead, shoulder warm against shoulder in the dark. Their hands kept meeting on the pick like moths at the same small flame; the brass tumblers had gone warm beneath their fingers. \"You're doing it wrong,\" Nora breathed, and turned Zane's hand a half-turn, and the lock sighed open at the very moment she forgot to breathe. \"Teamwork,\" he whispered, and she did not move away." },
+        { label: 'Cheeky & Warm', text: "Okay, picture it: one doorway, built for a single very small monk, and somehow both of us in it, shoulder to shoulder, way too close. Our hands kept bumping on the pick and I was Not Going To Think About That. \"You're doing it wrong.\" \"I had it.\" \"You absolutely did not have it.\" The lock clicked. We froze — grinning like idiots, neither admitting anything. \"Teamwork,\" Zane breathed. I told him to shut up. And no, I did not move away." },
       ],
     },
     {
-      base: 'After the battle, Ben sits down beside Hanna and splits the last ration.',
+      base: 'After the battle, Zane sits down beside Nora and splits the last ration.',
       voices: [
-        { label: 'Tactile & Tender', text: "Ben broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like small forgivenesses. He pressed the bigger half into Hanna's hand — \"they're the same,\" he lied — and closed her fingers around it. He said nothing about the battle, or the ones not sitting with them. He just let the warmth of his palm say the rest, and they breathed, which was more than some could." },
-        { label: 'Breathless & Defiant', text: "We were both still shaking. Didn't matter. Ben dropped down beside me, tore the last waybread in two, shoved the bigger half at my chest. \"They're the same,\" he lied. \"Eat.\" \"You eat.\" \"Eat, or I'll sit on you.\" I ate. He watched me do it like it was the only order that had gone right all day. We were both still breathing. Maybe that was enough." },
-        { label: 'Deadpan & Theatrical', text: "\"I saved you the bigger piece,\" said Ben, which was a lie; the halves were identical and he had measured them with the grim precision of a man who'd nearly died and intended to be petty about smaller things now. He pressed it on Hanna until she ate. They sat in the wreckage, sharing stale waybread like it was a feast. It was, a bit. They were both still breathing, which was more than the architecture could say." },
-        { label: 'Caustic & Candid', text: "People think wartime friendship is all noble speeches. It's not. It's Ben, your idiot best friend, splitting one sad heel of waybread and insisting his half is smaller when it obviously isn't. I let him win that lie. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the both-of-us-still-breathing — this one I lose on purpose, every time." },
-        { label: 'Storybook & Atmospheric', text: "Ben broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like a small and ordinary mercy. \"They're the same size,\" he said, which was a kind lie, and folded Hanna's fingers around the larger half. He spoke of neither the battle nor the empty places where friends had sat. He only let the warmth of his hand finish the sentence — and they breathed, the two of them, which the evening had promised no one." },
-        { label: 'Cheeky & Warm', text: "We were both still shaking, which I was pretending not to notice about myself. Ben dropped down next to me, ripped the last waybread in half, and shoved the bigger piece at my chest. \"They're the same,\" he said, lying directly to my face. \"Eat.\" \"You eat.\" \"Eat, or I sit on you.\" I ate. He watched me like it was the one thing that had gone right all day — and we were both still breathing, so. Maybe it was." },
+        { label: 'Tactile & Tender', text: "Zane broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like small forgivenesses. He pressed the bigger half into Nora's hand — \"they're the same,\" he lied — and closed her fingers around it. He said nothing about the battle, or the ones not sitting with them. He just let the warmth of his palm say the rest, and they breathed, which was more than some could." },
+        { label: 'Breathless & Defiant', text: "We were both still shaking. Didn't matter. Zane dropped down beside me, tore the last waybread in two, shoved the bigger half at my chest. \"They're the same,\" he lied. \"Eat.\" \"You eat.\" \"Eat, or I'll sit on you.\" I ate. He watched me do it like it was the only order that had gone right all day. We were both still breathing. Maybe that was enough." },
+        { label: 'Deadpan & Theatrical', text: "\"I saved you the bigger piece,\" said Zane, which was a lie; the halves were identical and he had measured them with the grim precision of a man who'd nearly died and intended to be petty about smaller things now. He pressed it on Nora until she ate. They sat in the wreckage, sharing stale waybread like it was a feast. It was, a bit. They were both still breathing, which was more than the architecture could say." },
+        { label: 'Caustic & Candid', text: "People think wartime friendship is all noble speeches. It's not. It's Zane, your idiot best friend, splitting one sad heel of waybread and insisting his half is smaller when it obviously isn't. I let him win that lie. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the both-of-us-still-breathing — this one I lose on purpose, every time." },
+        { label: 'Storybook & Atmospheric', text: "Zane broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like a small and ordinary mercy. \"They're the same size,\" he said, which was a kind lie, and folded Nora's fingers around the larger half. He spoke of neither the battle nor the empty places where friends had sat. He only let the warmth of his hand finish the sentence — and they breathed, the two of them, which the evening had promised no one." },
+        { label: 'Cheeky & Warm', text: "We were both still shaking, which I was pretending not to notice about myself. Zane dropped down next to me, ripped the last waybread in half, and shoved the bigger piece at my chest. \"They're the same,\" he said, lying directly to my face. \"Eat.\" \"You eat.\" \"Eat, or I sit on you.\" I ate. He watched me like it was the one thing that had gone right all day — and we were both still breathing, so. Maybe it was." },
       ],
     },
     {
-      base: 'Emil stands the night watch alone, at the top of the tower.',
+      base: 'Zane stands the night watch alone, at the top of the tower.',
       voices: [
-        { label: 'Tactile & Tender', text: "Emil had his mother's woolen scarf wound twice around his throat, and he kept finding the place where the dye had run, a small map of an old rainstorm. The tower was cold, the stars far, the watch his alone. He set his back to the stone and looked up. For a while the wool remembered warmth even where his hands had stopped believing in it, and the far stars did not seem quite so far." },
+        { label: 'Tactile & Tender', text: "Zane had his mother's woolen scarf wound twice around his throat, and he kept finding the place where the dye had run, a small map of an old rainstorm. The tower was cold, the stars far, the watch his alone. He set his back to the stone and looked up. For a while the wool remembered warmth even where his hands had stopped believing in it, and the far stars did not seem quite so far." },
         { label: 'Breathless & Defiant', text: "Just me up here. Me, the wind, the dark, and whatever the dark is hiding tonight. My mother's scarf is wound twice at my throat and it'll have to be enough. I set my back to the cold stone and look up. Fine. I can do alone — I've done alone. I stare the night down like it owes me money. It does not blink. Neither do I." },
-        { label: 'Deadpan & Theatrical', text: "The night watch, Emil had decided, was a magnificent way to be reminded that one was deeply unimportant to the universe. The stars ignored him. The wind ignored him with real commitment. He tugged his mother's scarf higher, set his back to the cold stone, and looked up at them anyway. He saluted the darkness. Standards, after all, were standards." },
+        { label: 'Deadpan & Theatrical', text: "The night watch, Zane had decided, was a magnificent way to be reminded that one was deeply unimportant to the universe. The stars ignored him. The wind ignored him with real commitment. He tugged his mother's scarf higher, set his back to the cold stone, and looked up at them anyway. He saluted the darkness. Standards, after all, were standards." },
         { label: 'Caustic & Candid', text: "Night watch is punishment duty dressed up as honor, and everyone above me knows it. You stand six hours on a freezing tower so that if something terrible comes, you can scream about it slightly before it kills everyone. That's the whole job. So there I was — my mother's scarf doubled at my throat, back to the cold stone, gloriously expendable — and, fine, yes, looking up, because nobody warns you how unfair the stars are from up here." },
-        { label: 'Storybook & Atmospheric', text: "High on the tower the night was vast and old, and Emil stood alone inside it with his mother's woolen scarf wound twice at his throat. He kept finding the place where the dye had run, a small faded map of some long-ago rainstorm. The wind went by like something with somewhere to be; the stars hung far and patient. He set his back to the cold stone and looked up, and for a while the wool remembered a warmth his hands had forgotten." },
+        { label: 'Storybook & Atmospheric', text: "High on the tower the night was vast and old, and Zane stood alone inside it with his mother's woolen scarf wound twice at his throat. He kept finding the place where the dye had run, a small faded map of some long-ago rainstorm. The wind went by like something with somewhere to be; the stars hung far and patient. He set his back to the cold stone and looked up, and for a while the wool remembered a warmth his hands had forgotten." },
         { label: 'Cheeky & Warm', text: "Just me up here. Me, the wind, the dark, and whatever the dark's hiding tonight — fabulous. My mother's scarf is wound twice around my neck and it's going to have to be enough, because the tower's idea of hospitality is 'freezing.' I put my back to the cold stone and looked up. And, fine, yes — the stars were ridiculous. Nobody warns you about that part. I'd never give the night the satisfaction of saying so out loud." },
       ],
     },
     {
-      base: 'Greta holds Lukas as he dies, while the snow falls.',
+      base: 'Nora holds Zane as he dies, while the snow falls.',
       voices: [
-        { label: 'Tactile & Tender', text: "Greta had whittled the little wooden bird on a hundred easier nights, and she pressed it into Lukas's failing hand now because she had nothing else to give that her own fingers had made. Her other hand stayed on the wound. The snow settled on his hair and did not melt. He apologized — for the blood on her sleeve, the fool — and smiled like it was all right. She kept her thumb moving against his knuckle, the old whittling motion, as if she could carve one more morning out of nothing." },
-        { label: 'Breathless & Defiant', text: "Stay. Stay with me, Lukas. I'm ordering you. The snow came down and his blood was so warm against it, and I pressed both hands to the wound like I could hold him in by force. The little bird I'd carved was still in his hand. \"Don't,\" I said. \"Don't you dare.\" He smiled — that was the worst part — and apologized for my sleeve. He smiled like it was all right. It was not all right." },
-        { label: 'Deadpan & Theatrical', text: "\"This is embarrassing,\" Lukas managed, blood on his teeth, snow in his lashes, the little carved bird loose in his palm. \"Dying. In winter. So dramatic.\" Greta told him to save his breath and pressed harder on the wound; he said breath was rather the issue, wasn't it, and apologized for her sleeve. The snow kept falling, indifferent and clean. He made one more joke. He did not make a second." },
-        { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life Lukas was bleeding into the snow and apologizing — apologizing, the maddening fool — for the blood on my sleeve, the carved bird I'd given him still in his fist. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
-        { label: 'Storybook & Atmospheric', text: "The snow came down soft as forgetting, settling in Lukas's hair without melting. Greta pressed one hand to the wound and with the other folded the little wooden bird — carved on a hundred kinder nights — into his failing fingers. He apologized, the fool, for the blood on her sleeve, and smiled as though the whole white world were not coming apart. \"Stay,\" she told him. He made one more small joke into the falling snow. He did not make another." },
-        { label: 'Cheeky & Warm', text: "I always thought, when it came to it, I'd say something perfect. Instead I said \"don't you dare\" about four times, which is not in any of the songs. Lukas was bleeding into the snow and using his last breaths to apologize for my sleeve — my sleeve! — the carved bird I'd given him still tucked in his fist. \"Stay,\" I told him. He smiled like it was all fine, the absolute menace. He got out one more joke. He didn't get out a second." },
+        { label: 'Tactile & Tender', text: "Nora had whittled the little wooden bird on a hundred easier nights, and she pressed it into Zane's failing hand now because she had nothing else to give that her own fingers had made. Her other hand stayed on the wound. The snow settled on his hair and did not melt. He apologized — for the blood on her sleeve, the fool — and smiled like it was all right. She kept her thumb moving against his knuckle, the old whittling motion, as if she could carve one more morning out of nothing." },
+        { label: 'Breathless & Defiant', text: "Stay. Stay with me, Zane. I'm ordering you. The snow came down and his blood was so warm against it, and I pressed both hands to the wound like I could hold him in by force. The little bird I'd carved was still in his hand. \"Don't,\" I said. \"Don't you dare.\" He smiled — that was the worst part — and apologized for my sleeve. He smiled like it was all right. It was not all right." },
+        { label: 'Deadpan & Theatrical', text: "\"This is embarrassing,\" Zane managed, blood on his teeth, snow in his lashes, the little carved bird loose in his palm. \"Dying. In winter. So dramatic.\" Nora told him to save his breath and pressed harder on the wound; he said breath was rather the issue, wasn't it, and apologized for her sleeve. The snow kept falling, indifferent and clean. He made one more joke. He did not make a second." },
+        { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life Zane was bleeding into the snow and apologizing — apologizing, the maddening fool — for the blood on my sleeve, the carved bird I'd given him still in his fist. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
+        { label: 'Storybook & Atmospheric', text: "The snow came down soft as forgetting, settling in Zane's hair without melting. Nora pressed one hand to the wound and with the other folded the little wooden bird — carved on a hundred kinder nights — into his failing fingers. He apologized, the fool, for the blood on her sleeve, and smiled as though the whole white world were not coming apart. \"Stay,\" she told him. He made one more small joke into the falling snow. He did not make another." },
+        { label: 'Cheeky & Warm', text: "I always thought, when it came to it, I'd say something perfect. Instead I said \"don't you dare\" about four times, which is not in any of the songs. Zane was bleeding into the snow and using his last breaths to apologize for my sleeve — my sleeve! — the carved bird I'd given him still tucked in his fist. \"Stay,\" I told him. He smiled like it was all fine, the absolute menace. He got out one more joke. He didn't get out a second." },
       ],
     },
   ],
   de: [
     {
-      base: 'Lena duelliert sich mit ihrem Rivalen Jonas, während die große Halle ringsum brennt.',
+      base: 'Nora duelliert sich mit ihrem Rivalen Zane, während die große Halle ringsum brennt.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Lenas Großmutter hatte ihr Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und als Jonass Feuerzauber an ihr zerbrach, glitt er an dem Gewebe ab wie Regen von Öltuch. Sie spürte jeden Stich halten. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war, und da war sie ihm schon zu nah und rammte ihm die Schulter in die Rippen. Er hatte gegrinst, als wäre das Duell gewonnen. Was ihre Familie für sie gemacht hatte, tat, was Liebe tut: Es hielt sie einen Atemzug länger aufrecht." },
-        { label: 'Atemlos & trotzig', text: "Jonas schleuderte Feuer. Es zerbrach an meinem Mantel und glitt ab — danke, Großmutter. Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide aus dieser Halle. Gut. Ich bin nicht die, die fällt." },
-        { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Lena selbst für Jonas ein wenig übertrieben fand. Sein Feuerzauber glitt an ihrem kupferdurchwirkten Mantel ab und brachte nichts zustande außer ruinierten Vorhängen. „Du hast neu dekoriert“, bemerkte sie und duckte sich unter einem Hieb, während ein Dachbalken gefällig dorthin fiel, wo eben ihr Kopf gewesen war. Jonas knurrte etwas von Bestimmung. Sie rammte ihm die Schulter in die Rippen, vor allem, um ihn zum Schweigen zu bringen." },
-        { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Jonas schleuderte einen verbotenen Feuerritus, der ihn in einem Jahrzehnt die Seele kostet — nicht, dass der Angeber so weit dächte —, und der glitt einfach an dem Mantel ab, den meine Großmutter mit Kupfer durchwirkt hatte. Ein Dachbalken hätte die Sache fast für uns beide entschieden. Also hörte ich auf, wie eine Dame zu fechten, und rammte ihm stattdessen die Schulter in die Rippen." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Das Feuer blühte an den hohen Fenstern auf wie ein zweiter, hungrigerer Sonnenuntergang, und einen Herzschlag lang war die brennende Halle beinahe schön. Jonas' Zauber schoss auf Lena zu — und glitt von dem Kupfer ab, das ihre Großmutter Winterabend für Winterabend in ihren Mantel gefädelt hatte, als hielten die Hände der alten Frau sie noch immer warm. Ein Dachbalken fiel dorthin, wo eben ihr Kopf gewesen war, und zog Funken hinter sich her wie aufgeschreckte Glühwürmchen. Jonas lächelte, seiner Sache sicher. Lena trat in diese Sicherheit hinein und rammte ihm die Schulter in die Rippen." },
-        { label: 'Frech & herzlich', text: "Die große Halle stand also in Flammen — sehr dramatisch, Jonas, wirklich. Er schleuderte mir mit einer unerträglich selbstgefälligen kleinen Geste einen Feuerzauber entgegen, und der... glitt einfach an meinem Mantel ab. Danke, Oma, und danke für deine neunhundert Stunden Kupferfaden. Ein Dachbalken krachte genau dorthin, wo eben mein Kopf gewesen war, worüber ich beschloss, nicht nachzudenken. Er grinste, als hätte er schon gewonnen. Süß. Ich rammte ihm die Schulter in die Rippen und wischte ihm das Grinsen aus dem Gesicht." },
+        { label: 'Sinnlich & zärtlich', text: "Noras Großmutter hatte ihr Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und als Zanes Feuerzauber an ihr zerbrach, glitt er an dem Gewebe ab wie Regen von Öltuch. Sie spürte jeden Stich halten. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war, und da war sie ihm schon zu nah und rammte ihm die Schulter in die Rippen. Er hatte gegrinst, als wäre das Duell gewonnen. Was ihre Familie für sie gemacht hatte, tat, was Liebe tut: Es hielt sie einen Atemzug länger aufrecht." },
+        { label: 'Atemlos & trotzig', text: "Zane schleuderte Feuer. Es zerbrach an meinem Mantel und glitt ab — danke, Großmutter. Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide aus dieser Halle. Gut. Ich bin nicht die, die fällt." },
+        { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Nora selbst für Zane ein wenig übertrieben fand. Sein Feuerzauber glitt an ihrem kupferdurchwirkten Mantel ab und brachte nichts zustande außer ruinierten Vorhängen. „Du hast neu dekoriert“, bemerkte sie und duckte sich unter einem Hieb, während ein Dachbalken gefällig dorthin fiel, wo eben ihr Kopf gewesen war. Zane knurrte etwas von Bestimmung. Sie rammte ihm die Schulter in die Rippen, vor allem, um ihn zum Schweigen zu bringen." },
+        { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Zane schleuderte einen verbotenen Feuerritus, der ihn in einem Jahrzehnt die Seele kostet — nicht, dass der Angeber so weit dächte —, und der glitt einfach an dem Mantel ab, den meine Großmutter mit Kupfer durchwirkt hatte. Ein Dachbalken hätte die Sache fast für uns beide entschieden. Also hörte ich auf, wie eine Dame zu fechten, und rammte ihm stattdessen die Schulter in die Rippen." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Das Feuer blühte an den hohen Fenstern auf wie ein zweiter, hungrigerer Sonnenuntergang, und einen Herzschlag lang war die brennende Halle beinahe schön. Zane' Zauber schoss auf Nora zu — und glitt von dem Kupfer ab, das ihre Großmutter Winterabend für Winterabend in ihren Mantel gefädelt hatte, als hielten die Hände der alten Frau sie noch immer warm. Ein Dachbalken fiel dorthin, wo eben ihr Kopf gewesen war, und zog Funken hinter sich her wie aufgeschreckte Glühwürmchen. Zane lächelte, seiner Sache sicher. Nora trat in diese Sicherheit hinein und rammte ihm die Schulter in die Rippen." },
+        { label: 'Frech & herzlich', text: "Die große Halle stand also in Flammen — sehr dramatisch, Zane, wirklich. Er schleuderte mir mit einer unerträglich selbstgefälligen kleinen Geste einen Feuerzauber entgegen, und der... glitt einfach an meinem Mantel ab. Danke, Oma, und danke für deine neunhundert Stunden Kupferfaden. Ein Dachbalken krachte genau dorthin, wo eben mein Kopf gewesen war, worüber ich beschloss, nicht nachzudenken. Er grinste, als hätte er schon gewonnen. Süß. Ich rammte ihm die Schulter in die Rippen und wischte ihm das Grinsen aus dem Gesicht." },
       ],
     },
     {
-      base: 'Die Seilbrücke reißt über der Schlucht — Mara fängt die letzte Planke.',
+      base: 'Die Seilbrücke reißt über der Schlucht — Nora fängt die letzte Planke.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn Mara kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden; jetzt fanden ihre Finger den Knoten ihres Vaters, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält. Das Holz riss ihr die Handflächen auf. Sie brachte ein Knie hoch, dann das andere, und kletterte zurück auf den Sims." },
+        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn Nora kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden; jetzt fanden ihre Finger den Knoten ihres Vaters, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält. Das Holz riss ihr die Handflächen auf. Sie brachte ein Knie hoch, dann das andere, und kletterte zurück auf den Sims." },
         { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich packte die letzte Planke, und das Holz riss mir die Handflächen auf, und es war mir egal. Mein Vater hatte diese Seile neu gebunden; ich kannte seinen Knoten am Griff. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ein Knie hoch. Dann das andere. Ich kletterte meinen eigenen Schrei zurück auf den Sims." },
-        { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Mara fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte, die Handflächen aufgerissen — und erkannte ausgerechnet das Knotenwerk ihres Vaters. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Sie brachte ein Knie hoch, dann das andere, und machte sich an das mühsame Geschäft, nicht zu sterben." },
+        { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Nora fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte, die Handflächen aufgerissen — und erkannte ausgerechnet das Knotenwerk ihres Vaters. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Sie brachte ein Knie hoch, dann das andere, und machte sich an das mühsame Geschäft, nicht zu sterben." },
         { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet und nur von Tradition und Optimismus zusammengehalten. Als sie mich also fallen ließ, war ich nicht überrascht — wütend, baumelnd, mit blutenden Handflächen, aber nicht überrascht. Die einzige Gnade war das Seil: Mein Vater hatte diese Knoten neu gebunden, und seiner hielt. Ich brachte ein Knie hoch, dann das andere, aus reinem Trotz. Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Die Brücke gab unter Mara nach wie ein zu lange angehaltener Atem, der endlich entweicht, und unter ihr öffnete die Schlucht ihren langen blauen Schlund. Ihre Hände fanden die letzte Planke — altes Zedernholz, glatt wie eine zu oft erzählte Geschichte —, und das Holz biss ihr in die Handflächen, noch während es sie rettete. Ihr Vater hatte diese Seile neu gebunden; sie kannte seinen ungeschickten, treuen Knoten, wie man eine Stimme im Dunkeln kennt. Ein Knie, dann das andere, und sie kletterte zurück in die Welt der Lebenden." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Die Brücke gab unter Nora nach wie ein zu lange angehaltener Atem, der endlich entweicht, und unter ihr öffnete die Schlucht ihren langen blauen Schlund. Ihre Hände fanden die letzte Planke — altes Zedernholz, glatt wie eine zu oft erzählte Geschichte —, und das Holz biss ihr in die Handflächen, noch während es sie rettete. Ihr Vater hatte diese Seile neu gebunden; sie kannte seinen ungeschickten, treuen Knoten, wie man eine Stimme im Dunkeln kennt. Ein Knie, dann das andere, und sie kletterte zurück in die Welt der Lebenden." },
         { label: 'Frech & herzlich', text: "Die Brücke war einfach... weg. Eben noch eine Brücke, im nächsten Moment ein nachdrücklicher Vorschlag, doch bitte fliegen zu lernen. Ich packte die letzte Planke — Holz, Splitter, Blut, das ganze Programm — und ehrlich? Unverschämt. Aber mein Vater hatte diese Seile neu gebunden, als ich klein war, und seinen knubbeligen Knoten würde ich überall erkennen. Unter mir hielt die Schlucht ihr Plädoyer. Ich lehnte ab. Ein Knie hoch, dann das andere, und ich zog mich zurück auf den Sims, fluchend den ganzen Weg." },
       ],
     },
     {
-      base: 'Nora und Finn knacken dasselbe Schloss im Dunkeln, Schulter an Schulter.',
+      base: 'Nora und Zane knacken dasselbe Schloss im Dunkeln, Schulter an Schulter.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Ihre Hände trafen sich immer wieder am Dietrich — Finns am Daumen schwielig, Noras tintenfleckig — und keiner zog so schnell zurück, wie er sollte. Die Zuhaltungen waren aus Messing, warm jetzt vom Arbeiten, ihre Schultern aneinandergedrängt in einem Türrahmen, der für einen gebaut war. „Du machst es falsch“, murmelte sie und führte seine Finger eine halbe Drehung. Das Schloss gab im selben Moment nach wie ihr Atem. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
-        { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Finns Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Unsere Hände stießen ständig am Dietrich zusammen. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
-        { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Nora fest. „Ich konzentriere mich“, sagte Finn, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, die Hände aneinanderstoßend an einem einzigen Dietrich, und arbeiteten an einem Schloss, das deutlich weniger Spannung zwischen den beiden verlangte, die daran hingen. Das Schloss kapitulierte zuerst. „Teamwork“, sagte Finn. Nora verbuchte es als taktische Niederlage und rückte nicht weg." },
-        { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte diesen Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Mit Finns Schulter an meiner brauchte ich dreißig. Das Ding klickte; er grinste und sagte „Teamwork“. Ich sagte ihm, er solle den Mund halten. Er riecht nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach — also nein, ich rückte nicht weg." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Der Türrahmen war für einen einzigen reuigen Mönch gebaut und beherbergte stattdessen zwei Diebe, Schulter warm an Schulter im Dunkeln. Ihre Hände trafen sich am Dietrich immer wieder wie Motten an derselben kleinen Flamme; die messingnen Zuhaltungen waren unter ihren Fingern warm geworden. „Du machst es falsch“, hauchte Nora und drehte Finns Hand eine halbe Umdrehung, und das Schloss seufzte sich auf — genau in dem Moment, in dem sie vergaß zu atmen. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
-        { label: 'Frech & herzlich', text: "Stell dir das vor: ein Türrahmen, gebaut für einen einzigen, sehr kleinen Mönch, und trotzdem irgendwie wir beide darin, Schulter an Schulter, viel zu nah. Unsere Hände stießen ständig am Dietrich zusammen, und ich Würde Da Jetzt Nicht Drüber Nachdenken. „Du machst es falsch.“ „Ich hatt's.“ „Du hattest es ganz sicher nicht.“ Das Schloss klickte. Wir erstarrten — grinsend wie zwei Idioten, keiner gab irgendwas zu. „Teamwork“, hauchte Finn. Ich sagte ihm, er solle den Mund halten. Und nein, ich rückte nicht weg." },
+        { label: 'Sinnlich & zärtlich', text: "Ihre Hände trafen sich immer wieder am Dietrich — Zanes am Daumen schwielig, Noras tintenfleckig — und keiner zog so schnell zurück, wie er sollte. Die Zuhaltungen waren aus Messing, warm jetzt vom Arbeiten, ihre Schultern aneinandergedrängt in einem Türrahmen, der für einen gebaut war. „Du machst es falsch“, murmelte sie und führte seine Finger eine halbe Drehung. Das Schloss gab im selben Moment nach wie ihr Atem. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
+        { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Zanes Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Unsere Hände stießen ständig am Dietrich zusammen. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
+        { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Nora fest. „Ich konzentriere mich“, sagte Zane, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, die Hände aneinanderstoßend an einem einzigen Dietrich, und arbeiteten an einem Schloss, das deutlich weniger Spannung zwischen den beiden verlangte, die daran hingen. Das Schloss kapitulierte zuerst. „Teamwork“, sagte Zane. Nora verbuchte es als taktische Niederlage und rückte nicht weg." },
+        { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte diesen Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Mit Zanes Schulter an meiner brauchte ich dreißig. Das Ding klickte; er grinste und sagte „Teamwork“. Ich sagte ihm, er solle den Mund halten. Er riecht nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach — also nein, ich rückte nicht weg." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Der Türrahmen war für einen einzigen reuigen Mönch gebaut und beherbergte stattdessen zwei Diebe, Schulter warm an Schulter im Dunkeln. Ihre Hände trafen sich am Dietrich immer wieder wie Motten an derselben kleinen Flamme; die messingnen Zuhaltungen waren unter ihren Fingern warm geworden. „Du machst es falsch“, hauchte Nora und drehte Zanes Hand eine halbe Umdrehung, und das Schloss seufzte sich auf — genau in dem Moment, in dem sie vergaß zu atmen. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
+        { label: 'Frech & herzlich', text: "Stell dir das vor: ein Türrahmen, gebaut für einen einzigen, sehr kleinen Mönch, und trotzdem irgendwie wir beide darin, Schulter an Schulter, viel zu nah. Unsere Hände stießen ständig am Dietrich zusammen, und ich Würde Da Jetzt Nicht Drüber Nachdenken. „Du machst es falsch.“ „Ich hatt's.“ „Du hattest es ganz sicher nicht.“ Das Schloss klickte. Wir erstarrten — grinsend wie zwei Idioten, keiner gab irgendwas zu. „Teamwork“, hauchte Zane. Ich sagte ihm, er solle den Mund halten. Und nein, ich rückte nicht weg." },
       ],
     },
     {
-      base: 'Nach der Schlacht setzt sich Ben neben Hanna und teilt die letzte Ration.',
+      base: 'Nach der Schlacht setzt sich Zane neben Nora und teilt die letzte Ration.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Ben brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er drückte Hanna die größere Hälfte in die Hand — „die sind gleich groß“, log er — und schloss ihre Finger darum. Er sagte nichts über die Schlacht oder über die, die nicht mit ihnen saßen. Er ließ nur die Wärme seiner Handfläche den Rest sagen, und sie atmeten beide, was mehr war, als manche konnten." },
-        { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Ben ließ sich neben mir fallen, riss das letzte Wegbrot entzwei, drückte mir die größere Hälfte gegen die Brust. „Die sind gleich groß“, log er. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Wir atmeten beide noch. Vielleicht war das genug." },
-        { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Ben, was eine Lüge war; die Hälften waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Er drängte es Hanna auf, bis sie aß. Sie saßen im Trümmerfeld und teilten altes Wegbrot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
-        { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus Ben, deinem trotteligen besten Freund, der einen traurigen Wegbrotkanten teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihm diese Lüge. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Wir-beide-atmen-noch — den verliere ich mit Absicht, jedes Mal." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Ben brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie eine kleine, alltägliche Gnade. „Die sind gleich groß“, sagte er, was eine gütige Lüge war, und schloss Hannas Finger um die größere Hälfte. Er sprach weder von der Schlacht noch von den leeren Plätzen, an denen Freunde gesessen hatten. Er ließ nur die Wärme seiner Hand den Satz zu Ende bringen — und sie atmeten, die beiden, was der Abend niemandem versprochen hatte." },
-        { label: 'Frech & herzlich', text: "Wir zitterten beide noch, was ich an mir selbst gekonnt zu ignorieren versuchte. Ben ließ sich neben mir fallen, riss das letzte Wegbrot entzwei und drückte mir das größere Stück gegen die Brust. „Die sind gleich groß“, log er mir mitten ins Gesicht. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es das Einzige, was den ganzen Tag richtig gelaufen war — und wir atmeten beide noch, also. Vielleicht war es das ja." },
+        { label: 'Sinnlich & zärtlich', text: "Zane brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er drückte Nora die größere Hälfte in die Hand — „die sind gleich groß“, log er — und schloss ihre Finger darum. Er sagte nichts über die Schlacht oder über die, die nicht mit ihnen saßen. Er ließ nur die Wärme seiner Handfläche den Rest sagen, und sie atmeten beide, was mehr war, als manche konnten." },
+        { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Zane ließ sich neben mir fallen, riss das letzte Wegbrot entzwei, drückte mir die größere Hälfte gegen die Brust. „Die sind gleich groß“, log er. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Wir atmeten beide noch. Vielleicht war das genug." },
+        { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Zane, was eine Lüge war; die Hälften waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Er drängte es Nora auf, bis sie aß. Sie saßen im Trümmerfeld und teilten altes Wegbrot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
+        { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus Zane, deinem trotteligen besten Freund, der einen traurigen Wegbrotkanten teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihm diese Lüge. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Wir-beide-atmen-noch — den verliere ich mit Absicht, jedes Mal." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Zane brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie eine kleine, alltägliche Gnade. „Die sind gleich groß“, sagte er, was eine gütige Lüge war, und schloss Noras Finger um die größere Hälfte. Er sprach weder von der Schlacht noch von den leeren Plätzen, an denen Freunde gesessen hatten. Er ließ nur die Wärme seiner Hand den Satz zu Ende bringen — und sie atmeten, die beiden, was der Abend niemandem versprochen hatte." },
+        { label: 'Frech & herzlich', text: "Wir zitterten beide noch, was ich an mir selbst gekonnt zu ignorieren versuchte. Zane ließ sich neben mir fallen, riss das letzte Wegbrot entzwei und drückte mir das größere Stück gegen die Brust. „Die sind gleich groß“, log er mir mitten ins Gesicht. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es das Einzige, was den ganzen Tag richtig gelaufen war — und wir atmeten beide noch, also. Vielleicht war es das ja." },
       ],
     },
     {
-      base: 'Emil steht allein die Nachtwache, hoch oben auf dem Turm.',
+      base: 'Zane steht allein die Nachtwache, hoch oben auf dem Turm.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Emil hatte den Wollschal seiner Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt, die Sterne fern, die Wache ganz allein seine. Er lehnte den Rücken an den Stein und sah hinauf. Eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo seine Hände nicht mehr daran glaubten, und die fernen Sterne schienen gar nicht mehr so fern." },
+        { label: 'Sinnlich & zärtlich', text: "Zane hatte den Wollschal seiner Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt, die Sterne fern, die Wache ganz allein seine. Er lehnte den Rücken an den Stein und sah hinauf. Eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo seine Hände nicht mehr daran glaubten, und die fernen Sterne schienen gar nicht mehr so fern." },
         { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er muss reichen. Ich lehne den Rücken an den kalten Stein und sehe hinauf. Gut. Allein kann ich — allein hab ich schon hinter mir. Ich starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
-        { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Emil beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Er zog den Schal seiner Mutter höher, lehnte den Rücken an den kalten Stein und sah trotzdem zu ihnen hinauf. Er salutierte der Dunkelheit. Prinzipien waren schließlich Prinzipien." },
+        { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Zane beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Er zog den Schal seiner Mutter höher, lehnte den Rücken an den kalten Stein und sah trotzdem zu ihnen hinauf. Er salutierte der Dunkelheit. Prinzipien waren schließlich Prinzipien." },
         { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da — den Schal meiner Mutter doppelt um den Hals, den Rücken am kalten Stein, herrlich entbehrlich — und, ja, gut, sah hinauf, weil dir niemand sagt, wie ungerecht die Sterne von hier oben sind." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Hoch oben auf dem Turm war die Nacht weit und alt, und Emil stand ganz allein in ihr, den Wollschal seiner Mutter zweimal um den Hals geschlungen. Immer wieder fand er die Stelle, an der die Farbe verlaufen war, eine kleine verblasste Landkarte irgendeines längst vergangenen Regensturms. Der Wind zog vorüber wie etwas, das anderswo erwartet wurde; die Sterne hingen fern und geduldig. Er lehnte den Rücken an den kalten Stein und sah hinauf, und eine Weile erinnerte sich die Wolle an eine Wärme, die seine Hände vergessen hatten." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Hoch oben auf dem Turm war die Nacht weit und alt, und Zane stand ganz allein in ihr, den Wollschal seiner Mutter zweimal um den Hals geschlungen. Immer wieder fand er die Stelle, an der die Farbe verlaufen war, eine kleine verblasste Landkarte irgendeines längst vergangenen Regensturms. Der Wind zog vorüber wie etwas, das anderswo erwartet wurde; die Sterne hingen fern und geduldig. Er lehnte den Rücken an den kalten Stein und sah hinauf, und eine Weile erinnerte sich die Wolle an eine Wärme, die seine Hände vergessen hatten." },
         { label: 'Frech & herzlich', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht versteckt — wunderbar. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er wird reichen müssen, denn die Gastfreundschaft dieses Turms heißt „eiskalt“. Ich lehnte den Rücken an den kalten Stein und sah hinauf. Und, na gut, ja — die Sterne waren lächerlich schön. Vor dem Teil warnt einen keiner. Der Nacht würde ich nie die Genugtuung geben, das laut zuzugeben." },
       ],
     },
     {
-      base: 'Greta hält Lukas, während er stirbt und der Schnee fällt.',
+      base: 'Nora hält Zane, während er stirbt und der Schnee fällt.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Greta hatte den kleinen Holzvogel an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Lukass versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Ihre andere Hand blieb auf der Wunde. Der Schnee legte sich auf sein Haar und schmolz nicht. Er entschuldigte sich — für das Blut auf ihrem Ärmel, der Narr — und lächelte, als wäre alles in Ordnung. Sie hielt den Daumen an seinem Knöchel in Bewegung, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen schnitzen." },
-        { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir, Lukas. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. Der kleine Vogel, den ich geschnitzt hatte, lag noch in seiner Hand. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte — das war das Schlimmste — und entschuldigte sich für meinen Ärmel. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
-        { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Lukas hervor, Blut auf den Zähnen, Schnee in den Wimpern, der kleine geschnitzte Vogel lose in seiner Hand. „Sterben. Im Winter. So dramatisch.“ Greta sagte ihm, er solle seinen Atem sparen, und drückte fester auf die Wunde; er sagte, der Atem sei ja genau das Problem, nicht wahr, und entschuldigte sich für ihren Ärmel. Der Schnee fiel weiter, gleichgültig und rein. Er machte noch einen Witz. Einen zweiten machte er nicht." },
-        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Lukas im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
+        { label: 'Sinnlich & zärtlich', text: "Nora hatte den kleinen Holzvogel an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Zanes versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Ihre andere Hand blieb auf der Wunde. Der Schnee legte sich auf sein Haar und schmolz nicht. Er entschuldigte sich — für das Blut auf ihrem Ärmel, der Narr — und lächelte, als wäre alles in Ordnung. Sie hielt den Daumen an seinem Knöchel in Bewegung, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen schnitzen." },
+        { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir, Zane. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. Der kleine Vogel, den ich geschnitzt hatte, lag noch in seiner Hand. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte — das war das Schlimmste — und entschuldigte sich für meinen Ärmel. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
+        { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Zane hervor, Blut auf den Zähnen, Schnee in den Wimpern, der kleine geschnitzte Vogel lose in seiner Hand. „Sterben. Im Winter. So dramatisch.“ Nora sagte ihm, er solle seinen Atem sparen, und drückte fester auf die Wunde; er sagte, der Atem sei ja genau das Problem, nicht wahr, und entschuldigte sich für ihren Ärmel. Der Schnee fiel weiter, gleichgültig und rein. Er machte noch einen Witz. Einen zweiten machte er nicht." },
+        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Zane im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
       ],
     },
   ],
@@ -1314,7 +1430,6 @@ function flowRenderFreewrite() {
   const mins = Math.floor(fw.remaining / 60), secs = fw.remaining % 60;
   const timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
   stage.innerHTML =
-    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
     '<div class="idea-lead">' + t('flow.freewrite.title') + '</div>' +
     '<div class="flow-duration-row">' +
       [300, 600, 900].map(d => '<button class="flow-dur-btn' + (fw.duration === d ? ' on' : '') + '" data-d="' + d + '">' + (d / 60) + ' ' + t('flow.min') + '</button>').join('') +
@@ -1329,7 +1444,8 @@ function flowRenderFreewrite() {
       '<div class="flow-wordcount" id="flow-wordcount">' + flowWordCount(fw.text) + ' ' + t('flow.words') + '</div>' +
       '<div class="idea-spacer"></div>' +
       '<button class="idea-next" id="flow-start-btn">' + (fw.running ? t('flow.pause') : t('flow.start')) + '</button>' +
-    '</div>';
+    '</div>' +
+    '<div class="idea-actions"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>';
 
   stage.querySelector('#flow-home-btn').addEventListener('click', () => { flowClearTimer(); flowHome(); });
   stage.querySelectorAll('.flow-dur-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -1383,8 +1499,9 @@ function flowFreewriteDone() {
     '<div class="idea-done-tag">' + t('flow.done') + '</div>' +
     '<div class="idea-close">' + ideaEsc(t('flow.freewrite.done.msg')) + ' (' + flowWordCount(fw.text) + ' ' + t('flow.words') + ')</div>' +
     '<div class="idea-actions idea-actions-end">' +
-      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
       '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
     '</div>';
   stage.querySelector('#flow-again-btn').addEventListener('click', flowFreewriteStart);
   stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
@@ -1406,7 +1523,6 @@ function flowRenderBadly() {
   const b = flowState.badly;
   const isBad = b.phase === 'bad';
   stage.innerHTML =
-    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
     '<div class="idea-lead">' + t('flow.badly.title') + '</div>' +
     '<div class="flow-prompt-row">' +
       '<div class="flow-prompt">' + ideaEsc(b.prompt) + '</div>' +
@@ -1415,6 +1531,7 @@ function flowRenderBadly() {
     '<div class="idea-dev-instructions"><p>' + ideaEsc(isBad ? t('flow.badly.instr1') : t('flow.badly.instr2')) + '</p></div>' +
     '<textarea class="idea-answer" id="flow-badly-area" rows="8" placeholder="' + ideaEsc(t('flow.badly.placeholder')) + '">' + ideaEsc(isBad ? b.bad : b.less) + '</textarea>' +
     '<div class="idea-actions">' +
+      '<button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button>' +
       '<div class="idea-spacer"></div>' +
       '<button class="idea-next" id="flow-badly-next">' + (isBad ? t('flow.badly.next') : t('flow.done')) + '</button>' +
     '</div>';
@@ -1440,8 +1557,9 @@ function flowBadlyDone() {
     '<div class="idea-done-tag">' + t('flow.done') + '</div>' +
     '<div class="idea-close">' + ideaEsc(t('flow.badly.done.msg')) + '</div>' +
     '<div class="idea-actions idea-actions-end">' +
-      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
       '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
     '</div>';
   stage.querySelector('#flow-again-btn').addEventListener('click', flowBadlyStart);
   stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
@@ -1462,7 +1580,6 @@ function flowRenderStyle() {
   const s = flowState.style;
   const scene = scenes[s.sceneIdx];
   stage.innerHTML =
-    '<div class="flow-back-row"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>' +
     '<div class="idea-lead">' + t('flow.style.title') + '</div>' +
     '<div class="flow-scene-picker">' +
       scenes.map((sc, i) => '<button class="flow-scene-btn' + (i === s.sceneIdx ? ' on' : '') + '" data-i="' + i + '">' + t('flow.style.scene') + ' ' + (i + 1) + '</button>').join('') +
@@ -1470,7 +1587,8 @@ function flowRenderStyle() {
     '<div class="flow-scene-base">' + ideaEsc(scene.base) + '</div>' +
     '<div class="flow-voices">' + scene.voices.map(v => '<div class="flow-voice"><div class="flow-voice-label">' + ideaEsc(v.label) + '</div><div class="flow-voice-text">' + ideaEsc(v.text) + '</div></div>').join('') + '</div>' +
     '<div class="idea-dev-conclusion-label">' + t('flow.style.yourturn') + '</div>' +
-    '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>';
+    '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>' +
+    '<div class="idea-actions"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>';
 
   stage.querySelector('#flow-home-btn').addEventListener('click', flowHome);
   stage.querySelectorAll('.flow-scene-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -1491,7 +1609,7 @@ function bs2AddChild(parentId, type, prompt) {
   ideaMap.nodes.push({ id, parentId, type, text: '', prompt: prompt || null });
   saveProject();
   renderBrainstorming();
-  const newText = document.querySelector(`#page-brainstorming [data-node-id="${id}"] .bs2-text`);
+  const newText = document.querySelector(`#bs2-tree [data-node-id="${id}"] .bs2-text`);
   if (newText) { newText.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); newText.focus(); }
 }
 
@@ -1638,15 +1756,6 @@ function renderBrainstorming() {
   // Run autoResize after cards are in the DOM
   requestAnimationFrame(() => tree.querySelectorAll('.bs2-text').forEach(autoResize));
 }
-
-document.getElementById('bs2-add-root')?.addEventListener('click', () => {
-  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-  ideaMap.nodes.push({ id, parentId: null, type: 'root', text: '', prompt: null });
-  saveProject();
-  renderBrainstorming();
-  const newText = document.querySelector(`#page-brainstorming [data-node-id="${id}"] .bs2-text`);
-  if (newText) newText.focus();
-});
 
 // ── Worldbuilding ──
 function renderWorldbuilding() {
@@ -1831,7 +1940,6 @@ function switchPage(page) {
   if (page === 'home') renderHome();
   if (page === 'stats') renderStats();
   if (page === 'worldbuilding') renderWorldbuilding();
-  if (page === 'brainstorming') renderBrainstorming();
   if (page === 'ideas') renderIdeas();
   if (page === 'theme') renderTheme();
   if (page === 'brainstorm') requestAnimationFrame(() => { bsCanvas.querySelectorAll('.bs-note-text').forEach(autoResize); expandCanvas(); });
@@ -1881,6 +1989,433 @@ async function renderHome() {
   });
 
   container.appendChild(grid);
+}
+
+// ══════════════════════════════════
+// ── IDEA POOL ──
+// A cross-project collection that lives ABOVE individual projects: a place to
+// dump every "what if I wrote…" idea so it stops competing for attention,
+// combine ideas that fit together, and decide which one to develop next.
+// Stored in its own localStorage key (not inside any project).
+// ══════════════════════════════════
+const LS_IDEAPOOL = 'inktink.ideapool';
+// idea: { id, title, note, spark: 0-3, ready: 0-3, combinedFrom: [titles], created }
+let ideaPool = { focusId: null, sort: 'created', ideas: [] };
+let ideaPoolCombine = false;       // combine-mode toggle
+let ideaPoolSelected = new Set();  // ids selected while combining
+let ideaPoolSuggestId = null;      // transient "decide for me" highlight
+
+function loadIdeaPool() {
+  try {
+    const raw = localStorage.getItem(LS_IDEAPOOL);
+    if (raw) {
+      const d = JSON.parse(raw);
+      ideaPool = {
+        focusId: d.focusId || null,
+        sort: d.sort || 'created',
+        ideas: Array.isArray(d.ideas) ? d.ideas : [],
+      };
+    }
+  } catch {}
+}
+
+function saveIdeaPool() {
+  try { localStorage.setItem(LS_IDEAPOOL, JSON.stringify(ideaPool)); } catch {}
+}
+
+function ideaPoolId() {
+  return 'idea-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function ideaPoolSorted() {
+  const list = ideaPool.ideas.slice();
+  const sweet = i => (i.spark || 0) + (i.ready || 0);
+  switch (ideaPool.sort) {
+    case 'spark': list.sort((a, b) => (b.spark || 0) - (a.spark || 0)); break;
+    case 'ready': list.sort((a, b) => (b.ready || 0) - (a.ready || 0)); break;
+    case 'sweet': list.sort((a, b) => sweet(b) - sweet(a)); break;
+    default:      list.sort((a, b) => (b.created || 0) - (a.created || 0));
+  }
+  // The current focus always floats to the very top, whatever the sort.
+  if (ideaPool.focusId) {
+    list.sort((a, b) => (b.id === ideaPool.focusId) - (a.id === ideaPool.focusId));
+  }
+  return list;
+}
+
+function ideaPoolAdd(title) {
+  const text = (title || '').trim();
+  if (!text) return;
+  ideaPool.ideas.push({
+    id: ideaPoolId(), title: text, note: '',
+    spark: 0, ready: 0, combinedFrom: [], created: Date.now(),
+  });
+  saveIdeaPool();
+  renderIdeaPool();
+}
+
+// Weighted-random pick so excitement nudges the dice without making it
+// deterministic — the point is to break decision paralysis, not to be "right".
+function ideaPoolPick() {
+  const pool = ideaPool.ideas.filter(i => i.id !== ideaPool.focusId);
+  if (!pool.length) return;
+  let total = 0;
+  for (const i of pool) total += (i.spark || 0) + 1;
+  let r = Math.random() * total;
+  let chosen = pool[0];
+  for (const i of pool) { r -= (i.spark || 0) + 1; if (r <= 0) { chosen = i; break; } }
+  ideaPoolSuggestId = chosen.id;
+  renderIdeaPool();
+}
+
+function ideaPoolCombineSelected() {
+  const picked = ideaPool.ideas.filter(i => ideaPoolSelected.has(i.id));
+  if (picked.length < 2) return;
+  const sources = picked.map(i => i.title);
+  const note = picked.map(i => i.note).filter(Boolean).join('\n\n');
+  ideaPool.ideas.push({
+    id: ideaPoolId(),
+    title: sources.join(' + '),
+    note,
+    spark: Math.max(...picked.map(i => i.spark || 0)),
+    ready: 0,
+    combinedFrom: sources,
+    created: Date.now(),
+  });
+  ideaPoolCombine = false;
+  ideaPoolSelected.clear();
+  saveIdeaPool();
+  renderIdeaPool();
+}
+
+// Picks a project name that won't silently overwrite an existing saved
+// project ("My idea", "My idea 2", …). Used both for ideas graduating into
+// projects and for renaming the current project via the sidebar title.
+function uniqueProjectName(base, exceptCurrent) {
+  const store = readProjectsStore();
+  let name = base || t('project.untitled');
+  let n = 2;
+  while (store[name] && name !== exceptCurrent) name = base + ' ' + (n++);
+  return name;
+}
+
+// Turns an idea into a real, saved InkTink project: a fresh workspace whose
+// description is seeded from the idea's note. Optionally leaves the idea in the
+// pool (default removes it, since it has "graduated").
+function ideaPoolToProject(idea, keepInPool) {
+  if (typeof flushEditor === 'function') flushEditor();
+  const fresh = {
+    beats: [], characters: [], moodboard: [], blurb: idea.note || '',
+    writing: { chapters: [] }, brainstorm: { notes: [], links: [] },
+    timeline: { columns: [], rows: [] }, inspiration: [], todos: [],
+    writingGoal: 0, wordHistory: [], selectedStructure: null,
+    worldbuilding: { entries: [], customCategories: [], hiddenBuiltins: [] },
+    ideaMap: { nodes: [] }, storyTheme: {}, ideaWorkshops: {},
+  };
+  currentProjectName = null;
+  applyProjectData(fresh);
+  const name = uniqueProjectName((idea.title || '').trim());
+  saveProjectAs(name);
+  currentProjectName = name;
+  isDirty = false;
+  updateProjectLabel();
+
+  if (!keepInPool) {
+    ideaPool.ideas = ideaPool.ideas.filter(i => i.id !== idea.id);
+    if (ideaPool.focusId === idea.id) ideaPool.focusId = null;
+    saveIdeaPool();
+  }
+  switchPage('writing');
+}
+
+function ideaPoolToProjectModal(idea) {
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <div class="modal-title">${t('ideapool.toproject.title')}</div>
+    <div class="modal-empty">${t('ideapool.toproject.confirm')}</div>
+    <label class="ip-keep"><input type="checkbox" id="ip-keep"> ${t('ideapool.toproject.keep')}</label>
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px">
+      <button class="btn-secondary" id="ip-tp-cancel">${t('btn.cancel')}</button>
+      <button class="btn-primary" id="ip-tp-go">${t('ideapool.toproject.go')}</button>
+    </div>
+  `;
+  openModal(container);
+  container.querySelector('#ip-tp-cancel').addEventListener('click', closeModal);
+  container.querySelector('#ip-tp-go').addEventListener('click', () => {
+    const keep = container.querySelector('#ip-keep').checked;
+    closeModal();
+    ideaPoolToProject(idea, keep);
+  });
+}
+
+function ideaPoolRatingEl(idea, key, label) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ip-rating';
+  const lab = document.createElement('span');
+  lab.className = 'ip-rating-label';
+  lab.textContent = label;
+  wrap.appendChild(lab);
+  const dots = document.createElement('div');
+  dots.className = 'ip-dots';
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'ip-dot' + ((idea[key] || 0) >= i ? ' on' : '');
+    dot.type = 'button';
+    dot.addEventListener('click', () => {
+      idea[key] = (idea[key] === i) ? i - 1 : i; // click current top dot to clear it
+      saveIdeaPool();
+      renderIdeaPool();
+    });
+    dots.appendChild(dot);
+  }
+  wrap.appendChild(dots);
+  return wrap;
+}
+
+// container: the element to render into (the idea pool now lives inline inside
+// the "Find & Develop Ideas" stage, reached via a starter card, rather than
+// having its own top-level nav page). Remembered across re-renders so internal
+// calls like renderIdeaPool() after an edit don't need to pass it again.
+let ideaPoolContainer = null;
+function renderIdeaPool(container) {
+  if (container) ideaPoolContainer = container;
+  const page = ideaPoolContainer;
+  if (!page) return;
+  page.innerHTML = '';
+
+  const intro = document.createElement('div');
+  intro.className = 'ip-intro';
+  intro.textContent = t('ideapool.tagline');
+  page.appendChild(intro);
+
+  // ── Capture row ──
+  const capture = document.createElement('div');
+  capture.className = 'ip-capture';
+  const input = document.createElement('input');
+  input.className = 'ip-capture-input';
+  input.placeholder = t('ideapool.capture.placeholder');
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-primary';
+  addBtn.textContent = t('ideapool.add');
+  const submit = () => { ideaPoolAdd(input.value); };
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  addBtn.addEventListener('click', submit);
+  capture.appendChild(input);
+  capture.appendChild(addBtn);
+  page.appendChild(capture);
+
+  // ── Focus banner ──
+  const focus = ideaPool.ideas.find(i => i.id === ideaPool.focusId);
+  const banner = document.createElement('div');
+  banner.className = 'ip-focus' + (focus ? ' has' : '');
+  if (focus) {
+    const info = document.createElement('div');
+    info.className = 'ip-focus-info';
+    info.innerHTML = '<span class="ip-focus-label">' + t('ideapool.focus.label') + '</span>' +
+      '<span class="ip-focus-title"></span>';
+    info.querySelector('.ip-focus-title').textContent = focus.title;
+    const clear = document.createElement('button');
+    clear.className = 'ip-focus-clear';
+    clear.textContent = t('ideapool.focus.clear');
+    clear.addEventListener('click', () => { ideaPool.focusId = null; saveIdeaPool(); renderIdeaPool(); });
+    banner.appendChild(info);
+    banner.appendChild(clear);
+  } else {
+    banner.textContent = t('ideapool.focus.none');
+  }
+  page.appendChild(banner);
+
+  // ── Suggestion (from "decide for me") ──
+  if (ideaPoolSuggestId) {
+    const sug = ideaPool.ideas.find(i => i.id === ideaPoolSuggestId);
+    if (sug) {
+      const s = document.createElement('div');
+      s.className = 'ip-suggest';
+      const txt = document.createElement('span');
+      txt.innerHTML = '<strong></strong> — ' + t('ideapool.suggest');
+      txt.querySelector('strong').textContent = sug.title;
+      const yes = document.createElement('button');
+      yes.className = 'btn-primary';
+      yes.textContent = t('ideapool.focus.set');
+      yes.addEventListener('click', () => {
+        ideaPool.focusId = sug.id; ideaPoolSuggestId = null; saveIdeaPool(); renderIdeaPool();
+      });
+      const again = document.createElement('button');
+      again.className = 'btn-secondary';
+      again.textContent = t('ideapool.pick');
+      again.addEventListener('click', ideaPoolPick);
+      s.appendChild(txt); s.appendChild(yes); s.appendChild(again);
+      page.appendChild(s);
+    } else {
+      ideaPoolSuggestId = null;
+    }
+  }
+
+  // ── Toolbar (sort / decide / combine) ──
+  const toolbar = document.createElement('div');
+  toolbar.className = 'ip-toolbar';
+
+  const sortWrap = document.createElement('label');
+  sortWrap.className = 'ip-sort';
+  sortWrap.innerHTML = '<span>' + t('ideapool.sort.label') + '</span>';
+  const sortSel = document.createElement('select');
+  [['created', 'ideapool.sort.created'], ['sweet', 'ideapool.sort.sweet'],
+   ['spark', 'ideapool.sort.spark'], ['ready', 'ideapool.sort.ready']].forEach(([v, k]) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = t(k);
+    if (ideaPool.sort === v) o.selected = true;
+    sortSel.appendChild(o);
+  });
+  sortSel.addEventListener('change', () => { ideaPool.sort = sortSel.value; saveIdeaPool(); renderIdeaPool(); });
+  sortWrap.appendChild(sortSel);
+  toolbar.appendChild(sortWrap);
+
+  const spacer = document.createElement('div');
+  spacer.className = 'ip-toolbar-spacer';
+  toolbar.appendChild(spacer);
+
+  if (ideaPool.ideas.length >= 2) {
+    const pickBtn = document.createElement('button');
+    pickBtn.className = 'ip-tool-btn';
+    pickBtn.textContent = t('ideapool.pick');
+    pickBtn.addEventListener('click', ideaPoolPick);
+    toolbar.appendChild(pickBtn);
+
+    const combineBtn = document.createElement('button');
+    combineBtn.className = 'ip-tool-btn' + (ideaPoolCombine ? ' on' : '');
+    combineBtn.textContent = ideaPoolCombine ? t('ideapool.combine.cancel') : t('ideapool.combine');
+    combineBtn.addEventListener('click', () => {
+      ideaPoolCombine = !ideaPoolCombine;
+      ideaPoolSelected.clear();
+      renderIdeaPool();
+    });
+    toolbar.appendChild(combineBtn);
+  }
+  page.appendChild(toolbar);
+
+  if (ideaPoolCombine) {
+    const hint = document.createElement('div');
+    hint.className = 'ip-combine-bar';
+    const h = document.createElement('span');
+    h.textContent = t('ideapool.combine.hint');
+    const merge = document.createElement('button');
+    merge.className = 'btn-primary';
+    merge.textContent = t('ideapool.combine.do');
+    merge.disabled = ideaPoolSelected.size < 2;
+    merge.addEventListener('click', ideaPoolCombineSelected);
+    hint.appendChild(h);
+    hint.appendChild(merge);
+    page.appendChild(hint);
+  }
+
+  // ── Cards ──
+  if (!ideaPool.ideas.length) {
+    const empty = document.createElement('div');
+    empty.className = 'ip-empty';
+    empty.textContent = t('ideapool.empty');
+    page.appendChild(empty);
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'ip-grid';
+  ideaPoolSorted().forEach(idea => {
+    const isFocus = idea.id === ideaPool.focusId;
+    const parked = ideaPool.focusId && !isFocus;
+    const card = document.createElement('div');
+    card.className = 'ip-card'
+      + (isFocus ? ' is-focus' : '')
+      + (parked ? ' is-parked' : '')
+      + (idea.id === ideaPoolSuggestId ? ' is-suggest' : '')
+      + (ideaPoolSelected.has(idea.id) ? ' is-selected' : '');
+
+    if (ideaPoolCombine) {
+      card.classList.add('selectable');
+      card.addEventListener('click', e => {
+        if (e.target.closest('input, textarea, button')) return;
+        if (ideaPoolSelected.has(idea.id)) ideaPoolSelected.delete(idea.id);
+        else ideaPoolSelected.add(idea.id);
+        renderIdeaPool();
+      });
+    }
+
+    // Title
+    const title = document.createElement('input');
+    title.className = 'ip-card-title';
+    title.value = idea.title;
+    title.placeholder = t('ideapool.title.placeholder');
+    title.addEventListener('input', () => { idea.title = title.value; saveIdeaPool(); });
+    card.appendChild(title);
+
+    // Combined-from badge
+    if (idea.combinedFrom && idea.combinedFrom.length) {
+      const badge = document.createElement('div');
+      badge.className = 'ip-combined';
+      badge.textContent = t('ideapool.combined.from') + ' ' + idea.combinedFrom.join(', ');
+      card.appendChild(badge);
+    }
+
+    // Note
+    const note = document.createElement('textarea');
+    note.className = 'ip-card-note';
+    note.value = idea.note || '';
+    note.placeholder = t('ideapool.note.placeholder');
+    note.rows = 3;
+    note.addEventListener('input', () => { idea.note = note.value; saveIdeaPool(); autoResize(note); });
+    card.appendChild(note);
+
+    // Ratings
+    const ratings = document.createElement('div');
+    ratings.className = 'ip-ratings';
+    ratings.appendChild(ideaPoolRatingEl(idea, 'spark', t('ideapool.spark')));
+    ratings.appendChild(ideaPoolRatingEl(idea, 'ready', t('ideapool.ready')));
+    card.appendChild(ratings);
+
+    // Start-as-project action
+    const toProj = document.createElement('button');
+    toProj.className = 'ip-card-toproject';
+    toProj.textContent = t('ideapool.toproject');
+    toProj.addEventListener('click', () => ideaPoolToProjectModal(idea));
+    card.appendChild(toProj);
+
+    // Footer actions
+    const foot = document.createElement('div');
+    foot.className = 'ip-card-foot';
+    const focusBtn = document.createElement('button');
+    focusBtn.className = 'ip-card-focus' + (isFocus ? ' on' : '');
+    focusBtn.textContent = isFocus ? '★ ' + t('ideapool.focus.label') : '☆ ' + t('ideapool.focus.set');
+    focusBtn.addEventListener('click', () => {
+      ideaPool.focusId = isFocus ? null : idea.id;
+      ideaPoolSuggestId = null;
+      saveIdeaPool();
+      renderIdeaPool();
+    });
+    const del = document.createElement('button');
+    del.className = 'ip-card-del';
+    del.title = t('ideapool.delete');
+    del.textContent = '×';
+    del.addEventListener('click', () => {
+      ideaPool.ideas = ideaPool.ideas.filter(i => i.id !== idea.id);
+      if (ideaPool.focusId === idea.id) ideaPool.focusId = null;
+      ideaPoolSelected.delete(idea.id);
+      saveIdeaPool();
+      renderIdeaPool();
+    });
+    foot.appendChild(focusBtn);
+    foot.appendChild(del);
+    card.appendChild(foot);
+
+    if (parked) {
+      const parkedNote = document.createElement('div');
+      parkedNote.className = 'ip-parked-note';
+      parkedNote.textContent = t('ideapool.focus.parked');
+      card.appendChild(parkedNote);
+    }
+
+    grid.appendChild(card);
+  });
+  page.appendChild(grid);
+  requestAnimationFrame(() => grid.querySelectorAll('textarea').forEach(autoResize));
 }
 
 // ══════════════════════════════════
@@ -2176,7 +2711,7 @@ document.querySelector('.topbar-brand').addEventListener('click', () => switchPa
 
 // Home page CTA buttons delegate to the existing topbar handlers
 document.getElementById('home-btn-new').addEventListener('click', () => document.getElementById('btn-new-project').click());
-document.getElementById('home-btn-load').addEventListener('click', () => document.getElementById('btn-load-project').click());
+document.getElementById('home-btn-import').addEventListener('click', () => document.getElementById('btn-import-project').click());
 
 // ── Global light / dark theme ──
 function applyTheme(theme) {
@@ -3689,6 +4224,33 @@ function updateProjectLabel() {
   if (el) el.textContent = currentProjectName || t('project.untitled');
 }
 
+// The sidebar title doubles as the project name: editing it renames the saved
+// project (or creates it, if this workspace was never named) and the export
+// filename follows along automatically, since exportProjectToFile() already
+// uses currentProjectName.
+function commitProjectTitle(rawName) {
+  const fallback = t('project.untitled');
+  let newName = (rawName || '').trim() || fallback;
+  const prevName = currentProjectName || fallback;
+  if (newName === prevName) { updateProjectLabel(); return; }
+
+  const store = readProjectsStore();
+  if (currentProjectName && store[currentProjectName]) {
+    const finalName = uniqueProjectName(newName, currentProjectName);
+    store[finalName] = store[currentProjectName];
+    store[finalName].modified = new Date().toISOString();
+    if (finalName !== currentProjectName) delete store[currentProjectName];
+    writeProjectsStore(store);
+    currentProjectName = finalName;
+    updateProjectLabel();
+  } else {
+    const finalName = uniqueProjectName(newName);
+    currentProjectName = finalName;
+    saveProjectAs(finalName);
+    updateProjectLabel();
+  }
+}
+
 function applyProjectData(data) {
   beats = data.beats || [];
   characters = data.characters || [];
@@ -3946,114 +4508,18 @@ document.getElementById('btn-export-word').addEventListener('click', exportToWor
 document.getElementById('btn-export-project').addEventListener('click', exportProjectToFile);
 document.getElementById('btn-import-project').addEventListener('click', importProjectFromFile);
 
-// Save button
-document.getElementById('btn-save-project').addEventListener('click', () => {
-  const container = document.createElement('div');
-  container.innerHTML = `
-    <div class="modal-title">${t('save.modal.title')}</div>
-    <div class="save-form">
-      <label for="save-name">${t('save.modal.label')}</label>
-      <input type="text" id="save-name" placeholder="${t('save.placeholder')}" value="${currentProjectName || ''}">
-      <button class="btn-primary" id="save-confirm" style="align-self:flex-end">${t('save.btn')}</button>
-    </div>
-  `;
-  openModal(container);
-  const input = container.querySelector('#save-name');
-  input.focus();
-  input.select();
-
-  async function doSave() {
-    const name = input.value.trim();
-    if (!name) return;
-    const btn = container.querySelector('#save-confirm');
-    btn.disabled = true;
-    btn.textContent = t('save.saving');
-    try {
-      await saveProjectAs(name);
-      currentProjectName = name;
-      isDirty = false;
-      updateProjectLabel();
-      closeModal();
-    } catch(e) {
-      btn.disabled = false;
-      btn.textContent = t('save.btn');
-      const err = container.querySelector('.save-error') || document.createElement('div');
-      err.className = 'save-error';
-      err.textContent = t('save.error');
-      container.querySelector('.save-form').appendChild(err);
-    }
-  }
-
-  container.querySelector('#save-confirm').addEventListener('click', doSave);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') doSave(); });
+// Sidebar title: click to rename — doubles as the project name (and export filename)
+const projTitleEl = document.getElementById('proj-title');
+projTitleEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); projTitleEl.blur(); }
+  if (e.key === 'Escape') { e.preventDefault(); updateProjectLabel(); projTitleEl.blur(); }
 });
+projTitleEl.addEventListener('blur', () => commitProjectTitle(projTitleEl.textContent));
 
 // Load button
-document.getElementById('btn-load-project').addEventListener('click', async () => {
-  const projects = await listProjects();
-  const container = document.createElement('div');
-
-  if (projects.length === 0) {
-    container.innerHTML = `
-      <div class="modal-title">${t('load.modal.title')}</div>
-      <div class="modal-empty">${t('load.modal.empty')}</div>
-    `;
-    openModal(container);
-    return;
-  }
-
-  container.innerHTML = `<div class="modal-title">${t('load.modal.title')}</div>`;
-  const list = document.createElement('ul');
-  list.className = 'project-list';
-
-  const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
-  projects.forEach(p => {
-    const date = new Date(p.modified).toLocaleDateString(locale, {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-    const li = document.createElement('li');
-    li.className = 'project-list-item';
-    li.innerHTML = `
-      <div>
-        <div class="name">${p.name}</div>
-        <div class="date">${date}</div>
-      </div>
-      <div class="actions">
-        <button class="project-list-delete" title="${t('beat.delete.title')}">&times;</button>
-      </div>
-    `;
-
-    li.addEventListener('click', async (e) => {
-      if (e.target.closest('.project-list-delete')) return;
-      const data = await loadProjectByName(p.name);
-      currentProjectName = p.name;
-      applyProjectData(data);
-      updateProjectLabel();
-      closeModal();
-    });
-
-    li.querySelector('.project-list-delete').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      await deleteProjectByName(p.name);
-      li.remove();
-      if (list.children.length === 0) {
-        container.innerHTML = `
-          <div class="modal-title">${t('load.modal.title')}</div>
-          <div class="modal-empty">${t('load.modal.empty')}</div>
-        `;
-      }
-    });
-
-    list.appendChild(li);
-  });
-
-  container.appendChild(list);
-  openModal(container);
-});
-
 // ── Init: load from server ──
 (async function init() {
+  loadIdeaPool();
   const data = await loadProject();
   applyProjectData(data);
 })();

@@ -25,10 +25,8 @@
       <button class="tb-util" id="lang-toggle">EN</button>
       <div class="tb-divider"></div>
       <button class="tb-ghost" id="btn-new-project" data-i18n="btn.new">New</button>
-      <button class="tb-ghost" id="btn-load-project" data-i18n="btn.load">Load</button>
       <button class="tb-ghost" id="btn-import-project" data-i18n="btn.import" data-i18n-tooltip="btn.import.title">Import</button>
-      <button class="tb-ghost" id="btn-export-project" data-i18n="btn.export" data-i18n-tooltip="btn.export.title">Export</button>
-      <button class="tb-cta" id="btn-save-project" data-i18n="btn.save">Save</button>
+      <button class="tb-cta" id="btn-export-project" data-i18n="btn.export" data-i18n-tooltip="btn.export.title">Export</button>
     </div>
   </header>
 
@@ -48,9 +46,6 @@
     <button class="icon-nav-btn" data-page="theme" data-tooltip="Theme" data-i18n-tooltip="nav.theme">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
     </button>
-    <button class="icon-nav-btn" data-page="brainstorming" data-tooltip="Brainstorming" data-i18n-tooltip="nav.brainstorming">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-    </button>
     <button class="icon-nav-btn" data-page="beats" data-tooltip="Story Beats" data-i18n-tooltip="nav.beats">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     </button>
@@ -69,7 +64,7 @@
   </nav>
 
   <aside class="sidebar">
-    <div class="proj-title" id="proj-title">Untitled Project</div>
+    <div class="proj-title" id="proj-title" contenteditable="true" spellcheck="false" title="Click to rename — also used as the export filename">Untitled Project</div>
     <textarea class="proj-blurb" id="project-blurb" placeholder="What's it about? A short description of your project..." rows="3"></textarea>
 
     <div class="sb-section">
@@ -97,7 +92,7 @@
         <p class="home-tagline" data-i18n="home.tagline">Your creative writing workspace</p>
         <div class="home-actions">
           <button class="btn-primary home-btn" id="home-btn-new" data-i18n="btn.new">New Project</button>
-          <button class="btn-secondary home-btn" id="home-btn-load" data-i18n="btn.load">Load Project</button>
+          <button class="btn-secondary home-btn" id="home-btn-import" data-i18n="btn.import">Import</button>
         </div>
       </div>
       <div class="home-recent" id="home-recent"></div>
@@ -142,17 +137,6 @@
 
     <!-- Find Ideas (guided when stuck) -->
     <section id="page-ideas" class="page"></section>
-
-    <!-- Brainstorming (idea tree) -->
-    <section id="page-brainstorming" class="page">
-      <div class="bs2-layout">
-        <div class="page-header">
-          <h1 data-i18n="nav.brainstorming">Brainstorming</h1>
-          <button class="btn-primary" id="bs2-add-root" data-i18n="brainstorming.add">+ New Idea</button>
-        </div>
-        <div class="bs2-tree" id="bs2-tree"></div>
-      </div>
-    </section>
 
     <!-- Notes (sticky canvas) -->
     <section id="page-brainstorm" class="page">
