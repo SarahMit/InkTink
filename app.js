@@ -329,6 +329,10 @@ const TR = {
     'ideapool.ready': 'Ready to start',
     'ideapool.title.placeholder': 'Idea title',
     'ideapool.note.placeholder': 'Notes, fragments, why it pulls at you…',
+    'ideapool.image.add': '+ Add image',
+    'ideapool.image.remove': 'Remove image',
+    'ideapool.link.placeholder': 'Link (e.g. inspiration, reference)',
+    'ideapool.link.open': '↗ Open link',
     'ideapool.delete': 'Delete idea',
     'ideapool.empty': 'No ideas yet — capture your first one above.',
     'ideapool.toproject': '→ Start as project',
@@ -525,6 +529,10 @@ const TR = {
     'ideapool.ready': 'Startklar',
     'ideapool.title.placeholder': 'Titel der Idee',
     'ideapool.note.placeholder': 'Notizen, Fragmente, warum sie dich reizt…',
+    'ideapool.image.add': '+ Bild hinzufügen',
+    'ideapool.image.remove': 'Bild entfernen',
+    'ideapool.link.placeholder': 'Link (z. B. Inspiration, Referenz)',
+    'ideapool.link.open': '↗ Link öffnen',
     'ideapool.delete': 'Idee löschen',
     'ideapool.empty': 'Noch keine Ideen — fang oben mit der ersten an.',
     'ideapool.toproject': '→ Als Projekt starten',
@@ -2056,7 +2064,7 @@ function ideaPoolAdd(title) {
   const text = (title || '').trim();
   if (!text) return;
   ideaPool.ideas.push({
-    id: ideaPoolId(), title: text, note: '',
+    id: ideaPoolId(), title: text, note: '', link: '', image: '',
     spark: 0, ready: 0, combinedFrom: [], created: Date.now(),
   });
   saveIdeaPool();
@@ -2372,6 +2380,63 @@ function renderIdeaPool(container) {
     note.rows = 3;
     note.addEventListener('input', () => { idea.note = note.value; saveIdeaPool(); autoResize(note); });
     card.appendChild(note);
+
+    // Image
+    if (idea.image) {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'ip-card-image-wrap';
+      const img = document.createElement('img');
+      img.className = 'ip-card-image';
+      img.src = idea.image;
+      img.alt = '';
+      const rmImg = document.createElement('button');
+      rmImg.className = 'ip-card-image-rm';
+      rmImg.title = t('ideapool.image.remove');
+      rmImg.textContent = '×';
+      rmImg.addEventListener('click', () => { idea.image = ''; saveIdeaPool(); renderIdeaPool(); });
+      imgWrap.appendChild(img);
+      imgWrap.appendChild(rmImg);
+      card.appendChild(imgWrap);
+    } else {
+      const imgBtn = document.createElement('label');
+      imgBtn.className = 'ip-card-image-add';
+      imgBtn.textContent = t('ideapool.image.add');
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          idea.image = reader.result;
+          saveIdeaPool();
+          renderIdeaPool();
+        };
+        reader.readAsDataURL(file);
+      });
+      imgBtn.appendChild(fileInput);
+      card.appendChild(imgBtn);
+    }
+
+    // Link
+    const link = document.createElement('input');
+    link.className = 'ip-card-link';
+    link.type = 'url';
+    link.value = idea.link || '';
+    link.placeholder = t('ideapool.link.placeholder');
+    link.addEventListener('input', () => { idea.link = link.value; saveIdeaPool(); });
+    card.appendChild(link);
+    if (idea.link) {
+      const linkOpen = document.createElement('a');
+      linkOpen.className = 'ip-card-link-open';
+      linkOpen.href = idea.link;
+      linkOpen.target = '_blank';
+      linkOpen.rel = 'noopener noreferrer';
+      linkOpen.textContent = t('ideapool.link.open');
+      card.appendChild(linkOpen);
+    }
 
     // Ratings
     const ratings = document.createElement('div');

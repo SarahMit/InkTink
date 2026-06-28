@@ -3727,6 +3727,37 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
 }
 .ip-card-note:focus { outline: none; border-color: var(--accent); }
 
+.ip-card-image-wrap { position: relative; }
+.ip-card-image {
+  width: 100%; max-height: 160px; object-fit: cover;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); display: block;
+}
+.ip-card-image-rm {
+  position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
+  font-size: 15px; line-height: 1; cursor: pointer;
+  background: rgba(0,0,0,.55); border: none; border-radius: 50%; color: #fff;
+}
+.ip-card-image-rm:hover { background: rgba(192,57,43,.85); }
+.ip-card-image-add {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px; font-size: 12px; cursor: pointer; color: var(--text-muted);
+  background: var(--bg-surface); border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.ip-card-image-add:hover { border-color: var(--accent); color: var(--text); }
+
+.ip-card-link {
+  width: 100%; font-size: 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); padding: 6px 9px;
+}
+.ip-card-link:focus { outline: none; border-color: var(--accent); }
+.ip-card-link-open {
+  font-size: 12px; color: var(--accent); text-decoration: none;
+  align-self: flex-start;
+}
+.ip-card-link-open:hover { text-decoration: underline; }
+
 .ip-ratings { display: flex; flex-direction: column; gap: 6px; }
 .ip-rating { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .ip-rating-label { font-size: 12px; color: var(--text-muted); }
