@@ -331,6 +331,9 @@ const TR = {
     'ideapool.note.placeholder': 'Notes, fragments, why it pulls at you…',
     'ideapool.image.add': '+ Add image',
     'ideapool.image.remove': 'Remove image',
+    'ideapool.image.recrop': 'Adjust crop',
+    'ideapool.image.crop.title': 'Choose how the image is cropped',
+    'ideapool.image.crop.use': 'Use this crop',
     'ideapool.link.placeholder': 'Link (e.g. inspiration, reference)',
     'ideapool.link.open': '↗ Open link',
     'ideapool.delete': 'Delete idea',
@@ -427,6 +430,11 @@ const TR = {
     'notes.add': '+ Note', 'notes.note.placeholder': 'Idea...',
     'notes.empty': 'Empty canvas.\nClick "+ Note" and drag cards freely.\nUse the connect symbol to link notes into a mind map.',
     'notes.btn.link': 'Link to another note', 'notes.btn.delete': 'Delete note',
+    'notes.btn.image': 'Add image', 'notes.image.remove': 'Remove image',
+    'notes.link.label.placeholder': 'Label…', 'notes.link.delete': 'Delete connection',
+    'notes.btn.resize': 'Drag to resize', 'notes.btn.hyperlink': 'Add hyperlink',
+    'notes.hyperlink.url': 'https://…', 'notes.hyperlink.label': 'Link text (optional)',
+    'notes.hyperlink.done': 'Save link', 'notes.hyperlink.edit': 'Edit link', 'notes.hyperlink.remove': 'Remove link',
     'timeline.add.col': '+ Column', 'timeline.add.row': '+ Thread',
     'timeline.col.placeholder': 'Chapter', 'timeline.row.placeholder': 'Thread',
     'timeline.card.placeholder': 'What happens here?',
@@ -531,6 +539,9 @@ const TR = {
     'ideapool.note.placeholder': 'Notizen, Fragmente, warum sie dich reizt…',
     'ideapool.image.add': '+ Bild hinzufügen',
     'ideapool.image.remove': 'Bild entfernen',
+    'ideapool.image.recrop': 'Ausschnitt anpassen',
+    'ideapool.image.crop.title': 'Wähle den Bildausschnitt',
+    'ideapool.image.crop.use': 'Ausschnitt übernehmen',
     'ideapool.link.placeholder': 'Link (z. B. Inspiration, Referenz)',
     'ideapool.link.open': '↗ Link öffnen',
     'ideapool.delete': 'Idee löschen',
@@ -624,6 +635,11 @@ const TR = {
     'notes.add': '+ Notiz', 'notes.note.placeholder': 'Idee...',
     'notes.empty': 'Leere Leinwand.\nKlicke auf "+ Notiz" und ziehe die Karten frei herum.\nÜber das Verbinden-Symbol lassen sich Notizen zu einer Mindmap verknüpfen.',
     'notes.btn.link': 'Mit anderer Notiz verbinden', 'notes.btn.delete': 'Notiz löschen',
+    'notes.btn.image': 'Bild hinzufügen', 'notes.image.remove': 'Bild entfernen',
+    'notes.link.label.placeholder': 'Beschriftung…', 'notes.link.delete': 'Verbindung löschen',
+    'notes.btn.resize': 'Zum Skalieren ziehen', 'notes.btn.hyperlink': 'Hyperlink hinzufügen',
+    'notes.hyperlink.url': 'https://…', 'notes.hyperlink.label': 'Linktext (optional)',
+    'notes.hyperlink.done': 'Link speichern', 'notes.hyperlink.edit': 'Link bearbeiten', 'notes.hyperlink.remove': 'Link entfernen',
     'timeline.add.col': '+ Spalte', 'timeline.add.row': '+ Strang',
     'timeline.col.placeholder': 'Kapitel', 'timeline.row.placeholder': 'Strang',
     'timeline.card.placeholder': 'Was passiert hier?',
@@ -2145,6 +2161,109 @@ function ideaPoolToProject(idea, keepInPool) {
   switchPage('writing');
 }
 
+// Lets the user pan & zoom a picked image inside a fixed-aspect frame so
+// they choose the crop themselves, instead of us guessing via object-fit.
+function openImageCropModal(dataUrl, onConfirm) {
+  const FRAME_W = 320, FRAME_H = 240;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="modal-title">${t('ideapool.image.crop.title')}</div>
+    <div class="ip-crop-frame" style="width:${FRAME_W}px;height:${FRAME_H}px">
+      <img class="ip-crop-img" draggable="false">
+    </div>
+    <input type="range" class="ip-crop-zoom" min="0" max="100" value="0">
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px">
+      <button class="btn-secondary" id="ip-crop-cancel">${t('btn.cancel')}</button>
+      <button class="btn-primary" id="ip-crop-use">${t('ideapool.image.crop.use')}</button>
+    </div>
+  `;
+  openModal(wrap);
+
+  const frame = wrap.querySelector('.ip-crop-frame');
+  const img = wrap.querySelector('.ip-crop-img');
+  const zoomSlider = wrap.querySelector('.ip-crop-zoom');
+
+  let natW = 0, natH = 0, minScale = 1, scale = 1, offX = 0, offY = 0;
+  let dragging = false, startX = 0, startY = 0, startOffX = 0, startOffY = 0;
+
+  function applyTransform() {
+    img.style.width = (natW * scale) + 'px';
+    img.style.height = (natH * scale) + 'px';
+    img.style.transform = `translate(${offX}px, ${offY}px)`;
+  }
+  function clampOffsets() {
+    const w = natW * scale, h = natH * scale;
+    offX = Math.min(0, Math.max(FRAME_W - w, offX));
+    offY = Math.min(0, Math.max(FRAME_H - h, offY));
+  }
+
+  img.onload = () => {
+    natW = img.naturalWidth; natH = img.naturalHeight;
+    minScale = Math.max(FRAME_W / natW, FRAME_H / natH);
+    scale = minScale;
+    offX = (FRAME_W - natW * scale) / 2;
+    offY = (FRAME_H - natH * scale) / 2;
+    zoomSlider.value = 0;
+    applyTransform();
+  };
+  img.src = dataUrl;
+
+  zoomSlider.addEventListener('input', () => {
+    const frac = zoomSlider.value / 100;
+    const maxScale = minScale * 3;
+    const cx = FRAME_W / 2, cy = FRAME_H / 2;
+    const imgX = (cx - offX) / scale, imgY = (cy - offY) / scale;
+    scale = minScale + (maxScale - minScale) * frac;
+    offX = cx - imgX * scale;
+    offY = cy - imgY * scale;
+    clampOffsets();
+    applyTransform();
+  });
+
+  function pointerDown(e) {
+    dragging = true;
+    const p = e.touches ? e.touches[0] : e;
+    startX = p.clientX; startY = p.clientY;
+    startOffX = offX; startOffY = offY;
+  }
+  function pointerMove(e) {
+    if (!dragging) return;
+    const p = e.touches ? e.touches[0] : e;
+    offX = startOffX + (p.clientX - startX);
+    offY = startOffY + (p.clientY - startY);
+    clampOffsets();
+    applyTransform();
+  }
+  function pointerUp() { dragging = false; }
+
+  frame.addEventListener('mousedown', pointerDown);
+  window.addEventListener('mousemove', pointerMove);
+  window.addEventListener('mouseup', pointerUp);
+  frame.addEventListener('touchstart', pointerDown, { passive: true });
+  frame.addEventListener('touchmove', pointerMove, { passive: true });
+  frame.addEventListener('touchend', pointerUp);
+
+  function cleanup() {
+    window.removeEventListener('mousemove', pointerMove);
+    window.removeEventListener('mouseup', pointerUp);
+  }
+
+  wrap.querySelector('#ip-crop-cancel').addEventListener('click', () => { cleanup(); closeModal(); });
+  wrap.querySelector('#ip-crop-use').addEventListener('click', () => {
+    const OUT_W = 640, OUT_H = 480;
+    const canvas = document.createElement('canvas');
+    canvas.width = OUT_W; canvas.height = OUT_H;
+    const ctx = canvas.getContext('2d');
+    const sx = -offX / scale, sy = -offY / scale;
+    const sw = FRAME_W / scale, sh = FRAME_H / scale;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, OUT_W, OUT_H);
+    const result = canvas.toDataURL('image/jpeg', 0.88);
+    cleanup();
+    closeModal();
+    onConfirm(result);
+  });
+}
+
 function ideaPoolToProjectModal(idea) {
   const container = document.createElement('div');
   container.innerHTML = `
@@ -2389,12 +2508,24 @@ function renderIdeaPool(container) {
       img.className = 'ip-card-image';
       img.src = idea.image;
       img.alt = '';
+      const editImg = document.createElement('button');
+      editImg.className = 'ip-card-image-edit';
+      editImg.title = t('ideapool.image.recrop');
+      editImg.textContent = '⤢';
+      editImg.addEventListener('click', () => {
+        openImageCropModal(idea.image, cropped => {
+          idea.image = cropped;
+          saveIdeaPool();
+          renderIdeaPool();
+        });
+      });
       const rmImg = document.createElement('button');
       rmImg.className = 'ip-card-image-rm';
       rmImg.title = t('ideapool.image.remove');
       rmImg.textContent = '×';
       rmImg.addEventListener('click', () => { idea.image = ''; saveIdeaPool(); renderIdeaPool(); });
       imgWrap.appendChild(img);
+      imgWrap.appendChild(editImg);
       imgWrap.appendChild(rmImg);
       card.appendChild(imgWrap);
     } else {
@@ -2410,9 +2541,11 @@ function renderIdeaPool(container) {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-          idea.image = reader.result;
-          saveIdeaPool();
-          renderIdeaPool();
+          openImageCropModal(reader.result, cropped => {
+            idea.image = cropped;
+            saveIdeaPool();
+            renderIdeaPool();
+          });
         };
         reader.readAsDataURL(file);
       });
@@ -3875,6 +4008,8 @@ function setBsHint(text) {
 }
 
 const BS_NOTE_W = 210; // matches .bs-note width in CSS
+const BS_NOTE_MIN_W = 140;
+const BS_NOTE_MAX_W = 520;
 const BS_PAD    = 80;  // padding beyond the furthest note
 
 function expandCanvas() {
@@ -3884,7 +4019,8 @@ function expandCanvas() {
   brainstorm.notes.forEach(n => {
     const el = noteEls[n.id];
     const h = el ? el.offsetHeight : 100;
-    maxX = Math.max(maxX, (n.x || 0) + BS_NOTE_W + BS_PAD);
+    const w = el ? el.offsetWidth : BS_NOTE_W;
+    maxX = Math.max(maxX, (n.x || 0) + w + BS_PAD);
     maxY = Math.max(maxY, (n.y || 0) + h + BS_PAD);
   });
   bsCanvas.style.width  = maxX + 'px';
@@ -3917,15 +4053,21 @@ function createNoteEl(note) {
   el.style.left = (note.x || 0) + 'px';
   el.style.top = (note.y || 0) + 'px';
   el.style.setProperty('--note', note.color || BS_PALETTE[0]);
+  applyNoteScale(el, note);
 
   el.innerHTML = `
     <div class="bs-note-header">
       <button class="bs-note-swatch" title="Farbe wechseln"></button>
       <div class="bs-note-spacer"></div>
+      <label class="bs-note-btn img" title="${t('notes.btn.image')}">&#128247;<input type="file" accept="image/*" class="bs-note-img-input" style="display:none"></label>
+      <button class="bs-note-btn hyperlink" title="${t('notes.btn.hyperlink')}">&#127760;</button>
       <button class="bs-note-btn link" title="${t('notes.btn.link')}">&#128279;</button>
       <button class="bs-note-btn del" title="${t('notes.btn.delete')}">&times;</button>
     </div>
+    <div class="bs-note-img-wrap"></div>
     <textarea class="bs-note-text" placeholder="${t('notes.note.placeholder')}">${(note.text || '').replace(/</g, '&lt;')}</textarea>
+    <div class="bs-note-links"></div>
+    <div class="bs-note-resize" title="${t('notes.btn.resize')}"></div>
   `;
 
   const textarea = el.querySelector('.bs-note-text');
@@ -3935,6 +4077,151 @@ function createNoteEl(note) {
     autoResize(textarea);
     drawLinks();
     saveProjectDebounced();
+  });
+
+  // Image: render existing, and wire the header picker
+  const imgWrap = el.querySelector('.bs-note-img-wrap');
+  function renderNoteImage() {
+    imgWrap.innerHTML = '';
+    if (!note.image) return;
+    const img = document.createElement('img');
+    img.className = 'bs-note-img';
+    img.src = note.image;
+    img.alt = '';
+    const rm = document.createElement('button');
+    rm.className = 'bs-note-img-rm';
+    rm.title = t('notes.image.remove');
+    rm.textContent = '×';
+    rm.addEventListener('click', e => {
+      e.stopPropagation();
+      note.image = '';
+      renderNoteImage();
+      drawLinks();
+      saveProject();
+    });
+    imgWrap.appendChild(img);
+    imgWrap.appendChild(rm);
+  }
+  renderNoteImage();
+
+  const imgInput = el.querySelector('.bs-note-img-input');
+  imgInput.addEventListener('click', e => e.stopPropagation());
+  imgInput.addEventListener('change', () => {
+    const file = imgInput.files && imgInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      note.image = reader.result;
+      renderNoteImage();
+      drawLinks();
+      saveProject();
+    };
+    reader.readAsDataURL(file);
+    imgInput.value = '';
+  });
+
+  // Hyperlinks: attach one or more clickable links to the note
+  const linksWrap = el.querySelector('.bs-note-links');
+  if (!Array.isArray(note.hyperlinks)) note.hyperlinks = [];
+  const editingLinks = new WeakSet();
+
+  function renderNoteLinks() {
+    linksWrap.innerHTML = '';
+    note.hyperlinks.forEach(lk => {
+      const row = document.createElement('div');
+      row.className = 'bs-note-link';
+      if (editingLinks.has(lk)) {
+        const label = document.createElement('input');
+        label.type = 'text';
+        label.className = 'bs-note-link-input label';
+        label.placeholder = t('notes.hyperlink.label');
+        label.value = lk.label || '';
+        const url = document.createElement('input');
+        url.type = 'url';
+        url.className = 'bs-note-link-input url';
+        url.placeholder = t('notes.hyperlink.url');
+        url.value = lk.url || '';
+        const done = document.createElement('button');
+        done.className = 'bs-note-link-done';
+        done.textContent = '✓';
+        done.title = t('notes.hyperlink.done');
+        const commit = () => {
+          lk.url = normalizeUrl(url.value.trim());
+          lk.label = label.value.trim();
+          if (!lk.url) note.hyperlinks = note.hyperlinks.filter(x => x !== lk);
+          editingLinks.delete(lk);
+          renderNoteLinks();
+          drawLinks();
+          expandCanvas();
+          saveProject();
+        };
+        const cancel = () => {
+          if (!lk.url) note.hyperlinks = note.hyperlinks.filter(x => x !== lk);
+          editingLinks.delete(lk);
+          renderNoteLinks();
+          drawLinks();
+          expandCanvas();
+        };
+        [label, url].forEach(inp => {
+          inp.addEventListener('click', e => e.stopPropagation());
+          inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+            else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+          });
+        });
+        done.addEventListener('click', e => { e.stopPropagation(); commit(); });
+        row.appendChild(label);
+        row.appendChild(url);
+        row.appendChild(done);
+      } else {
+        const a = document.createElement('a');
+        a.className = 'bs-note-link-a';
+        a.href = lk.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = lk.label || lk.url;
+        a.title = lk.url;
+        a.addEventListener('click', e => e.stopPropagation());
+        const edit = document.createElement('button');
+        edit.className = 'bs-note-link-edit';
+        edit.textContent = '✎';
+        edit.title = t('notes.hyperlink.edit');
+        edit.addEventListener('click', e => {
+          e.stopPropagation();
+          editingLinks.add(lk);
+          renderNoteLinks();
+        });
+        const rm = document.createElement('button');
+        rm.className = 'bs-note-link-rm';
+        rm.textContent = '×';
+        rm.title = t('notes.hyperlink.remove');
+        rm.addEventListener('click', e => {
+          e.stopPropagation();
+          note.hyperlinks = note.hyperlinks.filter(x => x !== lk);
+          renderNoteLinks();
+          drawLinks();
+          expandCanvas();
+          saveProject();
+        });
+        row.appendChild(a);
+        row.appendChild(edit);
+        row.appendChild(rm);
+      }
+      linksWrap.appendChild(row);
+    });
+  }
+  renderNoteLinks();
+
+  el.querySelector('.bs-note-btn.hyperlink').addEventListener('click', e => {
+    e.stopPropagation();
+    const lk = { url: '', label: '' };
+    note.hyperlinks.push(lk);
+    editingLinks.add(lk);
+    renderNoteLinks();
+    const urlInput = linksWrap.querySelector('.bs-note-link:last-child .bs-note-link-input.url');
+    if (urlInput) urlInput.focus();
+    drawLinks();
+    expandCanvas();
   });
 
   // Color cycle
@@ -4002,8 +4289,52 @@ function createNoteEl(note) {
     document.addEventListener('mouseup', up);
   });
 
+  // Resize / scale via bottom-right handle
+  el.querySelector('.bs-note-resize').addEventListener('mousedown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const origW = note.w || BS_NOTE_W;
+    el.style.zIndex = 10;
+
+    function move(ev) {
+      const w = Math.round(clamp(origW + (ev.clientX - startX), BS_NOTE_MIN_W, BS_NOTE_MAX_W));
+      note.w = w;
+      applyNoteScale(el, note);
+      autoResize(textarea);
+      drawLinks();
+      expandCanvas();
+    }
+    function up() {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+      el.style.zIndex = '';
+      saveProjectDebounced();
+    }
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+
   noteEls[note.id] = el;
   return el;
+}
+
+function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+
+// Adds a scheme when the user typed a bare domain, leaving mailto:/other
+// schemes and already-qualified URLs untouched. Empty input stays empty.
+function normalizeUrl(url) {
+  if (!url) return '';
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//')) return url;
+  return 'https://' + url;
+}
+
+// Applies a note's stored width and scales its text/handles proportionally,
+// so widening a note enlarges the whole card (a genuine "scale").
+function applyNoteScale(el, note) {
+  const w = note.w || BS_NOTE_W;
+  el.style.width = w + 'px';
+  el.style.setProperty('--note-scale', (w / BS_NOTE_W).toFixed(3));
 }
 
 function addLink(fromId, toId) {
@@ -4038,26 +4369,87 @@ function drawLinks() {
     const a = noteCenter(link.from);
     const b = noteCenter(link.to);
     if (!a || !b) return;
-
-    const hit = document.createElementNS(SVGNS, 'line');
-    hit.setAttribute('class', 'bs-link-hit');
-    hit.setAttribute('x1', a.x); hit.setAttribute('y1', a.y);
-    hit.setAttribute('x2', b.x); hit.setAttribute('y2', b.y);
-    hit.addEventListener('click', () => {
-      brainstorm.links = brainstorm.links.filter(l => l.id !== link.id);
-      saveProject();
-      drawLinks();
-    });
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
 
     const line = document.createElementNS(SVGNS, 'line');
     line.setAttribute('class', 'bs-link-line');
     line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
     line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
 
+    const hit = document.createElementNS(SVGNS, 'line');
+    hit.setAttribute('class', 'bs-link-hit');
+    hit.setAttribute('x1', a.x); hit.setAttribute('y1', a.y);
+    hit.setAttribute('x2', b.x); hit.setAttribute('y2', b.y);
+    hit.addEventListener('click', () => openLinkEditor(link, mx, my));
+
     bsLinks.appendChild(line);
     bsLinks.appendChild(hit);
+
+    if (link.label) {
+      const label = document.createElementNS(SVGNS, 'text');
+      label.setAttribute('class', 'bs-link-label');
+      label.setAttribute('x', mx);
+      label.setAttribute('y', my);
+      label.textContent = link.label;
+      label.addEventListener('click', () => openLinkEditor(link, mx, my));
+      bsLinks.appendChild(label);
+    }
   });
 }
+
+// Inline editor for a connection: rename its label or delete the line.
+function openLinkEditor(link, x, y) {
+  closeLinkEditor();
+  const box = document.createElement('div');
+  box.className = 'bs-link-editor';
+  box.id = 'bs-link-editor';
+  box.style.left = x + 'px';
+  box.style.top = y + 'px';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'bs-link-editor-input';
+  input.placeholder = t('notes.link.label.placeholder');
+  input.value = link.label || '';
+
+  const del = document.createElement('button');
+  del.className = 'bs-link-editor-del';
+  del.title = t('notes.link.delete');
+  del.innerHTML = '&times;';
+  del.addEventListener('click', () => {
+    brainstorm.links = brainstorm.links.filter(l => l.id !== link.id);
+    closeLinkEditor();
+    saveProject();
+    drawLinks();
+  });
+
+  input.addEventListener('input', () => {
+    link.label = input.value;
+    saveProjectDebounced();
+    drawLinks();
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); closeLinkEditor(); saveProject(); }
+  });
+
+  box.appendChild(input);
+  box.appendChild(del);
+  bsCanvas.appendChild(box);
+  input.focus();
+  input.select();
+}
+
+function closeLinkEditor() {
+  const existing = document.getElementById('bs-link-editor');
+  if (existing) existing.remove();
+}
+
+// Dismiss the link editor when clicking elsewhere on the canvas.
+bsCanvas.addEventListener('mousedown', e => {
+  if (!e.target.closest('.bs-link-editor') && !e.target.closest('.bs-link-hit') && !e.target.closest('.bs-link-label')) {
+    closeLinkEditor();
+  }
+});
 
 // Add note
 document.getElementById('add-note-bs').addEventListener('click', () => {
