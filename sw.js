@@ -14,7 +14,8 @@ const ASSETS = [
   'app.js',
   'style.css',
   'manifest.json',
-  'assets/Logo.svg'
+  'assets/Logo.svg',
+  'vendor/docx.min.js'
 ];
 
 // Files that make up the app shell — these must stay fresh, so we prefer the

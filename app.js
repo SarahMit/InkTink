@@ -4,6 +4,18 @@
 // is done with explicit Export/Import to a .json file (images embedded).
 const LS_CURRENT = 'inktink.current';
 const LS_PROJECTS = 'inktink.projects'; // { [name]: { data, modified } }
+const LS_CURRENT_NAME = 'inktink.currentName'; // which named project is open
+
+// Named projects live only in LS_PROJECTS; LS_CURRENT_NAME points at the open
+// one. Unnamed work-in-progress lives in LS_CURRENT instead. Storing the open
+// project once (not twice) doubles the room before the localStorage quota hits.
+function setCurrentProjectName(name) {
+  currentProjectName = name || null;
+  try {
+    if (currentProjectName) localStorage.setItem(LS_CURRENT_NAME, currentProjectName);
+    else localStorage.removeItem(LS_CURRENT_NAME);
+  } catch {}
+}
 
 function collectProjectData() {
   return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, storyTheme, ideaWorkshops };
@@ -17,11 +29,38 @@ function writeProjectsStore(store) {
   localStorage.setItem(LS_PROJECTS, JSON.stringify(store));
 }
 
-async function loadProject() {
+// Boot loader. Prefers the v2 layout (pointer + named store). Falls back to the
+// old v1 layout where LS_CURRENT always held the freshest copy; migration is
+// non-destructive — nothing is deleted here, LS_CURRENT is only removed by the
+// save functions after a verified write to the named store.
+async function loadInitialProject() {
+  const store = readProjectsStore();
+
+  // v2: pointer to a named project
+  try {
+    const pointer = localStorage.getItem(LS_CURRENT_NAME);
+    if (pointer && store[pointer] && store[pointer].data) {
+      currentProjectName = pointer;
+      return store[pointer].data;
+    }
+    if (pointer) localStorage.removeItem(LS_CURRENT_NAME); // dangling pointer
+  } catch {}
+
+  // v1: full data in LS_CURRENT; adopt the matching name if one exists
   try {
     const raw = localStorage.getItem(LS_CURRENT);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const data = JSON.parse(raw);
+      for (const name of Object.keys(store)) {
+        if (JSON.stringify(store[name].data) === JSON.stringify(data)) {
+          setCurrentProjectName(name);
+          return data;
+        }
+      }
+      return data; // newer unsynced work — keep it as the unnamed working copy
+    }
   } catch {}
+
   return { beats: [], characters: [], moodboard: [] };
 }
 
@@ -37,32 +76,110 @@ function snapshotWordHistory() {
   if (wordHistory.length > 90) wordHistory = wordHistory.slice(-90);
 }
 
-async function saveProject() {
+// Saves the project exactly once (named store OR unnamed working copy) and
+// never throws: a failed save (usually the localStorage quota, hit by too
+// many/large images) shows a persistent warning banner with a backup button.
+function saveProject() {
+  if (!projectReady) return false; // boot-time call: nothing loaded yet
   snapshotWordHistory();
   try {
-    localStorage.setItem(LS_CURRENT, JSON.stringify(collectProjectData()));
-    // Keep the named copy in sync, if this project has been named.
+    const json = JSON.stringify(collectProjectData());
     if (currentProjectName) {
       const store = readProjectsStore();
-      store[currentProjectName] = { data: collectProjectData(), modified: new Date().toISOString() };
-      writeProjectsStore(store);
+      store[currentProjectName] = { data: JSON.parse(json), modified: new Date().toISOString() };
+      writeProjectsStore(store); // may throw on quota — previous layout intact
+      localStorage.setItem(LS_CURRENT_NAME, currentProjectName);
+      localStorage.removeItem(LS_CURRENT); // only after the store write succeeded
+    } else {
+      localStorage.setItem(LS_CURRENT, json);
+      localStorage.removeItem(LS_CURRENT_NAME);
     }
+    isDirty = false;
+    hideSaveWarning();
+    return true;
   } catch (e) {
-    // localStorage quota exceeded (usually too many/large embedded images)
     console.warn('Save failed:', e);
-    throw e;
+    showSaveWarning();
+    return false;
   }
+}
+
+// Persistent banner shown while saving fails (quota full); hidden again by the
+// next successful save. Toggling `hidden` is idempotent, so repeated failed
+// saves while typing don't flicker or spam.
+function showSaveWarning() {
+  const el = document.getElementById('save-warning');
+  if (el) el.hidden = false;
+}
+function hideSaveWarning() {
+  const el = document.getElementById('save-warning');
+  if (el) el.hidden = true;
 }
 
 // Images are embedded directly in the project as base64 data URLs, so a
 // single exported .json file is fully self-contained.
-function uploadImage(file) {
+
+function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve({ path: reader.result, filename: String(Date.now()) });
+    reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+// Downscales/recompresses an image so embedded photos don't blow the
+// localStorage quota. Transparent PNGs stay PNG (JPEG has no alpha); every
+// failure path falls back to the original, and the original is kept whenever
+// it is already smaller than the compressed result.
+const IMG_MAX_DIM = 1600;
+const IMG_JPEG_QUALITY = 0.82;
+async function compressImage(file) {
+  const original = await readFileAsDataURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = original;
+    });
+    const scale = Math.min(1, IMG_MAX_DIM / Math.max(img.width, img.height));
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+
+    // Cheap transparency probe on a small canvas, independent of input size.
+    let hasAlpha = false;
+    if (file.type === 'image/png') {
+      const probe = document.createElement('canvas');
+      probe.width = probe.height = 64;
+      const pctx = probe.getContext('2d');
+      pctx.drawImage(img, 0, 0, 64, 64);
+      const px = pctx.getImageData(0, 0, 64, 64).data;
+      for (let i = 3; i < px.length; i += 4) {
+        if (px[i] < 255) { hasAlpha = true; break; }
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    const compressed = hasAlpha
+      ? canvas.toDataURL('image/png')
+      : canvas.toDataURL('image/jpeg', IMG_JPEG_QUALITY);
+    return compressed.length < original.length ? compressed : original;
+  } catch (e) {
+    console.warn('Image compression failed, keeping original:', e);
+    return original;
+  }
+}
+
+async function uploadImage(file) {
+  // GIFs skip compression: drawing to a canvas would freeze the animation.
+  const path = (file.type && file.type.startsWith('image/') && file.type !== 'image/gif')
+    ? await compressImage(file)
+    : await readFileAsDataURL(file);
+  return { path, filename: String(Date.now()) };
 }
 
 // Embedded images need no separate deletion; removing the reference is enough.
@@ -76,13 +193,22 @@ async function listProjects() {
     .sort((a, b) => new Date(b.modified) - new Date(a.modified));
 }
 
-async function saveProjectAs(name) {
+function saveProjectAs(name) {
   snapshotWordHistory();
-  const store = readProjectsStore();
-  store[name] = { data: collectProjectData(), modified: new Date().toISOString() };
-  writeProjectsStore(store);
-  localStorage.setItem(LS_CURRENT, JSON.stringify(collectProjectData()));
-  return { ok: true, name };
+  try {
+    const store = readProjectsStore();
+    store[name] = { data: collectProjectData(), modified: new Date().toISOString() };
+    writeProjectsStore(store); // may throw on quota — previous layout intact
+    setCurrentProjectName(name);
+    localStorage.removeItem(LS_CURRENT);
+    isDirty = false;
+    hideSaveWarning();
+    return { ok: true, name };
+  } catch (e) {
+    console.warn('Save failed:', e);
+    showSaveWarning();
+    return { ok: false, name };
+  }
 }
 
 async function loadProjectByName(name) {
@@ -94,12 +220,18 @@ async function deleteProjectByName(name) {
   const store = readProjectsStore();
   delete store[name];
   writeProjectsStore(store);
+  // Deleting the open project: keep the work as the unnamed working copy.
+  if (name === currentProjectName) {
+    setCurrentProjectName(null);
+    saveProject();
+  }
 }
 
 // ── File export / import (move work between devices) ──
 function exportProjectToFile() {
   snapshotWordHistory();
-  const data = collectProjectData();
+  // version marks the export format; imports without it are treated as v1.
+  const data = { version: 2, ...collectProjectData() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -121,8 +253,9 @@ function importProjectFromFile() {
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
+        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('not a project file');
         if (typeof flushEditor === 'function') flushEditor();
-        currentProjectName = file.name.replace(/\.json$/i, '');
+        setCurrentProjectName(file.name.replace(/\.json$/i, ''));
         applyProjectData(data);
         updateProjectLabel();
         saveProject();
@@ -137,6 +270,13 @@ function importProjectFromFile() {
 }
 
 // ── State ──
+// Save plumbing lives up here because saveProject() already runs while the
+// rest of the script is still evaluating (e.g. the initial switchPage call).
+// Until init() has loaded the stored project, the in-memory state is empty
+// defaults — saving then would wipe the real data, so saveProject() no-ops.
+let projectReady = false;
+let saveTimer = null;
+let isDirty = false;
 let beats = [];
 let characters = [];
 let moodImages = [];
@@ -346,6 +486,12 @@ const TR = {
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'New task + Enter', 'sidebar.insp.empty': 'Add images as inspiration (+)',
     'project.untitled': 'Untitled Project', 'project.blurb.placeholder': "What's it about? A short description of your project...",
+    'save.warning': '⚠️ Saving failed — your browser storage is full. Your latest changes are NOT saved. Remove some images, or download a backup now.',
+    'save.warning.backup': 'Download backup',
+    'writing.export.docx': 'Export as Word document (.docx)',
+    'writing.untitled.chapter': 'Untitled Chapter',
+    'writing.untitled.scene': 'Untitled Scene',
+    'export.docx.unavailable': 'The Word export module has not loaded yet. Go online once and reload the page, then try again.',
     'writing.sections': 'Chapters & Scenes', 'writing.add.chapter': '+ Chapter',
     'writing.empty.chapters': 'No chapters yet.\nCreate one above.',
     'writing.empty.scene': 'Select a scene on the left\nor create a new one to start writing.',
@@ -554,6 +700,12 @@ const TR = {
     'sidebar.inspiration': 'Inspiration', 'sidebar.todo': 'To-do',
     'sidebar.todo.placeholder': 'Neue Aufgabe + Enter', 'sidebar.insp.empty': 'Bilder als Inspiration hinzufügen (+)',
     'project.untitled': 'Unbenanntes Projekt', 'project.blurb.placeholder': "Worum geht's? Kurze Beschreibung deines Projekts...",
+    'save.warning': '⚠️ Speichern fehlgeschlagen — der Browser-Speicher ist voll. Deine letzten Änderungen sind NICHT gespeichert. Entferne einige Bilder oder lade jetzt ein Backup herunter.',
+    'save.warning.backup': 'Backup herunterladen',
+    'writing.export.docx': 'Als Word-Dokument exportieren (.docx)',
+    'writing.untitled.chapter': 'Unbenanntes Kapitel',
+    'writing.untitled.scene': 'Unbenannte Szene',
+    'export.docx.unavailable': 'Das Word-Export-Modul ist noch nicht geladen. Einmal online gehen und die Seite neu laden, dann erneut versuchen.',
     'writing.sections': 'Kapitel & Szenen', 'writing.add.chapter': '+ Kapitel',
     'writing.empty.chapters': 'Noch keine Kapitel.\nLege oben ein Kapitel an.',
     'writing.empty.scene': 'Wähle links eine Szene aus\noder lege eine neue an, um zu schreiben.',
@@ -723,6 +875,8 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-tooltip]').forEach(el => { el.dataset.tooltip = t(el.dataset.i18nTooltip); });
   const blurb = document.getElementById('project-blurb');
   if (blurb) blurb.placeholder = t('project.blurb.placeholder');
+  const exportWordBtn = document.getElementById('btn-export-word');
+  if (exportWordBtn) exportWordBtn.title = t('writing.export.docx');
   const todoInput = document.getElementById('todo-input');
   if (todoInput) todoInput.placeholder = t('sidebar.todo.placeholder');
   const notePopoverTextEl = document.getElementById('note-popover-text');
@@ -951,7 +1105,14 @@ const IDEA_WORKSHOP_FIELDS = {
 
 const IDEA_NOTE_COLORS = ['#c8a2ff', '#ffd479', '#7ee0a0', '#7ec8ff', '#ff9eb1'];
 
-function ideaEsc(s) { return (s || '').replace(/</g, '&lt;'); }
+function ideaEsc(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function ideaGenId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function ideaStage() { return document.getElementById('idea-stage'); }
 
@@ -1669,7 +1830,7 @@ function createBs2Card(node, colorMap = {}) {
     ${node.parentId ? '<div class="bs2-connector"></div>' : ''}
     <div class="bs2-card">
       ${TYPE_LABEL[node.type] ? `<div class="bs2-type-label">${TYPE_LABEL[node.type]}</div>` : ''}
-      <textarea class="bs2-text" rows="1" placeholder="${node.type === 'root' ? t('bs2.root.placeholder') : t('bs2.child.placeholder')}">${node.text}</textarea>
+      <textarea class="bs2-text" rows="1" placeholder="${node.type === 'root' ? t('bs2.root.placeholder') : t('bs2.child.placeholder')}">${ideaEsc(node.text)}</textarea>
       <div class="bs2-actions">
         <button class="bs2-btn bs2-btn-why">+ Why?</button>
         <button class="bs2-btn bs2-btn-whatif">+ What if…</button>
@@ -1894,7 +2055,7 @@ function renderWorldbuilding() {
       card.className = 'wb-card';
       card.innerHTML = `
         <div class="wb-card-header">
-          <input class="wb-card-title" value="${entry.title.replace(/"/g, '&quot;')}" placeholder="${t('wb.entry.title.placeholder')}">
+          <input class="wb-card-title" value="${ideaEsc(entry.title)}" placeholder="${t('wb.entry.title.placeholder')}">
           <span class="wb-card-cat">${t('wb.builtin.' + entry.category) || entry.category}</span>
           <button class="wb-card-delete" title="Delete">&times;</button>
         </div>
@@ -1904,7 +2065,7 @@ function renderWorldbuilding() {
             <button class="wb-card-img-del" title="Remove image">&times;</button>
           </div>
         ` : ''}
-        <textarea class="wb-card-text" placeholder="${t('wb.entry.text.placeholder')}" rows="4">${entry.text}</textarea>
+        <textarea class="wb-card-text" placeholder="${t('wb.entry.text.placeholder')}" rows="4">${ideaEsc(entry.text)}</textarea>
         <label class="wb-card-img-add" title="${t('char.add.image')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           ${entry.image ? t('wb.img.replace') : t('char.add.image')}
@@ -2001,14 +2162,14 @@ async function renderHome() {
     const card = document.createElement('div');
     card.className = 'home-project-card';
     card.innerHTML = `
-      <div class="home-project-name">${p.name}</div>
+      <div class="home-project-name">${ideaEsc(p.name)}</div>
       <div class="home-project-date">${date}</div>
       <button class="home-project-del" title="${t('beat.delete.title')}">&times;</button>
     `;
     card.addEventListener('click', async e => {
       if (e.target.closest('.home-project-del')) return;
       const data = await loadProjectByName(p.name);
-      currentProjectName = p.name;
+      setCurrentProjectName(p.name);
       applyProjectData(data);
       updateProjectLabel();
       switchPage('writing');
@@ -2145,12 +2306,10 @@ function ideaPoolToProject(idea, keepInPool) {
     worldbuilding: { entries: [], customCategories: [], hiddenBuiltins: [] },
     ideaMap: { nodes: [] }, storyTheme: {}, ideaWorkshops: {},
   };
-  currentProjectName = null;
+  setCurrentProjectName(null);
   applyProjectData(fresh);
   const name = uniqueProjectName((idea.title || '').trim());
-  saveProjectAs(name);
-  currentProjectName = name;
-  isDirty = false;
+  saveProjectAs(name); // also adopts the name + persists the pointer
   updateProjectLabel();
 
   if (!keepInPool) {
@@ -2861,11 +3020,11 @@ function renderStats() {
               const barPct = ch.words === 0 ? 0 : Math.max(1, Math.round((ch.words / maxChWords) * 100));
               const segments = ch.scenes.map((sc, i) => {
                 const shade = 100 - (i % 5) * 15; // shades of the theme accent: 100,85,70,55,40
-                return `<div class="stats-stack-seg" style="flex:${sc.words || 0.01};background:color-mix(in srgb, var(--accent) ${shade}%, var(--bg-card))" title="${sc.title}: ${sc.words.toLocaleString('de-DE')} ${t('stats.words')}"></div>`;
+                return `<div class="stats-stack-seg" style="flex:${sc.words || 0.01};background:color-mix(in srgb, var(--accent) ${shade}%, var(--bg-card))" title="${ideaEsc(sc.title)}: ${sc.words.toLocaleString('de-DE')} ${t('stats.words')}"></div>`;
               }).join('');
               return `
                 <div class="stats-bar-row">
-                  <div class="stats-bar-label">${ch.title}</div>
+                  <div class="stats-bar-label">${ideaEsc(ch.title)}</div>
                   <div class="stats-bar-track">
                     <div class="stats-stacked-bar" style="width:${barPct}%">${segments}</div>
                   </div>
@@ -2968,8 +3127,8 @@ function createBeatCard(beat, i) {
   card.innerHTML = `
     <div class="beat-handle" title="${t('beat.drag.title')}">&#8942;&#8942;</div>
     <div class="beat-content">
-      <textarea class="beat-text" rows="1" placeholder="${t('beats.placeholder')}">${beat.text || ''}</textarea>
-      <textarea class="beat-theme" rows="1" placeholder="${t('beats.theme.placeholder')}">${beat.theme || ''}</textarea>
+      <textarea class="beat-text" rows="1" placeholder="${t('beats.placeholder')}">${ideaEsc(beat.text)}</textarea>
+      <textarea class="beat-theme" rows="1" placeholder="${t('beats.theme.placeholder')}">${ideaEsc(beat.theme)}</textarea>
     </div>
     <button class="beat-delete" title="${t('beat.delete.title')}">&times;</button>
   `;
@@ -3237,15 +3396,15 @@ function renderCharacters() {
       <div class="char-drag-handle">&#8942;&#8942;&#8942;</div>
       <div class="char-image-wrap" data-index="${i}">
         ${char.image
-          ? `<img src="${char.image}" alt="${char.name || t('char.name.placeholder')}" draggable="false" style="object-position:${char.imagePosition ? char.imagePosition.x + '% ' + char.imagePosition.y + '%' : '50% 50%'}">
+          ? `<img src="${char.image}" alt="${ideaEsc(char.name || t('char.name.placeholder'))}" draggable="false" style="object-position:${char.imagePosition ? char.imagePosition.x + '% ' + char.imagePosition.y + '%' : '50% 50%'}">
              <div class="char-img-hint">${t('char.img.drag')}</div>`
           : `<div class="char-image-placeholder"><span>&#128247;</span>${t('char.add.image')}</div>`
         }
       </div>
       <input type="file" accept="image/*" class="hidden-input" id="${fileId}">
       <div class="char-body">
-        <input class="char-name" type="text" placeholder="${t('char.name.placeholder')}" value="${char.name || ''}">
-        <textarea class="char-desc" placeholder="${t('char.desc.placeholder')}">${char.description || ''}</textarea>
+        <input class="char-name" type="text" placeholder="${t('char.name.placeholder')}" value="${ideaEsc(char.name)}">
+        <textarea class="char-desc" placeholder="${t('char.desc.placeholder')}">${ideaEsc(char.description)}</textarea>
         <button class="char-delete">${t('char.delete')}</button>
       </div>
     `;
@@ -3460,16 +3619,23 @@ moodFileInput.addEventListener('change', async e => {
 const chapterTree = document.getElementById('chapter-tree');
 const editorPane = document.getElementById('editor-pane');
 
-let saveTimer = null;
-let isDirty = false;
-
 function saveProjectDebounced() {
   isDirty = true;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveProject, 350);
 }
 
+// Closing the tab mid-debounce would lose the last keystrokes, so flush the
+// pending save first (localStorage is synchronous). The "unsaved changes"
+// dialog only appears if that save actually failed.
+function flushPendingSave() {
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  if (typeof flushEditor === 'function') flushEditor(); // pull live editor DOM into state
+  if (isDirty) saveProject();
+}
+window.addEventListener('pagehide', flushPendingSave);
 window.addEventListener('beforeunload', e => {
+  flushPendingSave();
   if (isDirty) {
     e.preventDefault();
     e.returnValue = '';
@@ -3511,7 +3677,7 @@ function renderChapterTree() {
       <div class="chapter-row">
         <span class="chapter-drag" draggable="true" title="${t('writing.drag.chapter')}" style="cursor:grab;color:var(--text-muted);font-size:13px">&#8942;&#8942;</span>
         <button class="chapter-toggle" title="${t('writing.collapse')}">${collapsed ? '&#9656;' : '&#9662;'}</button>
-        <input class="chapter-title" value="${(ch.title || '').replace(/"/g, '&quot;')}" placeholder="${t('writing.chapter.placeholder')}">
+        <input class="chapter-title" value="${ideaEsc(ch.title)}" placeholder="${t('writing.chapter.placeholder')}">
         <div class="chapter-actions">
           <button class="tree-icon-btn del" title="${t('writing.delete.chapter')}">&times;</button>
         </div>
@@ -3580,7 +3746,7 @@ function renderChapterTree() {
         li.dataset.scene = sc.id;
         li.innerHTML = `
           <span class="scene-drag" draggable="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
-          <input class="scene-name-input" value="${(sc.title || '').replace(/"/g, '&quot;')}" placeholder="${t('writing.scene.placeholder')}">
+          <input class="scene-name-input" value="${ideaEsc(sc.title)}" placeholder="${t('writing.scene.placeholder')}">
           <button class="scene-del" title="${t('writing.delete.scene')}">&times;</button>
         `;
 
@@ -3870,8 +4036,8 @@ function runSceneSearch(term, container) {
     const item = document.createElement('div');
     item.className = 'search-result-item';
     item.innerHTML = `
-      <div class="search-result-loc">${h.chTitle} &rsaquo; ${h.scTitle}</div>
-      ${h.snippet ? `<div class="search-result-snippet">${h.snippet.replace(/</g, '&lt;').replace('【', '<mark>').replace('】', '</mark>')}</div>` : ''}
+      <div class="search-result-loc">${ideaEsc(h.chTitle)} &rsaquo; ${ideaEsc(h.scTitle)}</div>
+      ${h.snippet ? `<div class="search-result-snippet">${ideaEsc(h.snippet).replace('【', '<mark>').replace('】', '</mark>')}</div>` : ''}
     `;
     item.addEventListener('click', () => {
       selectScene(h.chId, h.scId);
@@ -4065,7 +4231,7 @@ function createNoteEl(note) {
       <button class="bs-note-btn del" title="${t('notes.btn.delete')}">&times;</button>
     </div>
     <div class="bs-note-img-wrap"></div>
-    <textarea class="bs-note-text" placeholder="${t('notes.note.placeholder')}">${(note.text || '').replace(/</g, '&lt;')}</textarea>
+    <textarea class="bs-note-text" placeholder="${t('notes.note.placeholder')}">${ideaEsc(note.text)}</textarea>
     <div class="bs-note-links"></div>
     <div class="bs-note-resize" title="${t('notes.btn.resize')}"></div>
   `;
@@ -4603,7 +4769,7 @@ function renderTimeline() {
         card.className = 'tl-card';
         card.innerHTML = `
           <button class="tl-card-del" title="${t('timeline.delete.card')}">&times;</button>
-          <textarea class="tl-card-text" placeholder="${t('timeline.card.placeholder')}">${(row.cells[col.id] || '').replace(/</g, '&lt;')}</textarea>
+          <textarea class="tl-card-text" placeholder="${t('timeline.card.placeholder')}">${ideaEsc(row.cells[col.id])}</textarea>
         `;
         const ta = card.querySelector('.tl-card-text');
         requestAnimationFrame(() => autoResize(ta));
@@ -4707,14 +4873,34 @@ function commitProjectTitle(rawName) {
     store[finalName].modified = new Date().toISOString();
     if (finalName !== currentProjectName) delete store[currentProjectName];
     writeProjectsStore(store);
-    currentProjectName = finalName;
+    setCurrentProjectName(finalName);
     updateProjectLabel();
   } else {
     const finalName = uniqueProjectName(newName);
-    currentProjectName = finalName;
-    saveProjectAs(finalName);
+    saveProjectAs(finalName); // also adopts the name + persists the pointer
     updateProjectLabel();
   }
+}
+
+// Scene content is stored as editor HTML and rendered with innerHTML, so
+// anything arriving from an imported .json must be scrubbed of script vectors
+// first. A <template> parses without executing anything.
+function sanitizeHtml(html) {
+  if (typeof html !== 'string' || !html) return '';
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  tpl.content.querySelectorAll('script, style, iframe, object, embed, link, meta, base, form').forEach(el => el.remove());
+  tpl.content.querySelectorAll('*').forEach(el => {
+    for (const attr of [...el.attributes]) {
+      const name = attr.name.toLowerCase();
+      if (name.startsWith('on') || name === 'srcdoc') { el.removeAttribute(attr.name); continue; }
+      if (name === 'href' || name === 'src' || name === 'xlink:href') {
+        const value = attr.value.replace(/\s+/g, '').toLowerCase();
+        if (value.startsWith('javascript:') || value.startsWith('vbscript:')) el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return tpl.innerHTML;
 }
 
 function applyProjectData(data) {
@@ -4724,6 +4910,14 @@ function applyProjectData(data) {
   projectBlurb = data.blurb || '';
   blurbInput.value = projectBlurb;
   writing = data.writing && Array.isArray(data.writing.chapters) ? data.writing : { chapters: [] };
+  writing.chapters = writing.chapters
+    .filter(ch => ch && typeof ch === 'object')
+    .map(ch => ({
+      ...ch,
+      scenes: (Array.isArray(ch.scenes) ? ch.scenes : [])
+        .filter(sc => sc && typeof sc === 'object')
+        .map(sc => ({ ...sc, content: sanitizeHtml(sc.content) })),
+    }));
   // Select first available scene, if any
   activeChapterId = null;
   activeSceneId = null;
@@ -4903,7 +5097,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
     ideaWorkshops = { develop: ideaWorkshopDefault('develop'), char: ideaWorkshopDefault('char') };
     wbFilter = 'Alle';
     structureSelect.value = '';
-    currentProjectName = null;
+    setCurrentProjectName(null);
     activeChapterId = null;
     activeSceneId = null;
 
@@ -4924,55 +5118,101 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
   });
 });
 
-// Word export
-function exportToWord() {
+// ── Word export (.docx via the vendored docx library) ──
+// Converts a scene's editor HTML (p/div/h1-h3 blocks; b/strong, i/em, u, br
+// inline; span.inline-note margin notes) into docx Paragraph objects.
+// Margin notes are working notes, not manuscript — they are dropped.
+function sceneHtmlToParagraphs(html) {
+  const { Paragraph, TextRun, HeadingLevel } = docx;
+  const HEADINGS = { H1: HeadingLevel.HEADING_1, H2: HeadingLevel.HEADING_2, H3: HeadingLevel.HEADING_3 };
+  const BLOCKS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'UL', 'OL', 'LI']);
+
+  function runsForNode(node, fmt) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ? [new TextRun({ text: node.textContent, ...fmt })] : [];
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE || node.classList.contains('inline-note')) return [];
+    const tag = node.tagName;
+    if (tag === 'BR') return [new TextRun({ text: '', break: 1 })];
+    const next = { ...fmt };
+    if (tag === 'B' || tag === 'STRONG') next.bold = true;
+    if (tag === 'I' || tag === 'EM') next.italics = true;
+    if (tag === 'U') next.underline = {};
+    const runs = [];
+    for (const child of node.childNodes) runs.push(...runsForNode(child, next));
+    return runs;
+  }
+
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html || '';
+  const paragraphs = [];
+  let loose = []; // top-level text/inline nodes collect into an implicit paragraph
+
+  const flushLoose = () => {
+    if (loose.length) { paragraphs.push(new Paragraph({ children: loose })); loose = []; }
+  };
+
+  for (const node of tpl.content.childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE && BLOCKS.has(node.tagName)) {
+      flushLoose();
+      let runs = runsForNode(node, {});
+      // "<div><br></div>" is the editor's empty line — one empty paragraph, not two
+      if (runs.length === 1 && node.children.length === 1 && node.children[0].tagName === 'BR') runs = [];
+      paragraphs.push(new Paragraph({ children: runs, heading: HEADINGS[node.tagName] }));
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+      flushLoose();
+    } else {
+      loose.push(...runsForNode(node, {}));
+    }
+  }
+  flushLoose();
+  return paragraphs;
+}
+
+async function exportToDocx() {
+  if (typeof docx === 'undefined') { alert(t('export.docx.unavailable')); return; }
   if (typeof flushEditor === 'function') flushEditor();
 
-  const projectTitle = document.getElementById('proj-title').textContent || 'Projekt';
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+  const projectTitle = document.getElementById('proj-title').textContent || t('project.untitled');
 
-  let body = `<h1 style="text-align:center">${projectTitle}</h1><br>`;
-
+  const children = [
+    new Paragraph({
+      heading: HeadingLevel.TITLE,
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun(projectTitle)],
+    }),
+  ];
   for (const chapter of writing.chapters) {
-    body += `<h1>${chapter.title || 'Unbenanntes Kapitel'}</h1>`;
+    children.push(new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [new TextRun(chapter.title || t('writing.untitled.chapter'))],
+    }));
     for (const scene of (chapter.scenes || [])) {
       if (chapter.scenes.length > 1 || scene.title) {
-        body += `<h2>${scene.title || 'Unbenannte Szene'}</h2>`;
+        children.push(new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun(scene.title || t('writing.untitled.scene'))],
+        }));
       }
-      body += scene.content || '<p></p>';
-      body += '<br>';
+      children.push(...sceneHtmlToParagraphs(scene.content || ''));
     }
   }
 
-  const html = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office'
-          xmlns:w='urn:schemas-microsoft-com:office:word'
-          xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-      <meta charset='utf-8'>
-      <title>${projectTitle}</title>
-      <style>
-        body { font-family: Georgia, serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
-        h1 { font-size: 18pt; margin-top: 24pt; }
-        h2 { font-size: 14pt; margin-top: 18pt; }
-        h3 { font-size: 12pt; margin-top: 12pt; }
-        p  { margin: 0 0 8pt 0; }
-      </style>
-    </head>
-    <body>${body}</body>
-    </html>`;
-
-  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const doc = new Document({ sections: [{ children }] });
+  const blob = await Packer.toBlob(doc);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = (projectTitle || 'export') + '.doc';
+  a.download = (currentProjectName || projectTitle || 'export').replace(/[<>:"/\\|?*]/g, '_') + '.docx';
   a.click();
   URL.revokeObjectURL(url);
 }
 
-document.getElementById('btn-export-word').addEventListener('click', exportToWord);
+document.getElementById('btn-export-word').addEventListener('click', exportToDocx);
 document.getElementById('btn-export-project').addEventListener('click', exportProjectToFile);
 document.getElementById('btn-import-project').addEventListener('click', importProjectFromFile);
+document.getElementById('save-warning-backup').addEventListener('click', exportProjectToFile);
 
 // Sidebar title: click to rename — doubles as the project name (and export filename)
 const projTitleEl = document.getElementById('proj-title');
@@ -4986,6 +5226,7 @@ projTitleEl.addEventListener('blur', () => commitProjectTitle(projTitleEl.textCo
 // ── Init: load from server ──
 (async function init() {
   loadIdeaPool();
-  const data = await loadProject();
+  const data = await loadInitialProject();
+  projectReady = true; // loaded — saving is safe from here on
   applyProjectData(data);
 })();

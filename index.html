@@ -30,6 +30,11 @@
     </div>
   </header>
 
+  <div class="save-warning" id="save-warning" hidden>
+    <span data-i18n="save.warning">⚠️ Saving failed — your browser storage is full. Your latest changes are NOT saved. Remove some images, or download a backup now.</span>
+    <button class="save-warning-btn" id="save-warning-backup" data-i18n="save.warning.backup">Download backup</button>
+  </div>
+
   <nav class="icon-nav">
     <button class="icon-nav-btn" data-page="writing" data-tooltip="Writing" data-i18n-tooltip="nav.writing">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -127,7 +132,7 @@
           <div class="chapter-nav-header">
             <span data-i18n="writing.sections">Chapters &amp; Scenes</span>
             <div class="chapter-nav-actions">
-              <button class="btn-mini" id="btn-export-word" title="Export as Word document">&#8595; .doc</button>
+              <button class="btn-mini" id="btn-export-word" title="Export as Word document (.docx)">&#8595; .docx</button>
               <button class="btn-mini" id="add-chapter" data-i18n="writing.add.chapter">+ Chapter</button>
             </div>
           </div>
@@ -216,6 +221,7 @@
     </div>
   </div>
 
+  <script src="vendor/docx.min.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
