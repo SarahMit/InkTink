@@ -600,6 +600,7 @@ const TR = {
     'writing.delete.chapter': 'Delete chapter', 'writing.delete.scene': 'Delete scene',
     'writing.confirm.delete.chapter': 'Delete chapter "{title}" and all its scenes?',
     'writing.untitled': 'Untitled',
+    'home.storage': 'InkTink is currently using {size} of storage in this browser.',
     'privacy.delete.button': 'Delete all data from this browser…',
     'privacy.delete.title': 'Delete all data from this browser?',
     'privacy.delete.msg': 'This removes every project, the idea pool, and all settings InkTink has stored in this browser — on this device only. Exported .json files are not affected. Download a full backup first if you want to keep anything.',
@@ -690,6 +691,7 @@ const TR = {
     'bs2.delete.msg': 'This idea has branches — deleting it also removes every idea that grew from it.',
     'bs2.delete.confirm': 'Delete',
     'notes.add': '+ Note', 'notes.note.placeholder': 'Idea...',
+    'notes.zoom.in': 'Zoom in (Ctrl + scroll)', 'notes.zoom.out': 'Zoom out (Ctrl + scroll)', 'notes.zoom.reset': 'Reset zoom to 100%',
     'notes.empty': 'Empty canvas.\nClick "+ Note" and drag cards freely.\nUse the connect symbol to link notes into a mind map.',
     'notes.btn.link': 'Link to another note', 'notes.btn.delete': 'Delete note',
     'notes.btn.image': 'Add image', 'notes.image.remove': 'Remove image',
@@ -841,6 +843,7 @@ const TR = {
     'writing.delete.chapter': 'Kapitel löschen', 'writing.delete.scene': 'Szene löschen',
     'writing.confirm.delete.chapter': 'Kapitel „{title}" und alle seine Szenen löschen?',
     'writing.untitled': 'ohne Titel',
+    'home.storage': 'InkTink belegt in diesem Browser gerade {size} Speicher.',
     'privacy.delete.button': 'Alle Daten aus diesem Browser löschen…',
     'privacy.delete.title': 'Alle Daten aus diesem Browser löschen?',
     'privacy.delete.msg': 'Das entfernt alle Projekte, den Ideen-Pool und sämtliche Einstellungen, die InkTink in diesem Browser gespeichert hat — nur auf diesem Gerät. Exportierte .json-Dateien sind nicht betroffen. Lade vorher ein komplettes Backup herunter, wenn du etwas behalten möchtest.',
@@ -928,6 +931,7 @@ const TR = {
     'bs2.delete.msg': 'Diese Idee hat Verzweigungen — beim Löschen verschwinden auch alle Ideen, die daraus entstanden sind.',
     'bs2.delete.confirm': 'Löschen',
     'notes.add': '+ Notiz', 'notes.note.placeholder': 'Idee...',
+    'notes.zoom.in': 'Hineinzoomen (Strg + Scrollen)', 'notes.zoom.out': 'Herauszoomen (Strg + Scrollen)', 'notes.zoom.reset': 'Zoom auf 100% zurücksetzen',
     'notes.empty': 'Leere Leinwand.\nKlicke auf "+ Notiz" und ziehe die Karten frei herum.\nÜber das Verbinden-Symbol lassen sich Notizen zu einer Mindmap verknüpfen.',
     'notes.btn.link': 'Mit anderer Notiz verbinden', 'notes.btn.delete': 'Notiz löschen',
     'notes.btn.image': 'Bild hinzufügen', 'notes.image.remove': 'Bild entfernen',
@@ -1031,6 +1035,12 @@ function applyI18n() {
   applySplit();
   applySidebarCollapsed();
   applyChnavCollapsed();
+  const zoomIn = document.getElementById('bs-zoom-in');
+  const zoomOut = document.getElementById('bs-zoom-out');
+  const zoomLabel = document.getElementById('bs-zoom-label');
+  if (zoomIn) zoomIn.title = t('notes.zoom.in');
+  if (zoomOut) zoomOut.title = t('notes.zoom.out');
+  if (zoomLabel) zoomLabel.title = t('notes.zoom.reset');
   const todoInput = document.getElementById('todo-input');
   if (todoInput) todoInput.placeholder = t('sidebar.todo.placeholder');
   const notePopoverTextEl = document.getElementById('note-popover-text');
@@ -2354,7 +2364,7 @@ function renderWorldbuilding() {
 // UI preferences (split view, collapsed sidebars) are per-device, not part of
 // the project data, so they live in their own localStorage key.
 const LS_UI = 'inktink-ui';
-let uiPrefs = { split: false, splitPage: 'brainstorm', splitLeft: 55, sbCollapsed: false, chnavCollapsed: false };
+let uiPrefs = { split: false, splitPage: 'brainstorm', splitLeft: 55, sbCollapsed: false, chnavCollapsed: false, bsZoom: 1 };
 try { uiPrefs = { ...uiPrefs, ...(JSON.parse(localStorage.getItem(LS_UI)) || {}) }; } catch {}
 function saveUiPrefs() {
   try { localStorage.setItem(LS_UI, JSON.stringify(uiPrefs)); } catch {}
@@ -2541,7 +2551,26 @@ document.getElementById('chnav-expand').addEventListener('click', () => {
   applyChnavCollapsed();
 });
 
+// How much localStorage InkTink occupies right now — makes it visible that
+// deleting images/projects actually frees space (strings are UTF-16, 2 B/char).
+function inktinkStorageSize() {
+  let chars = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('inktink')) chars += k.length + (localStorage.getItem(k) || '').length;
+  }
+  return chars * 2;
+}
+
+function formatBytes(b) {
+  if (b >= 1024 * 1024) return (b / (1024 * 1024)).toFixed(1) + ' MB';
+  return Math.max(1, Math.round(b / 1024)) + ' KB';
+}
+
 async function renderHome() {
+  const storageEl = document.getElementById('home-storage');
+  if (storageEl) storageEl.textContent = t('home.storage').replace('{size}', formatBytes(inktinkStorageSize()));
+
   const container = document.getElementById('home-recent');
   container.innerHTML = '';
 
@@ -4688,9 +4717,101 @@ const BS_NOTE_MIN_W = 140;
 const BS_NOTE_MAX_W = 520;
 const BS_PAD    = 80;  // padding beyond the furthest note
 
+// ── Canvas zoom ──
+// CSS `zoom` scales layout too, so the scrollable area stays correct without
+// extra bookkeeping. Mouse deltas and scroll offsets are in *screen* pixels
+// and must be divided by the zoom factor to land in canvas coordinates.
+const BS_ZOOM_MIN = 0.4, BS_ZOOM_MAX = 2, BS_ZOOM_STEP = 0.1;
+function bsZoom() { return uiPrefs.bsZoom || 1; }
+
+function applyBsZoom() {
+  bsCanvas.style.zoom = bsZoom();
+  const label = document.getElementById('bs-zoom-label');
+  if (label) label.textContent = Math.round(bsZoom() * 100) + '%';
+  expandCanvas();
+}
+
+function setBsZoom(z) {
+  uiPrefs.bsZoom = Math.round(clamp(z, BS_ZOOM_MIN, BS_ZOOM_MAX) * 10) / 10;
+  saveUiPrefs();
+  applyBsZoom();
+}
+
+document.getElementById('bs-zoom-in').addEventListener('click', () => setBsZoom(bsZoom() + BS_ZOOM_STEP));
+document.getElementById('bs-zoom-out').addEventListener('click', () => setBsZoom(bsZoom() - BS_ZOOM_STEP));
+document.getElementById('bs-zoom-label').addEventListener('click', () => setBsZoom(1));
+
+// Ctrl/Cmd + Mausrad zoomt das Board statt der Browserseite.
+document.getElementById('bs-canvas-wrap').addEventListener('wheel', e => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  setBsZoom(bsZoom() + (e.deltaY < 0 ? BS_ZOOM_STEP : -BS_ZOOM_STEP));
+}, { passive: false });
+
+applyBsZoom(); // restore the saved zoom on boot
+
+// ── Multi-select: drag a rectangle on empty canvas, move notes as a group ──
+const bsSelected = new Set();
+
+function bsClearSelection() {
+  bsSelected.clear();
+  bsCanvas.querySelectorAll('.bs-note.bs-selected').forEach(el => el.classList.remove('bs-selected'));
+}
+
+function bsApplySelectionClasses() {
+  brainstorm.notes.forEach(n => {
+    const el = noteEls[n.id];
+    if (el) el.classList.toggle('bs-selected', bsSelected.has(n.id));
+  });
+}
+
+bsCanvas.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  if (e.target !== bsCanvas && e.target !== bsLinks) return; // only empty areas
+  e.preventDefault();
+  const z = bsZoom();
+  const rect = bsCanvas.getBoundingClientRect(); // visual (zoomed) box
+  const startX = (e.clientX - rect.left) / z;
+  const startY = (e.clientY - rect.top) / z;
+  let marquee = null;
+  let moved = false;
+
+  function move(ev) {
+    const curX = (ev.clientX - rect.left) / z;
+    const curY = (ev.clientY - rect.top) / z;
+    if (!moved && Math.abs(curX - startX) < 4 && Math.abs(curY - startY) < 4) return;
+    moved = true;
+    if (!marquee) {
+      marquee = document.createElement('div');
+      marquee.className = 'bs-marquee';
+      bsCanvas.appendChild(marquee);
+    }
+    const x = Math.min(startX, curX), y = Math.min(startY, curY);
+    const w = Math.abs(curX - startX), h = Math.abs(curY - startY);
+    Object.assign(marquee.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+    // live highlight: every note whose box intersects the rectangle
+    bsSelected.clear();
+    brainstorm.notes.forEach(n => {
+      const el = noteEls[n.id];
+      if (!el) return;
+      const nx = n.x || 0, ny = n.y || 0;
+      if (nx < x + w && nx + el.offsetWidth > x && ny < y + h && ny + el.offsetHeight > y) bsSelected.add(n.id);
+    });
+    bsApplySelectionClasses();
+  }
+  function up() {
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    if (marquee) marquee.remove();
+    if (!moved) bsClearSelection(); // plain click on empty space deselects
+  }
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+});
+
 function expandCanvas() {
-  const wrapW = bsCanvasWrap.clientWidth;
-  const wrapH = bsCanvasWrap.clientHeight;
+  const wrapW = bsCanvasWrap.clientWidth / bsZoom();
+  const wrapH = bsCanvasWrap.clientHeight / bsZoom();
   let maxX = wrapW, maxY = wrapH;
   brainstorm.notes.forEach(n => {
     const el = noteEls[n.id];
@@ -4729,6 +4850,7 @@ function createNoteEl(note) {
   el.style.left = (note.x || 0) + 'px';
   el.style.top = (note.y || 0) + 'px';
   el.style.setProperty('--note', note.color || BS_PALETTE[0]);
+  if (bsSelected.has(note.id)) el.classList.add('bs-selected'); // survive re-renders
   applyNoteScale(el, note);
 
   el.innerHTML = `
@@ -4938,20 +5060,28 @@ function createNoteEl(note) {
     }
   });
 
-  // Drag via header
+  // Drag via header — a selected note drags the whole selection along
   const header = el.querySelector('.bs-note-header');
   header.addEventListener('mousedown', e => {
     if (e.target.closest('.bs-note-btn') || e.target.closest('.bs-note-swatch')) return;
     e.preventDefault();
     const startX = e.clientX, startY = e.clientY;
-    const origX = note.x || 0, origY = note.y || 0;
+    if (!bsSelected.has(note.id)) bsClearSelection(); // dragging an unselected note breaks the group
+    const group = bsSelected.has(note.id)
+      ? brainstorm.notes.filter(n => bsSelected.has(n.id))
+      : [note];
+    const origins = group.map(n => ({ n, x: n.x || 0, y: n.y || 0 }));
     el.style.zIndex = 10;
 
     function move(ev) {
-      note.x = Math.max(0, origX + (ev.clientX - startX));
-      note.y = Math.max(0, origY + (ev.clientY - startY));
-      el.style.left = note.x + 'px';
-      el.style.top = note.y + 'px';
+      const dx = (ev.clientX - startX) / bsZoom();
+      const dy = (ev.clientY - startY) / bsZoom();
+      origins.forEach(o => {
+        o.n.x = Math.max(0, o.x + dx);
+        o.n.y = Math.max(0, o.y + dy);
+        const gel = noteEls[o.n.id];
+        if (gel) { gel.style.left = o.n.x + 'px'; gel.style.top = o.n.y + 'px'; }
+      });
       drawLinks();
       expandCanvas();
     }
@@ -4974,7 +5104,7 @@ function createNoteEl(note) {
     el.style.zIndex = 10;
 
     function move(ev) {
-      const w = Math.round(clamp(origW + (ev.clientX - startX), BS_NOTE_MIN_W, BS_NOTE_MAX_W));
+      const w = Math.round(clamp(origW + (ev.clientX - startX) / bsZoom(), BS_NOTE_MIN_W, BS_NOTE_MAX_W));
       note.w = w;
       applyNoteScale(el, note);
       autoResize(textarea);
@@ -5131,8 +5261,8 @@ bsCanvas.addEventListener('mousedown', e => {
 document.getElementById('add-note-bs').addEventListener('click', () => {
   const note = {
     id: Date.now(),
-    x: bsCanvasWrap.scrollLeft + 40 + Math.floor(Math.random() * 120),
-    y: bsCanvasWrap.scrollTop  + 40 + Math.floor(Math.random() * 80),
+    x: bsCanvasWrap.scrollLeft / bsZoom() + 40 + Math.floor(Math.random() * 120),
+    y: bsCanvasWrap.scrollTop / bsZoom()  + 40 + Math.floor(Math.random() * 80),
     text: '',
     color: BS_PALETTE[brainstorm.notes.length % BS_PALETTE.length]
   };
@@ -5151,7 +5281,10 @@ bsCanvas.addEventListener('click', e => {
   if (linkingFrom && (e.target === bsCanvas || e.target === bsLinks)) cancelLinking();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && linkingFrom) cancelLinking();
+  if (e.key === 'Escape') {
+    if (linkingFrom) cancelLinking();
+    if (bsSelected.size) bsClearSelection();
+  }
 });
 
 // ══════════════════════════════════

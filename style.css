@@ -226,7 +226,10 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   align-items: center;
   padding: 10px 0;
   gap: 4px;
-  z-index: 90;
+  /* Above .sb-expand (also z-index:90) so its icon tooltips — which extend past
+     the rail's own width — aren't clipped by that strip when the sidebar is
+     collapsed. */
+  z-index: 95;
 }
 
 .icon-nav-btn {
@@ -386,9 +389,15 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
 }
 .btn-danger:hover { background: var(--danger-hover); }
 
+.home-storage {
+  margin-top: 26px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* Quiet "leave no trace" action at the bottom of the home page */
 .home-danger {
-  margin-top: 26px;
+  margin-top: 8px;
   background: none;
   border: none;
   font-family: inherit;
@@ -2258,6 +2267,43 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   align-items: center;
   gap: 14px;
 }
+
+/* Rubber-band selection on the notes board */
+.bs-marquee {
+  position: absolute;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 30;
+}
+.bs-note.bs-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Notes board zoom control */
+.bs-zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+.bs-zoom-btn, .bs-zoom-label {
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: calc(var(--radius-sm) - 2px);
+  padding: 3px 8px;
+}
+.bs-zoom-btn { font-size: 15px; line-height: 1; }
+.bs-zoom-label { font-size: 12px; font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+.bs-zoom-btn:hover, .bs-zoom-label:hover { background: var(--bg-hover); color: var(--text); }
 
 .bs-hint {
   font-size: 12px;
