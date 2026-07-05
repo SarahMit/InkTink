@@ -333,7 +333,9 @@ function ideaWorkshopFromData(saved, name) {
     if (shape[i].structured) base.parts = { ...def.fields[i].parts, ...(f.parts || {}) };
     return base;
   });
-  return { step: saved.step || 0, fields };
+  // `seeded` must be preserved explicitly — this rebuild drops unknown props,
+  // and losing it would re-enable "Seed project structure" after every reload.
+  return { step: saved.step || 0, seeded: !!saved.seeded, fields };
 }
 
 // Builds the combined "conclusion" text for a structured field so the sidebar
@@ -442,7 +444,7 @@ const TR = {
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
     'nav.writing': 'Manuscript', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Theme', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Spark', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Theme', 'nav.brainstorming': 'Idea Tree', 'nav.ideas': 'Spark', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
     'nav.ideapool': 'Idea Pool',
     'ideapool.tagline': 'A home for every idea, so none of them has to live rent-free in your head. Capture them, see which ones fit together, and pick one to focus on next.',
@@ -505,6 +507,9 @@ const TR = {
     'writing.delete.chapter': 'Delete chapter', 'writing.delete.scene': 'Delete scene',
     'writing.confirm.delete.chapter': 'Delete chapter "{title}" and all its scenes?',
     'writing.untitled': 'Untitled',
+    'writing.status.draft': 'Draft', 'writing.status.revised': 'Revised', 'writing.status.done': 'Done',
+    'writing.status.cycle': 'Click to change status',
+    'writing.summary.placeholder': 'One line on what happens here — shows as a tooltip in the chapter list…',
     'editor.theme.toggle': 'Toggle light/dark', 'editor.search': 'Search', 'editor.close': 'Close',
     'editor.fmt.bold': 'Bold (Ctrl+B)', 'editor.fmt.italic': 'Italic (Ctrl+I)', 'editor.fmt.underline': 'Underline (Ctrl+U)',
     'editor.fmt.block': 'Paragraph format',
@@ -515,6 +520,11 @@ const TR = {
     'beats.slot.empty': 'No beats yet — click "+ Beat".', 'beats.add.slot': '+ Beat',
     'beats.placeholder': 'Describe this beat...',
     'beats.theme.placeholder': 'How does this beat reflect the story\'s theme?',
+    'beats.write.scene': 'Write this scene',
+    'beats.drafted': 'Drafted · {n} words',
+    'beats.drafted.jump': 'Jump to this scene in the manuscript',
+    'beats.coverage': '{n} of {m} beats drafted',
+    'beats.write.newchapter': 'Chapter 1',
     'beat.drag.title': 'Drag to reorder', 'beat.delete.title': 'Delete',
     'struct.drei-akt.name': '3-Act Structure',
     'struct.drei-akt.phase.akt1.label': 'Act I – Introduction',
@@ -573,6 +583,9 @@ const TR = {
     'brainstorming.add': '+ New Idea', 'brainstorming.empty': 'No ideas yet — click "+ New Idea" to start.',
     'bs2.root.placeholder': 'Enter idea…', 'bs2.child.placeholder': 'Enter thought…',
     'bs2.add.child': '+ Idea', 'bs2.add.whatif': '+ What if…', 'bs2.whatif.placeholder': 'custom scenario',
+    'bs2.delete.title': 'Delete this branch?',
+    'bs2.delete.msg': 'This idea has branches — deleting it also removes every idea that grew from it.',
+    'bs2.delete.confirm': 'Delete',
     'notes.add': '+ Note', 'notes.note.placeholder': 'Idea...',
     'notes.empty': 'Empty canvas.\nClick "+ Note" and drag cards freely.\nUse the connect symbol to link notes into a mind map.',
     'notes.btn.link': 'Link to another note', 'notes.btn.delete': 'Delete note',
@@ -625,6 +638,12 @@ const TR = {
     'ideas.back': '← Back', 'ideas.skip': "Don't know — skip", 'ideas.next': 'Next',
     'ideas.done': 'Done', 'ideas.done.empty': 'Nothing noted yet — go back and fill in a few answers.',
     'ideas.to.notes': 'Send to Notes', 'ideas.to.character': 'Save as Character Entry', 'ideas.restart': 'Another starting point',
+    'ideas.seed': 'Seed project structure',
+    'ideas.seed.title': 'Your premise becomes the project description; beginning, middle & end become story beats.',
+    'ideas.seed.done': 'Added to your project ✓',
+    'ideas.seed.beginning': 'Beginning:', 'ideas.seed.middle': 'Middle:', 'ideas.seed.end': 'End:',
+    'flow.keep': 'Keep this → send to Notes',
+    'flow.keep.done': 'Saved to Notes ✓',
     'ideas.develop.field': 'Field', 'ideas.develop.finish': 'Finish',
     'ideas.develop.sidebar.title': 'Conclusions so far',
     'ideas.develop.empty': 'Not written yet.',
@@ -656,7 +675,7 @@ const TR = {
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
     'nav.writing': 'Manuskript', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
-    'nav.theme': 'Thema', 'nav.brainstorming': 'Brainstorming', 'nav.ideas': 'Impulse', 'nav.beats': 'Story Beats',
+    'nav.theme': 'Thema', 'nav.brainstorming': 'Ideen-Baum', 'nav.ideas': 'Impulse', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
     'nav.ideapool': 'Ideen-Pool',
     'ideapool.tagline': 'Ein Zuhause für jede Idee, damit keine mehr in deinem Kopf herumspukt. Sammle sie, schau welche zusammenpassen, und wähle eine zum Weitermachen aus.',
@@ -719,6 +738,9 @@ const TR = {
     'writing.delete.chapter': 'Kapitel löschen', 'writing.delete.scene': 'Szene löschen',
     'writing.confirm.delete.chapter': 'Kapitel „{title}" und alle seine Szenen löschen?',
     'writing.untitled': 'ohne Titel',
+    'writing.status.draft': 'Entwurf', 'writing.status.revised': 'Überarbeitet', 'writing.status.done': 'Fertig',
+    'writing.status.cycle': 'Klicken, um den Status zu wechseln',
+    'writing.summary.placeholder': 'Ein Satz dazu, was hier passiert — erscheint als Tooltip in der Kapitelliste…',
     'editor.theme.toggle': 'Hell/Dunkel umschalten', 'editor.search': 'Suchen', 'editor.close': 'Schließen',
     'editor.fmt.bold': 'Fett (Strg+B)', 'editor.fmt.italic': 'Kursiv (Strg+I)', 'editor.fmt.underline': 'Unterstrichen (Strg+U)',
     'editor.fmt.block': 'Absatzformat',
@@ -729,6 +751,11 @@ const TR = {
     'beats.slot.empty': 'Noch kein Beat — klicke "+ Beat".', 'beats.add.slot': '+ Beat',
     'beats.placeholder': 'Beat beschreiben...',
     'beats.theme.placeholder': 'Wie spiegelt dieser Beat das Thema der Geschichte wider?',
+    'beats.write.scene': 'Diese Szene schreiben',
+    'beats.drafted': 'Geschrieben · {n} Wörter',
+    'beats.drafted.jump': 'Zu dieser Szene im Manuskript springen',
+    'beats.coverage': '{n} von {m} Beats geschrieben',
+    'beats.write.newchapter': 'Kapitel 1',
     'beat.drag.title': 'Ziehen zum Umsortieren', 'beat.delete.title': 'Löschen',
     'struct.drei-akt.name': '3-Akt-Struktur',
     'struct.drei-akt.phase.akt1.label': 'Akt I – Einführung', 'struct.drei-akt.phase.akt1.desc': 'Wir lernen die Welt kennen, bevor alles in Bewegung gerät.',
@@ -784,6 +811,9 @@ const TR = {
     'brainstorming.add': '+ Neue Idee', 'brainstorming.empty': 'Noch keine Ideen — klicke "+ Neue Idee" um zu starten.',
     'bs2.root.placeholder': 'Idee eingeben…', 'bs2.child.placeholder': 'Gedanke eingeben…',
     'bs2.add.child': '+ Idee', 'bs2.add.whatif': '+ Was wäre wenn…', 'bs2.whatif.placeholder': 'eigenes Szenario',
+    'bs2.delete.title': 'Diesen Zweig löschen?',
+    'bs2.delete.msg': 'Diese Idee hat Verzweigungen — beim Löschen verschwinden auch alle Ideen, die daraus entstanden sind.',
+    'bs2.delete.confirm': 'Löschen',
     'notes.add': '+ Notiz', 'notes.note.placeholder': 'Idee...',
     'notes.empty': 'Leere Leinwand.\nKlicke auf "+ Notiz" und ziehe die Karten frei herum.\nÜber das Verbinden-Symbol lassen sich Notizen zu einer Mindmap verknüpfen.',
     'notes.btn.link': 'Mit anderer Notiz verbinden', 'notes.btn.delete': 'Notiz löschen',
@@ -836,6 +866,12 @@ const TR = {
     'ideas.back': '← Zurück', 'ideas.skip': 'Weiß nicht — überspringen', 'ideas.next': 'Weiter',
     'ideas.done': 'Geschafft', 'ideas.done.empty': 'Noch nichts notiert — geh zurück und füll ein paar Antworten aus.',
     'ideas.to.notes': 'An Notizen schicken', 'ideas.to.character': 'Als Charaktereintrag speichern', 'ideas.restart': 'Anderer Startpunkt',
+    'ideas.seed': 'Struktur ins Projekt übernehmen',
+    'ideas.seed.title': 'Deine Prämisse wird zur Projektbeschreibung; Anfang, Mitte & Ende werden Story Beats.',
+    'ideas.seed.done': 'Ins Projekt übernommen ✓',
+    'ideas.seed.beginning': 'Anfang:', 'ideas.seed.middle': 'Mitte:', 'ideas.seed.end': 'Ende:',
+    'flow.keep': 'Behalten → an Notizen schicken',
+    'flow.keep.done': 'In den Notizen ✓',
     'ideas.develop.field': 'Feld', 'ideas.develop.finish': 'Abschließen',
     'ideas.develop.sidebar.title': 'Bisherige Conclusions',
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
@@ -925,7 +961,7 @@ const IDEA_WORKSHOP_META = {
     char: { icon: 'user', title: 'Who Is My Character', sub: 'What drives the character',
       doneClose: 'You have worked out what set your character\'s story in motion, what holds them in place, what they\'re already up against, and why we\'d follow them.' },
     ideapool: { icon: 'layers', title: 'Idea Pool', sub: 'Too many project ideas at once? Collect, combine, and choose what to focus on' },
-    brainstorming: { icon: 'tree', title: 'Brainstorming', sub: 'Branch out from one idea with Why?, What if…, and And then?' },
+    brainstorming: { icon: 'tree', title: 'Idea Tree', sub: 'Branch one idea into a tree with Why?, What if…, and And then?' },
   },
   de: {
     develop: { icon: 'spark', title: 'Erste Idee ausarbeiten', sub: 'Mach aus verstreuten Notizen ein tragfähiges Fundament',
@@ -933,7 +969,7 @@ const IDEA_WORKSHOP_META = {
     char: { icon: 'user', title: 'Wer ist mein Charakter', sub: 'Was den Charakter antreibt',
       doneClose: 'Du hast herausgearbeitet, was die Geschichte deines Charakters ins Rollen brachte, was ihn in der Patt-Situation hält, womit er bereits zu kämpfen hat und warum wir ihn begleiten wollen.' },
     ideapool: { icon: 'layers', title: 'Ideen-Pool', sub: 'Zu viele Projektideen im Kopf? Sammeln, kombinieren und wählen, worauf du dich konzentrierst' },
-    brainstorming: { icon: 'tree', title: 'Brainstorming', sub: 'Von einer Idee aus verzweigen mit Warum?, Was wäre wenn… und Und dann?' },
+    brainstorming: { icon: 'tree', title: 'Ideen-Baum', sub: 'Eine Idee mit Warum?, Was wäre wenn… und Und dann? zum Baum verzweigen' },
   },
 };
 
@@ -1334,12 +1370,20 @@ function ideaWorkshopFinish(name) {
     const c = ws.fields[i].conclusion.trim();
     return c ? '<div class="idea-bullet"><span class="idea-bullet-q">' + ideaEsc(f.conclusionLabel) + '</span>' + ideaEsc(c) + '</div>' : '';
   }).join('');
+  // The develop workshop can seed the project: premise → blurb, B/M/E → beats.
+  // Only shown when there is something to seed; one-shot (ws.seeded).
+  const seedParts = name === 'develop' ? (ws.fields[3].parts || {}) : {};
+  const canSeed = name === 'develop' && (
+    ws.fields[0].conclusion.trim() ||
+    ['beginning', 'middle', 'end'].some(k => (seedParts[k] || '').trim())
+  );
   stage.innerHTML =
     '<div class="idea-done-tag">' + t('ideas.done') + '</div>' +
     '<div class="idea-close">' + ideaEsc(meta.doneClose) + '</div>' +
     (bullets || '<div class="idea-meta">' + t('ideas.done.empty') + '</div>') +
     '<div class="idea-actions idea-actions-end">' +
       (name === 'char' ? '<button class="idea-next" id="idea-dev-to-char">' + t('ideas.to.character') + '</button>' : '') +
+      (canSeed ? '<button class="idea-next" id="idea-dev-seed" title="' + ideaEsc(t('ideas.seed.title')) + '"' + (ws.seeded ? ' disabled' : '') + '>' + (ws.seeded ? t('ideas.seed.done') : t('ideas.seed')) + '</button>' : '') +
       '<button class="idea-ghost" id="idea-dev-to-notes">' + t('ideas.to.notes') + '</button>' +
       '<button class="idea-ghost" id="idea-dev-restart">' + t('ideas.restart') + '</button>' +
     '</div>';
@@ -1347,6 +1391,33 @@ function ideaWorkshopFinish(name) {
   stage.querySelector('#idea-dev-to-notes').addEventListener('click', () => ideaWorkshopSendToNotes(name, fields));
   const toCharBtn = stage.querySelector('#idea-dev-to-char');
   if (toCharBtn) toCharBtn.addEventListener('click', () => ideaWorkshopSaveAsCharacter(fields));
+  const seedBtn = stage.querySelector('#idea-dev-seed');
+  if (seedBtn) seedBtn.addEventListener('click', () => { ideaWorkshopSeedProject(); seedBtn.disabled = true; seedBtn.textContent = t('ideas.seed.done'); });
+}
+
+// Carries the develop workshop's results into the project so the thinking
+// doesn't stay trapped in the workshop: the premise becomes the project
+// description (only if it's still empty), and beginning/middle/end become
+// three free-form beats. Note: while a structure template is selected the
+// beats page only shows template beats, so the seeded (phase-less) beats stay
+// hidden until "No Template" — they are kept, not lost.
+function ideaWorkshopSeedProject() {
+  const ws = ideaWorkshops.develop;
+  if (ws.seeded) return;
+  const premise = ws.fields[0].conclusion.trim();
+  if (premise && !projectBlurb.trim()) {
+    projectBlurb = premise;
+    blurbInput.value = premise;
+  }
+  const parts = ws.fields[3].parts || {};
+  [['beginning', 'ideas.seed.beginning'], ['middle', 'ideas.seed.middle'], ['end', 'ideas.seed.end']]
+    .forEach(([k, key], i) => {
+      const v = (parts[k] || '').trim();
+      if (v) beats.push({ id: Date.now() + i, text: t(key) + ' ' + v, theme: '' });
+    });
+  ws.seeded = true;
+  saveProject();
+  renderBeats();
 }
 
 function ideaWorkshopSendToNotes(name, fields) {
@@ -1601,6 +1672,24 @@ function flowHome() {
   });
 }
 
+// Escape hatch for warm-up text worth keeping: copy it onto the Notes canvas.
+// Deliberately does NOT switch pages — leaving would destroy the RAM-only
+// warm-up state. The button flips to a confirmation instead; the text stays.
+function flowKeepToNotes(text, btn) {
+  const s = (text || '').trim();
+  if (!s) return;
+  brainstorm.notes.push({
+    id: Date.now(),
+    x: 40,
+    y: 40 + (brainstorm.notes.length % 6) * 130,
+    text: s,
+    color: IDEA_NOTE_COLORS[brainstorm.notes.length % IDEA_NOTE_COLORS.length],
+  });
+  saveProject();
+  renderBrainstorm();
+  if (btn) { btn.disabled = true; btn.textContent = t('flow.keep.done'); }
+}
+
 // ── Freewrite Timer ──
 function flowFreewriteStart() {
   const fw = flowState.freewrite;
@@ -1634,9 +1723,14 @@ function flowRenderFreewrite() {
       '<div class="idea-spacer"></div>' +
       '<button class="idea-next" id="flow-start-btn">' + (fw.running ? t('flow.pause') : t('flow.start')) + '</button>' +
     '</div>' +
-    '<div class="idea-actions"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>';
+    '<div class="idea-actions">' +
+      '<button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-ghost" id="flow-keep-btn"' + (fw.text.trim() ? '' : ' style="display:none"') + '>' + t('flow.keep') + '</button>' +
+    '</div>';
 
   stage.querySelector('#flow-home-btn').addEventListener('click', () => { flowClearTimer(); flowHome(); });
+  stage.querySelector('#flow-keep-btn').addEventListener('click', () => flowKeepToNotes(fw.text, stage.querySelector('#flow-keep-btn')));
   stage.querySelectorAll('.flow-dur-btn').forEach(btn => btn.addEventListener('click', () => {
     if (fw.running) return;
     fw.duration = parseInt(btn.dataset.d, 10);
@@ -1651,6 +1745,8 @@ function flowRenderFreewrite() {
     autoResize(area);
     const wc = stage.querySelector('#flow-wordcount');
     if (wc) wc.textContent = flowWordCount(fw.text) + ' ' + t('flow.words');
+    const keepBtn = stage.querySelector('#flow-keep-btn');
+    if (keepBtn && !keepBtn.disabled) keepBtn.style.display = fw.text.trim() ? '' : 'none';
   });
   stage.querySelector('#flow-start-btn').addEventListener('click', flowToggleTimer);
 }
@@ -1690,10 +1786,13 @@ function flowFreewriteDone() {
     '<div class="idea-actions idea-actions-end">' +
       '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
       '<div class="idea-spacer"></div>' +
+      (fw.text.trim() ? '<button class="idea-ghost" id="flow-keep-btn">' + t('flow.keep') + '</button>' : '') +
       '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
     '</div>';
   stage.querySelector('#flow-again-btn').addEventListener('click', flowFreewriteStart);
   stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
+  const keepBtn = stage.querySelector('#flow-keep-btn');
+  if (keepBtn) keepBtn.addEventListener('click', () => flowKeepToNotes(fw.text, keepBtn));
 }
 
 // ── Write It Badly First ──
@@ -1742,16 +1841,22 @@ function flowRenderBadly() {
 function flowBadlyDone() {
   const stage = flowStageEl();
   if (!stage) return;
+  // Only the second, "less bad" draft is worth keeping — the deliberately bad
+  // one is disposable by design.
+  const keepText = (flowState.badly.less.trim() || flowState.badly.bad.trim());
   stage.innerHTML =
     '<div class="idea-done-tag">' + t('flow.done') + '</div>' +
     '<div class="idea-close">' + ideaEsc(t('flow.badly.done.msg')) + '</div>' +
     '<div class="idea-actions idea-actions-end">' +
       '<button class="idea-ghost" id="flow-home-btn2">' + t('flow.back') + '</button>' +
       '<div class="idea-spacer"></div>' +
+      (keepText ? '<button class="idea-ghost" id="flow-keep-btn">' + t('flow.keep') + '</button>' : '') +
       '<button class="idea-next" id="flow-again-btn">' + t('flow.again') + '</button>' +
     '</div>';
   stage.querySelector('#flow-again-btn').addEventListener('click', flowBadlyStart);
   stage.querySelector('#flow-home-btn2').addEventListener('click', flowHome);
+  const keepBtn = stage.querySelector('#flow-keep-btn');
+  if (keepBtn) keepBtn.addEventListener('click', () => flowKeepToNotes(keepText, keepBtn));
 }
 
 // ── Style Sampler (hardcoded scenes — static site, no generated text) ──
@@ -1777,9 +1882,14 @@ function flowRenderStyle() {
     '<div class="flow-voices">' + scene.voices.map(v => '<div class="flow-voice"><div class="flow-voice-label">' + ideaEsc(v.label) + '</div><div class="flow-voice-text">' + ideaEsc(v.text) + '</div></div>').join('') + '</div>' +
     '<div class="idea-dev-conclusion-label">' + t('flow.style.yourturn') + '</div>' +
     '<textarea class="idea-answer" id="flow-style-area" rows="6" placeholder="' + ideaEsc(t('flow.style.placeholder')) + '">' + ideaEsc(s.attempt) + '</textarea>' +
-    '<div class="idea-actions"><button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button></div>';
+    '<div class="idea-actions">' +
+      '<button class="idea-ghost" id="flow-home-btn">' + t('flow.back') + '</button>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-ghost" id="flow-keep-btn"' + (s.attempt.trim() ? '' : ' style="display:none"') + '>' + t('flow.keep') + '</button>' +
+    '</div>';
 
   stage.querySelector('#flow-home-btn').addEventListener('click', flowHome);
+  stage.querySelector('#flow-keep-btn').addEventListener('click', () => flowKeepToNotes(s.attempt, stage.querySelector('#flow-keep-btn')));
   stage.querySelectorAll('.flow-scene-btn').forEach(btn => btn.addEventListener('click', () => {
     s.sceneIdx = parseInt(btn.dataset.i, 10);
     s.attempt = '';
@@ -1788,7 +1898,12 @@ function flowRenderStyle() {
   const area = stage.querySelector('#flow-style-area');
   if (area) {
     autoResize(area);
-    area.addEventListener('input', () => { s.attempt = area.value; autoResize(area); });
+    area.addEventListener('input', () => {
+      s.attempt = area.value;
+      autoResize(area);
+      const keepBtn = stage.querySelector('#flow-keep-btn');
+      if (keepBtn && !keepBtn.disabled) keepBtn.style.display = s.attempt.trim() ? '' : 'none';
+    });
   }
 }
 
@@ -1889,11 +2004,11 @@ function createBs2Card(node, colorMap = {}) {
     if (!hasChildren) { bs2DeleteNode(node.id); return; }
     const c = document.createElement('div');
     c.innerHTML = `
-      <div class="modal-title">Knoten löschen</div>
-      <div class="modal-empty">Dieser Knoten hat Verzweigungen. Alle Unterideen werden ebenfalls gelöscht.</div>
+      <div class="modal-title">${t('bs2.delete.title')}</div>
+      <div class="modal-empty">${t('bs2.delete.msg')}</div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-        <button class="btn-secondary" id="bs2-del-cancel">Abbrechen</button>
-        <button class="btn-primary" id="bs2-del-confirm">Löschen</button>
+        <button class="btn-secondary" id="bs2-del-cancel">${t('btn.cancel')}</button>
+        <button class="btn-primary" id="bs2-del-confirm">${t('bs2.delete.confirm')}</button>
       </div>`;
     openModal(c);
     c.querySelector('#bs2-del-cancel').addEventListener('click', closeModal);
@@ -2128,6 +2243,7 @@ function switchPage(page) {
   if (pageEl) pageEl.classList.add('active');
   if (page === 'home') renderHome();
   if (page === 'stats') renderStats();
+  if (page === 'beats') renderBeats(); // keeps drafted chips & coverage current
   if (page === 'worldbuilding') renderWorldbuilding();
   if (page === 'ideas') renderIdeas();
   if (page === 'theme') renderTheme();
@@ -2298,9 +2414,17 @@ function uniqueProjectName(base, exceptCurrent) {
 // pool (default removes it, since it has "graduated").
 function ideaPoolToProject(idea, keepInPool) {
   if (typeof flushEditor === 'function') flushEditor();
+  // Carry the idea's collected material into the new project, not just the
+  // note: its image seeds the moodboard, its link becomes a Notes sticky.
   const fresh = {
-    beats: [], characters: [], moodboard: [], blurb: idea.note || '',
-    writing: { chapters: [] }, brainstorm: { notes: [], links: [] },
+    beats: [],
+    characters: [],
+    moodboard: idea.image ? [{ id: Date.now(), src: idea.image, comment: idea.title || '' }] : [],
+    blurb: idea.note || '',
+    writing: { chapters: [] },
+    brainstorm: idea.link
+      ? { notes: [{ id: Date.now(), x: 40, y: 40, text: idea.title || '', color: IDEA_NOTE_COLORS[0], hyperlinks: [{ url: idea.link, label: '' }] }], links: [] }
+      : { notes: [], links: [] },
     timeline: { columns: [], rows: [] }, inspiration: [], todos: [],
     writingGoal: 0, wordHistory: [], selectedStructure: null,
     worldbuilding: { entries: [], customCategories: [], hiddenBuiltins: [] },
@@ -2315,6 +2439,7 @@ function ideaPoolToProject(idea, keepInPool) {
   if (!keepInPool) {
     ideaPool.ideas = ideaPool.ideas.filter(i => i.id !== idea.id);
     if (ideaPool.focusId === idea.id) ideaPool.focusId = null;
+    if (ideaPoolSuggestId === idea.id) ideaPoolSuggestId = null;
     saveIdeaPool();
   }
   switchPage('writing');
@@ -2763,6 +2888,7 @@ function renderIdeaPool(container) {
     del.addEventListener('click', () => {
       ideaPool.ideas = ideaPool.ideas.filter(i => i.id !== idea.id);
       if (ideaPool.focusId === idea.id) ideaPool.focusId = null;
+      if (ideaPoolSuggestId === idea.id) ideaPoolSuggestId = null;
       ideaPoolSelected.delete(idea.id);
       saveIdeaPool();
       renderIdeaPool();
@@ -3119,19 +3245,61 @@ modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) clo
 // ══════════════════════════════════
 const beatsList = document.getElementById('beats-list');
 
+// A beat can point at the scene that drafts it (beat.sceneId). The scene keeps
+// no back-reference: deleting either side leaves the other untouched, and a
+// dangling sceneId is cleared lazily when the beat card renders.
+function beatSceneTitle(beat) {
+  if (beat.structBeat && selectedStructure)
+    return ts(selectedStructure, 'beat.' + beat.structBeat + '.name', beat.structBeat);
+  const txt = (beat.text || '').trim().replace(/\s+/g, ' ');
+  if (!txt) return t('writing.untitled.scene');
+  return txt.length <= 40 ? txt : txt.slice(0, 40).replace(/\s+\S*$/, '') + '…';
+}
+
+function beatWriteScene(beat) {
+  let ch = writing.chapters[writing.chapters.length - 1];
+  if (!ch) {
+    ch = { id: Date.now(), title: t('beats.write.newchapter'), collapsed: false, scenes: [] };
+    writing.chapters.push(ch);
+  }
+  ch.scenes = ch.scenes || [];
+  const scene = { id: Date.now(), title: beatSceneTitle(beat), content: '', status: 'draft', summary: (beat.text || '').trim() };
+  ch.scenes.push(scene);
+  ch.collapsed = false;
+  beat.sceneId = scene.id;
+  saveProject();
+  switchPage('writing');
+  renderChapterTree();
+  selectScene(ch.id, scene.id);
+}
+
 function createBeatCard(beat, i) {
   const card = document.createElement('div');
   card.className = 'beat-card';
   card.dataset.index = i;
+
+  let linked = beat.sceneId != null ? findSceneAnywhere(beat.sceneId) : {};
+  if (beat.sceneId != null && !linked.scene) { beat.sceneId = undefined; linked = {}; } // scene was deleted
 
   card.innerHTML = `
     <div class="beat-handle" title="${t('beat.drag.title')}">&#8942;&#8942;</div>
     <div class="beat-content">
       <textarea class="beat-text" rows="1" placeholder="${t('beats.placeholder')}">${ideaEsc(beat.text)}</textarea>
       <textarea class="beat-theme" rows="1" placeholder="${t('beats.theme.placeholder')}">${ideaEsc(beat.theme)}</textarea>
+      <div class="beat-scene-row">${linked.scene
+        ? `<button class="beat-drafted-chip" title="${t('beats.drafted.jump')}">&#10003; ${t('beats.drafted').replace('{n}', countWords(linked.scene.content || ''))}</button>`
+        : `<button class="btn-mini beat-write-btn">&#9998; ${t('beats.write.scene')}</button>`}</div>
     </div>
     <button class="beat-delete" title="${t('beat.delete.title')}">&times;</button>
   `;
+
+  const writeBtn = card.querySelector('.beat-write-btn');
+  if (writeBtn) writeBtn.addEventListener('click', () => beatWriteScene(beat));
+  const draftedChip = card.querySelector('.beat-drafted-chip');
+  if (draftedChip) draftedChip.addEventListener('click', () => {
+    switchPage('writing');
+    selectScene(linked.chapter.id, linked.scene.id);
+  });
 
   card.querySelector('.beat-delete').addEventListener('click', () => {
     beats.splice(i, 1);
@@ -3205,6 +3373,14 @@ function renderBeats() {
   beatsList.innerHTML = '';
   const struct = selectedStructure ? STRUCTURES[selectedStructure] : null;
   const addBeatBtn = document.getElementById('add-beat');
+
+  // Coverage counter: how much of the outline has a drafted scene behind it.
+  const cov = document.getElementById('beats-coverage');
+  if (cov) {
+    const drafted = beats.filter(b => b.sceneId != null && findSceneAnywhere(b.sceneId).scene).length;
+    cov.textContent = (selectedStructure && beats.length)
+      ? t('beats.coverage').replace('{n}', drafted).replace('{m}', beats.length) : '';
+  }
 
   if (!struct) {
     if (addBeatBtn) addBeatBtn.style.display = '';
@@ -3649,6 +3825,21 @@ function findScene(chId, scId) {
   return { chapter: ch, scene: sc };
 }
 
+// Locate a scene by id alone (beats store only the scene id, not the chapter).
+function findSceneAnywhere(scId) {
+  for (const ch of writing.chapters) {
+    const sc = (ch.scenes || []).find(s => s.id === scId);
+    if (sc) return { chapter: ch, scene: sc };
+  }
+  return {};
+}
+
+// Scenes from before this feature have no status field — they count as drafts.
+const SCENE_STATUSES = ['draft', 'revised', 'done'];
+function sceneStatus(sc) {
+  return SCENE_STATUSES.includes(sc && sc.status) ? sc.status : 'draft';
+}
+
 // Read the live editor DOM back into state (call before switching scenes)
 function flushEditor() {
   const ms = document.getElementById('manuscript');
@@ -3746,9 +3937,11 @@ function renderChapterTree() {
         li.dataset.scene = sc.id;
         li.innerHTML = `
           <span class="scene-drag" draggable="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
+          <span class="scene-status-dot status-${sceneStatus(sc)}"></span>
           <input class="scene-name-input" value="${ideaEsc(sc.title)}" placeholder="${t('writing.scene.placeholder')}">
           <button class="scene-del" title="${t('writing.delete.scene')}">&times;</button>
         `;
+        if (sc.summary) li.title = sc.summary;
 
         // Select scene (and focus the manuscript) when clicking empty row area
         li.addEventListener('click', e => {
@@ -3818,9 +4011,9 @@ function renderChapterTree() {
 
       const addBtn = document.createElement('button');
       addBtn.className = 'add-scene-btn';
-      addBtn.innerHTML = '+ Szene';
+      addBtn.innerHTML = t('writing.add.scene');
       addBtn.addEventListener('click', () => {
-        const scene = { id: Date.now(), title: 'Neue Szene', content: '' };
+        const scene = { id: Date.now(), title: t('writing.untitled.scene'), content: '', status: 'draft', summary: '' };
         ch.scenes = ch.scenes || [];
         ch.scenes.push(scene);
         saveProject();
@@ -3876,11 +4069,16 @@ function renderEditor() {
     return;
   }
 
+  const st = sceneStatus(scene);
   editorPane.innerHTML = `
     <div class="editor-header">
       <input class="scene-title-input" id="scene-title-input" value="${(scene.title || '').replace(/"/g, '&quot;')}" placeholder="${t('writing.scene.title.placeholder')}">
+      <button class="scene-status-chip status-${st}" id="scene-status-chip" title="${t('writing.status.cycle')}">${t('writing.status.' + st)}</button>
       <button class="editor-theme-btn" id="theme-toggle" title="${t('editor.theme.toggle')}">&#9790;</button>
       <button class="icon-btn" id="search-toggle" title="${t('editor.search')}">&#128269;</button>
+    </div>
+    <div class="editor-summary-row">
+      <input class="scene-summary-input" id="scene-summary-input" placeholder="${t('writing.summary.placeholder')}" value="${ideaEsc(scene.summary)}">
     </div>
     <div class="format-toolbar">
       <button class="fmt-btn" data-cmd="bold" title="${t('editor.fmt.bold')}"><b>B</b></button>
@@ -3919,6 +4117,27 @@ function renderEditor() {
     wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
     saveProjectDebounced();
   }
+
+  // Status chip cycles draft → revised → done; the tree dot is patched in place
+  // (a full renderChapterTree would steal focus, same as the title sync below).
+  const statusChip = editorPane.querySelector('#scene-status-chip');
+  statusChip.addEventListener('click', () => {
+    const next = SCENE_STATUSES[(SCENE_STATUSES.indexOf(sceneStatus(scene)) + 1) % SCENE_STATUSES.length];
+    scene.status = next;
+    statusChip.className = 'scene-status-chip status-' + next;
+    statusChip.textContent = t('writing.status.' + next);
+    const treeDot = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"] .scene-status-dot`);
+    if (treeDot) treeDot.className = 'scene-status-dot status-' + next;
+    saveProject();
+  });
+
+  const summaryInput = editorPane.querySelector('#scene-summary-input');
+  summaryInput.addEventListener('input', () => {
+    scene.summary = summaryInput.value;
+    const treeItem = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"]`);
+    if (treeItem) treeItem.title = scene.summary;
+    saveProjectDebounced();
+  });
 
   titleInput.addEventListener('input', () => {
     scene.title = titleInput.value;
@@ -4223,7 +4442,7 @@ function createNoteEl(note) {
 
   el.innerHTML = `
     <div class="bs-note-header">
-      <button class="bs-note-swatch" title="Farbe wechseln"></button>
+      <button class="bs-note-swatch" title="${t('timeline.change.color')}"></button>
       <div class="bs-note-spacer"></div>
       <label class="bs-note-btn img" title="${t('notes.btn.image')}">&#128247;<input type="file" accept="image/*" class="bs-note-img-input" style="display:none"></label>
       <button class="bs-note-btn hyperlink" title="${t('notes.btn.hyperlink')}">&#127760;</button>

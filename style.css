@@ -795,6 +795,31 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   gap: 8px;
 }
 
+/* Beat ↔ scene bridge: "Write this scene" / drafted chip + coverage counter */
+.beat-scene-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.beat-drafted-chip {
+  background: rgba(74, 222, 128, 0.14);
+  color: #3da963;
+  border: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.beat-drafted-chip:hover { filter: brightness(1.08); }
+.beats-coverage {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .beat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -1506,6 +1531,17 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   border-left: 1px solid var(--border);
 }
 
+/* Scene status: dot in the tree, cycling chip in the editor header */
+.scene-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--border-strong);
+}
+.scene-status-dot.status-revised { background: #f9c74f; }
+.scene-status-dot.status-done { background: #4ade80; }
+
 .scene-item {
   display: flex;
   align-items: center;
@@ -1626,6 +1662,39 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   padding: 16px 24px;
   border-bottom: 1px solid var(--border);
   background: inherit;
+}
+
+.scene-status-chip {
+  border: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+.scene-status-chip.status-revised { background: rgba(249, 199, 79, 0.18); color: #b8860b; }
+.scene-status-chip.status-done { background: rgba(74, 222, 128, 0.15); color: #3da963; }
+[data-theme="dark"] .scene-status-chip.status-revised { color: #f9c74f; }
+[data-theme="dark"] .scene-status-chip.status-done,
+[data-theme="dark"] .beat-drafted-chip { color: #6fcf8f; }
+
+.editor-summary-row {
+  padding: 6px 24px;
+  border-bottom: 1px solid var(--border);
+  background: inherit;
+}
+.scene-summary-input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .scene-title-input {
@@ -3491,7 +3560,6 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
 /* ── Theme view ── */
 .theme-layout {
   max-width: 680px;
-  margin: 0 auto;
   padding: 0 24px 48px;
   display: flex;
   flex-direction: column;
