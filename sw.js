@@ -15,6 +15,7 @@ const ASSETS = [
   'style.css',
   'manifest.json',
   'assets/Logo.svg',
+  'assets/favicon.svg',
   'vendor/docx.min.js'
 ];
 

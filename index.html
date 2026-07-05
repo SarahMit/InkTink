@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InkTink</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1a1a1a">
   <script>
@@ -22,7 +23,10 @@
     <div class="topbar-spacer"></div>
     <div class="topbar-actions">
       <button class="tb-util" id="split-toggle" title="Split view" aria-label="Split view">◫</button>
-      <select class="split-select" id="split-select" hidden></select>
+      <div class="split-picker" id="split-picker" hidden>
+        <button class="tb-util split-picker-btn" id="split-picker-btn" aria-label="Page shown on the right"></button>
+        <div class="split-menu" id="split-menu" hidden></div>
+      </div>
       <button class="tb-util" id="theme-switch" title="Toggle light/dark" aria-label="Toggle light/dark">☾</button>
       <button class="tb-util" id="lang-toggle">EN</button>
       <div class="tb-divider"></div>
@@ -71,6 +75,7 @@
   </nav>
 
   <aside class="sidebar">
+    <button class="sb-collapse" id="sidebar-collapse" aria-label="Collapse sidebar">&#171;</button>
     <div class="proj-title" id="proj-title" contenteditable="true" spellcheck="false" title="Click to rename — also used as the export filename">Untitled Project</div>
     <textarea class="proj-blurb" id="project-blurb" placeholder="What's it about? A short description of your project..." rows="3"></textarea>
 
@@ -90,7 +95,7 @@
       <input class="todo-input" id="todo-input" placeholder="New task + Enter">
     </div>
   </aside>
-  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">&#8249;</button>
+  <button class="sb-expand" id="sidebar-expand" hidden aria-label="Expand sidebar">&#187;</button>
 
   <main class="content">
     <!-- Home -->

@@ -922,7 +922,7 @@ function applyI18n() {
   const exportWordBtn = document.getElementById('btn-export-word');
   if (exportWordBtn) exportWordBtn.title = t('writing.export.docx');
   // Split view & sidebar controls carry translated tooltips/options.
-  buildSplitSelect();
+  buildSplitPicker();
   applySplit();
   applySidebarCollapsed();
   applyChnavCollapsed();
@@ -2295,39 +2295,77 @@ function switchPage(page) {
 // ── Split view (two pages side by side, draggable divider) ──
 const SPLIT_PAGES = ['writing', 'brainstorm', 'moodboard', 'ideas', 'theme', 'beats', 'timeline', 'characters', 'worldbuilding', 'stats'];
 
-function buildSplitSelect() {
-  const select = document.getElementById('split-select');
-  if (!select) return;
-  select.innerHTML = SPLIT_PAGES
-    .map(p => `<option value="${p}">${t(p === 'brainstorm' ? 'nav.notes' : 'nav.' + p)}</option>`)
-    .join('');
-  select.value = uiPrefs.splitPage;
-  select.title = t('split.select.title');
+function splitPageLabel(p) {
+  return t(p === 'brainstorm' ? 'nav.notes' : 'nav.' + p);
+}
+
+// The picker reuses the nav rail's inline SVGs, so the icons always match.
+function navIconSvg(p) {
+  const src = document.querySelector(`.icon-nav-btn[data-page="${p}"] svg`);
+  return src ? src.outerHTML : '';
+}
+
+function buildSplitPicker() {
+  const menu = document.getElementById('split-menu');
+  const btn = document.getElementById('split-picker-btn');
+  if (!menu || !btn) return;
+  btn.innerHTML = navIconSvg(uiPrefs.splitPage) + '<span class="split-picker-caret">&#9662;</span>';
+  btn.title = t('split.select.title') + ': ' + splitPageLabel(uiPrefs.splitPage);
+  menu.innerHTML = SPLIT_PAGES.map(p =>
+    `<button class="split-menu-item${p === uiPrefs.splitPage ? ' on' : ''}" data-page="${p}" title="${splitPageLabel(p)}">${navIconSvg(p)}</button>`
+  ).join('');
+  menu.querySelectorAll('.split-menu-item').forEach(item => item.addEventListener('click', () => {
+    const val = item.dataset.page;
+    menu.hidden = true;
+    if (val === uiPrefs.splitPage) return;
+    if (val === activePageName()) {
+      // Picking the page that's open on the left: swap the panes.
+      const old = uiPrefs.splitPage;
+      uiPrefs.splitPage = val;
+      saveUiPrefs();
+      switchPage(old);
+    } else {
+      uiPrefs.splitPage = val;
+      saveUiPrefs();
+      applySplit();
+    }
+    buildSplitPicker();
+  }));
 }
 
 function applySplit() {
   const content = document.querySelector('.content');
   const divider = document.getElementById('split-divider');
-  const select = document.getElementById('split-select');
+  const picker = document.getElementById('split-picker');
   const toggle = document.getElementById('split-toggle');
-  if (!content || !divider || !select || !toggle) return;
+  if (!content || !divider || !picker || !toggle) return;
   // The home page always gets the full width; the split comes back as soon as
   // another page is opened.
   const on = uiPrefs.split && activePageName() !== 'home';
   content.classList.toggle('split', on);
   content.style.setProperty('--split-left', uiPrefs.splitLeft + '%');
   divider.hidden = !on;
-  select.hidden = !uiPrefs.split;
+  picker.hidden = !uiPrefs.split;
   toggle.classList.toggle('on', uiPrefs.split);
   toggle.title = t('split.toggle.title');
   document.querySelectorAll('.page.split-pane').forEach(p => p.classList.remove('split-pane'));
   if (on) {
     const sec = document.getElementById('page-' + uiPrefs.splitPage);
     if (sec) sec.classList.add('split-pane');
-    if (select.value !== uiPrefs.splitPage) select.value = uiPrefs.splitPage;
+    buildSplitPicker(); // keeps the button icon in sync after pane swaps
     renderPageHooks(uiPrefs.splitPage);
   }
 }
+
+document.getElementById('split-picker-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  const menu = document.getElementById('split-menu');
+  menu.hidden = !menu.hidden;
+});
+document.addEventListener('click', e => {
+  const menu = document.getElementById('split-menu');
+  if (menu && !menu.hidden && !e.target.closest('.split-picker')) menu.hidden = true;
+});
 
 document.getElementById('split-toggle').addEventListener('click', () => {
   uiPrefs.split = !uiPrefs.split;
@@ -2335,24 +2373,8 @@ document.getElementById('split-toggle').addEventListener('click', () => {
     uiPrefs.splitPage = activePageName() === 'brainstorm' ? 'moodboard' : 'brainstorm';
   }
   saveUiPrefs();
-  buildSplitSelect();
+  buildSplitPicker();
   applySplit();
-});
-
-document.getElementById('split-select').addEventListener('change', () => {
-  const select = document.getElementById('split-select');
-  const val = select.value;
-  if (val === activePageName()) {
-    // Picking the page that's open on the left: swap the panes.
-    const old = uiPrefs.splitPage;
-    uiPrefs.splitPage = val;
-    saveUiPrefs();
-    switchPage(old);
-  } else {
-    uiPrefs.splitPage = val;
-    saveUiPrefs();
-    applySplit();
-  }
 });
 
 document.getElementById('split-divider').addEventListener('pointerdown', e => {
@@ -2378,11 +2400,10 @@ document.getElementById('split-divider').addEventListener('pointerdown', e => {
 // ── Collapsible sidebars (project sidebar + chapter tree) ──
 function applySidebarCollapsed() {
   document.body.classList.toggle('sb-collapsed', !!uiPrefs.sbCollapsed);
-  const btn = document.getElementById('sidebar-toggle');
-  if (btn) {
-    btn.innerHTML = uiPrefs.sbCollapsed ? '&#8250;' : '&#8249;';
-    btn.title = t(uiPrefs.sbCollapsed ? 'sidebar.expand' : 'sidebar.collapse');
-  }
+  const collapseBtn = document.getElementById('sidebar-collapse');
+  if (collapseBtn) collapseBtn.title = t('sidebar.collapse');
+  const expandBtn = document.getElementById('sidebar-expand');
+  if (expandBtn) { expandBtn.hidden = !uiPrefs.sbCollapsed; expandBtn.title = t('sidebar.expand'); }
 }
 
 function applyChnavCollapsed() {
@@ -2394,8 +2415,13 @@ function applyChnavCollapsed() {
   if (collapseBtn) collapseBtn.title = t('writing.chnav.collapse');
 }
 
-document.getElementById('sidebar-toggle').addEventListener('click', () => {
-  uiPrefs.sbCollapsed = !uiPrefs.sbCollapsed;
+document.getElementById('sidebar-collapse').addEventListener('click', () => {
+  uiPrefs.sbCollapsed = true;
+  saveUiPrefs();
+  applySidebarCollapsed();
+});
+document.getElementById('sidebar-expand').addEventListener('click', () => {
+  uiPrefs.sbCollapsed = false;
   saveUiPrefs();
   applySidebarCollapsed();
 });

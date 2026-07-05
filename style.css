@@ -403,28 +403,43 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   overflow-y: auto;
 }
 
-/* Collapsible project sidebar: a small round handle rides on its edge */
-.sidebar-toggle {
-  position: fixed;
-  top: calc(var(--topbar) + 16px);
-  left: calc(var(--icon-nav) + 270px - 13px);
-  z-index: 90;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  background: var(--bg-card);
+/* Collapsible project sidebar: « button inside the sidebar, slim » strip to
+   reopen — same pattern as the chapter list, nothing overlaps the icon rail */
+.sb-collapse {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: left 0.15s, color 0.15s;
 }
-.sidebar-toggle:hover { color: var(--text); }
+.sb-collapse:hover { background: var(--bg-hover); color: var(--text); }
+.sidebar .proj-title { padding-right: 26px; }
+.sb-expand {
+  position: fixed;
+  top: var(--topbar);
+  left: var(--icon-nav);
+  height: calc(100vh - var(--topbar));
+  width: 18px;
+  z-index: 90;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sb-expand:hover { background: var(--bg-hover); color: var(--text); }
+.sb-expand[hidden] { display: none; }
 body.sb-collapsed .sidebar { display: none; }
-body.sb-collapsed .sidebar-toggle { left: calc(var(--icon-nav) - 13px); }
-body.sb-collapsed .content { margin-left: var(--icon-nav); }
+body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 
 .proj-title {
   font-size: 22px;
@@ -817,18 +832,46 @@ body.sb-collapsed .content { margin-left: var(--icon-nav); }
 .split-divider:hover { background: var(--accent); }
 .split-divider[hidden] { display: none; }
 
-.split-select {
-  font-family: inherit;
-  font-size: 12px;
-  color: var(--text);
+/* Right-pane page picker: shows the nav icons instead of names */
+.split-picker { position: relative; }
+.split-picker[hidden] { display: none; }
+.split-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.split-picker-btn svg { width: 16px; height: 16px; }
+.split-picker-caret { font-size: 9px; color: var(--text-muted); }
+.split-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 120;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 8px;
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  cursor: pointer;
-  max-width: 140px;
+  box-shadow: var(--shadow);
 }
-.split-select[hidden] { display: none; }
+.split-menu[hidden] { display: none; }
+.split-menu-item {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.split-menu-item svg { width: 17px; height: 17px; }
+.split-menu-item:hover { background: var(--bg-hover); color: var(--text); }
+.split-menu-item.on { background: var(--accent-dim); color: var(--accent); }
 .tb-util.on { background: var(--accent-dim); color: var(--accent); }
 
 .page-header {
