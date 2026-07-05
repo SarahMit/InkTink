@@ -21,6 +21,8 @@
     </div>
     <div class="topbar-spacer"></div>
     <div class="topbar-actions">
+      <button class="tb-util" id="split-toggle" title="Split view" aria-label="Split view">◫</button>
+      <select class="split-select" id="split-select" hidden></select>
       <button class="tb-util" id="theme-switch" title="Toggle light/dark" aria-label="Toggle light/dark">☾</button>
       <button class="tb-util" id="lang-toggle">EN</button>
       <div class="tb-divider"></div>
@@ -88,6 +90,7 @@
       <input class="todo-input" id="todo-input" placeholder="New task + Enter">
     </div>
   </aside>
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">&#8249;</button>
 
   <main class="content">
     <!-- Home -->
@@ -129,10 +132,12 @@
     <!-- Writing -->
     <section id="page-writing" class="page active">
       <div class="writing-layout">
+        <button class="chnav-expand" id="chnav-expand" hidden aria-label="Show chapter list">&#187;</button>
         <aside class="chapter-nav">
           <div class="chapter-nav-header">
             <span data-i18n="writing.sections">Chapters &amp; Scenes</span>
             <div class="chapter-nav-actions">
+              <button class="btn-mini" id="chnav-collapse" aria-label="Hide chapter list">&#171;</button>
               <button class="btn-mini" id="btn-export-word" title="Export as Word document (.docx)">&#8595; .docx</button>
               <button class="btn-mini" id="add-chapter" data-i18n="writing.add.chapter">+ Chapter</button>
             </div>
@@ -203,6 +208,8 @@
       </div>
       <div class="moodboard-grid" id="moodboard-grid"></div>
     </section>
+
+    <div class="split-divider" id="split-divider" hidden></div>
   </main>
 
   <!-- Inline note popover -->

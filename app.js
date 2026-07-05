@@ -507,6 +507,10 @@ const TR = {
     'writing.delete.chapter': 'Delete chapter', 'writing.delete.scene': 'Delete scene',
     'writing.confirm.delete.chapter': 'Delete chapter "{title}" and all its scenes?',
     'writing.untitled': 'Untitled',
+    'split.toggle.title': 'Split view: two pages side by side',
+    'split.select.title': 'Page shown on the right',
+    'sidebar.collapse': 'Collapse sidebar', 'sidebar.expand': 'Expand sidebar',
+    'writing.chnav.collapse': 'Hide chapter list', 'writing.chnav.expand': 'Show chapter list',
     'writing.status.draft': 'Draft', 'writing.status.revised': 'Revised', 'writing.status.done': 'Done',
     'writing.status.cycle': 'Click to change status',
     'writing.summary.placeholder': 'One line on what happens here — shows as a tooltip in the chapter list…',
@@ -738,6 +742,10 @@ const TR = {
     'writing.delete.chapter': 'Kapitel löschen', 'writing.delete.scene': 'Szene löschen',
     'writing.confirm.delete.chapter': 'Kapitel „{title}" und alle seine Szenen löschen?',
     'writing.untitled': 'ohne Titel',
+    'split.toggle.title': 'Geteilte Ansicht: zwei Seiten nebeneinander',
+    'split.select.title': 'Seite in der rechten Hälfte',
+    'sidebar.collapse': 'Seitenleiste einklappen', 'sidebar.expand': 'Seitenleiste ausklappen',
+    'writing.chnav.collapse': 'Kapitelliste einklappen', 'writing.chnav.expand': 'Kapitelliste ausklappen',
     'writing.status.draft': 'Entwurf', 'writing.status.revised': 'Überarbeitet', 'writing.status.done': 'Fertig',
     'writing.status.cycle': 'Klicken, um den Status zu wechseln',
     'writing.summary.placeholder': 'Ein Satz dazu, was hier passiert — erscheint als Tooltip in der Kapitelliste…',
@@ -913,6 +921,11 @@ function applyI18n() {
   if (blurb) blurb.placeholder = t('project.blurb.placeholder');
   const exportWordBtn = document.getElementById('btn-export-word');
   if (exportWordBtn) exportWordBtn.title = t('writing.export.docx');
+  // Split view & sidebar controls carry translated tooltips/options.
+  buildSplitSelect();
+  applySplit();
+  applySidebarCollapsed();
+  applyChnavCollapsed();
   const todoInput = document.getElementById('todo-input');
   if (todoInput) todoInput.placeholder = t('sidebar.todo.placeholder');
   const notePopoverTextEl = document.getElementById('note-popover-text');
@@ -2232,15 +2245,24 @@ function renderWorldbuilding() {
 }
 
 // ── Navigation (icon sidebar) ──
-function switchPage(page) {
-  if (typeof flushEditor === 'function') { flushEditor(); saveProject(); }
-  if (page !== 'ideas' && typeof flowClearTimer === 'function') flowClearTimer();
-  document.querySelectorAll('.icon-nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const btn = document.querySelector(`.icon-nav-btn[data-page="${page}"]`);
-  if (btn) btn.classList.add('active');
-  const pageEl = document.getElementById('page-' + page);
-  if (pageEl) pageEl.classList.add('active');
+
+// UI preferences (split view, collapsed sidebars) are per-device, not part of
+// the project data, so they live in their own localStorage key.
+const LS_UI = 'inktink-ui';
+let uiPrefs = { split: false, splitPage: 'brainstorm', splitLeft: 55, sbCollapsed: false, chnavCollapsed: false };
+try { uiPrefs = { ...uiPrefs, ...(JSON.parse(localStorage.getItem(LS_UI)) || {}) }; } catch {}
+function saveUiPrefs() {
+  try { localStorage.setItem(LS_UI, JSON.stringify(uiPrefs)); } catch {}
+}
+
+function activePageName() {
+  const el = document.querySelector('.page.active');
+  return el ? el.id.replace('page-', '') : 'home';
+}
+
+// Pages that refresh their DOM when they become visible — shared between the
+// main pane and the split pane.
+function renderPageHooks(page) {
   if (page === 'home') renderHome();
   if (page === 'stats') renderStats();
   if (page === 'beats') renderBeats(); // keeps drafted chips & coverage current
@@ -2249,6 +2271,144 @@ function switchPage(page) {
   if (page === 'theme') renderTheme();
   if (page === 'brainstorm') requestAnimationFrame(() => { bsCanvas.querySelectorAll('.bs-note-text').forEach(autoResize); expandCanvas(); });
 }
+
+function switchPage(page) {
+  if (typeof flushEditor === 'function') { flushEditor(); saveProject(); }
+  if (page !== 'ideas' && typeof flowClearTimer === 'function') flowClearTimer();
+  // Navigating to the page already shown on the right swaps the panes instead
+  // of showing the same page twice (one DOM node can't live in two places).
+  if (uiPrefs.split && page === uiPrefs.splitPage) {
+    const prev = activePageName();
+    uiPrefs.splitPage = (prev !== 'home' && prev !== page) ? prev : (page === 'brainstorm' ? 'moodboard' : 'brainstorm');
+    saveUiPrefs();
+  }
+  document.querySelectorAll('.icon-nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`.icon-nav-btn[data-page="${page}"]`);
+  if (btn) btn.classList.add('active');
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  renderPageHooks(page);
+  applySplit();
+}
+
+// ── Split view (two pages side by side, draggable divider) ──
+const SPLIT_PAGES = ['writing', 'brainstorm', 'moodboard', 'ideas', 'theme', 'beats', 'timeline', 'characters', 'worldbuilding', 'stats'];
+
+function buildSplitSelect() {
+  const select = document.getElementById('split-select');
+  if (!select) return;
+  select.innerHTML = SPLIT_PAGES
+    .map(p => `<option value="${p}">${t(p === 'brainstorm' ? 'nav.notes' : 'nav.' + p)}</option>`)
+    .join('');
+  select.value = uiPrefs.splitPage;
+  select.title = t('split.select.title');
+}
+
+function applySplit() {
+  const content = document.querySelector('.content');
+  const divider = document.getElementById('split-divider');
+  const select = document.getElementById('split-select');
+  const toggle = document.getElementById('split-toggle');
+  if (!content || !divider || !select || !toggle) return;
+  // The home page always gets the full width; the split comes back as soon as
+  // another page is opened.
+  const on = uiPrefs.split && activePageName() !== 'home';
+  content.classList.toggle('split', on);
+  content.style.setProperty('--split-left', uiPrefs.splitLeft + '%');
+  divider.hidden = !on;
+  select.hidden = !uiPrefs.split;
+  toggle.classList.toggle('on', uiPrefs.split);
+  toggle.title = t('split.toggle.title');
+  document.querySelectorAll('.page.split-pane').forEach(p => p.classList.remove('split-pane'));
+  if (on) {
+    const sec = document.getElementById('page-' + uiPrefs.splitPage);
+    if (sec) sec.classList.add('split-pane');
+    if (select.value !== uiPrefs.splitPage) select.value = uiPrefs.splitPage;
+    renderPageHooks(uiPrefs.splitPage);
+  }
+}
+
+document.getElementById('split-toggle').addEventListener('click', () => {
+  uiPrefs.split = !uiPrefs.split;
+  if (uiPrefs.split && uiPrefs.splitPage === activePageName()) {
+    uiPrefs.splitPage = activePageName() === 'brainstorm' ? 'moodboard' : 'brainstorm';
+  }
+  saveUiPrefs();
+  buildSplitSelect();
+  applySplit();
+});
+
+document.getElementById('split-select').addEventListener('change', () => {
+  const select = document.getElementById('split-select');
+  const val = select.value;
+  if (val === activePageName()) {
+    // Picking the page that's open on the left: swap the panes.
+    const old = uiPrefs.splitPage;
+    uiPrefs.splitPage = val;
+    saveUiPrefs();
+    switchPage(old);
+  } else {
+    uiPrefs.splitPage = val;
+    saveUiPrefs();
+    applySplit();
+  }
+});
+
+document.getElementById('split-divider').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const divider = document.getElementById('split-divider');
+  const content = document.querySelector('.content');
+  divider.setPointerCapture(e.pointerId);
+  const rect = content.getBoundingClientRect();
+  const move = ev => {
+    const pct = Math.min(75, Math.max(25, ((ev.clientX - rect.left) / rect.width) * 100));
+    uiPrefs.splitLeft = Math.round(pct * 10) / 10;
+    content.style.setProperty('--split-left', uiPrefs.splitLeft + '%');
+  };
+  const up = () => {
+    divider.removeEventListener('pointermove', move);
+    divider.removeEventListener('pointerup', up);
+    saveUiPrefs();
+  };
+  divider.addEventListener('pointermove', move);
+  divider.addEventListener('pointerup', up);
+});
+
+// ── Collapsible sidebars (project sidebar + chapter tree) ──
+function applySidebarCollapsed() {
+  document.body.classList.toggle('sb-collapsed', !!uiPrefs.sbCollapsed);
+  const btn = document.getElementById('sidebar-toggle');
+  if (btn) {
+    btn.innerHTML = uiPrefs.sbCollapsed ? '&#8250;' : '&#8249;';
+    btn.title = t(uiPrefs.sbCollapsed ? 'sidebar.expand' : 'sidebar.collapse');
+  }
+}
+
+function applyChnavCollapsed() {
+  const layout = document.querySelector('.writing-layout');
+  if (layout) layout.classList.toggle('chnav-collapsed', !!uiPrefs.chnavCollapsed);
+  const expandBtn = document.getElementById('chnav-expand');
+  if (expandBtn) { expandBtn.hidden = !uiPrefs.chnavCollapsed; expandBtn.title = t('writing.chnav.expand'); }
+  const collapseBtn = document.getElementById('chnav-collapse');
+  if (collapseBtn) collapseBtn.title = t('writing.chnav.collapse');
+}
+
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
+  uiPrefs.sbCollapsed = !uiPrefs.sbCollapsed;
+  saveUiPrefs();
+  applySidebarCollapsed();
+});
+document.getElementById('chnav-collapse').addEventListener('click', () => {
+  uiPrefs.chnavCollapsed = true;
+  saveUiPrefs();
+  applyChnavCollapsed();
+});
+document.getElementById('chnav-expand').addEventListener('click', () => {
+  uiPrefs.chnavCollapsed = false;
+  saveUiPrefs();
+  applyChnavCollapsed();
+});
 
 async function renderHome() {
   const container = document.getElementById('home-recent');
