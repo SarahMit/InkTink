@@ -242,6 +242,93 @@ function exportProjectToFile() {
   URL.revokeObjectURL(url);
 }
 
+// Full-browser backup: every saved project, the unnamed working copy, and the
+// idea pool in one file. importProjectFromFile() recognizes and restores it.
+function exportFullBackup() {
+  snapshotWordHistory();
+  const store = readProjectsStore();
+  if (currentProjectName) {
+    store[currentProjectName] = { data: JSON.parse(JSON.stringify(collectProjectData())), modified: new Date().toISOString() };
+  }
+  const payload = {
+    version: 2,
+    backup: true,
+    projects: store,
+    currentName: currentProjectName,
+    current: currentProjectName ? null : collectProjectData(),
+    ideaPool,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'inktink-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Removes everything InkTink has stored in this browser (all projects, the
+// idea pool, UI settings) — for leaving no trace on a shared computer.
+// Exported .json files are untouched. Reloads into a fresh, empty app.
+function deleteAllLocalData() {
+  projectReady = false; // block the unload flush from re-saving anything
+  isDirty = false;
+  ['inktink.current', 'inktink.currentName', 'inktink.projects', 'inktink.ideapool',
+   'inktink-ui', 'inktink-theme', 'inktink-lang'].forEach(k => {
+    try { localStorage.removeItem(k); } catch {}
+  });
+  location.reload();
+}
+
+function openDeleteAllModal() {
+  const c = document.createElement('div');
+  c.innerHTML = `
+    <div class="modal-title">${t('privacy.delete.title')}</div>
+    <div class="modal-empty">${t('privacy.delete.msg')}</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+      <button class="btn-secondary" id="del-all-backup">${t('privacy.delete.backup')}</button>
+      <button class="btn-secondary" id="del-all-cancel">${t('btn.cancel')}</button>
+      <button class="btn-danger" id="del-all-confirm">${t('privacy.delete.confirm')}</button>
+    </div>`;
+  openModal(c);
+  c.querySelector('#del-all-backup').addEventListener('click', exportFullBackup);
+  c.querySelector('#del-all-cancel').addEventListener('click', closeModal);
+  c.querySelector('#del-all-confirm').addEventListener('click', deleteAllLocalData);
+}
+
+// Restores a full-browser backup file (see exportFullBackup): all projects,
+// the idea pool, and the previously open project.
+function restoreFullBackup(data) {
+  const store = {};
+  for (const [name, entry] of Object.entries(data.projects)) {
+    if (entry && entry.data && typeof entry.data === 'object') store[name] = entry;
+  }
+  writeProjectsStore(store);
+  if (data.ideaPool && typeof data.ideaPool === 'object') {
+    try { localStorage.setItem(LS_IDEAPOOL, JSON.stringify(data.ideaPool)); } catch {}
+    loadIdeaPool();
+  }
+  const names = Object.keys(store)
+    .sort((a, b) => new Date(store[b].modified || 0) - new Date(store[a].modified || 0));
+  if (data.currentName && store[data.currentName]) {
+    setCurrentProjectName(data.currentName);
+    applyProjectData(store[data.currentName].data);
+  } else if (data.current && typeof data.current === 'object') {
+    setCurrentProjectName(null);
+    applyProjectData(data.current);
+  } else if (names.length) {
+    setCurrentProjectName(names[0]);
+    applyProjectData(store[names[0]].data);
+  } else {
+    setCurrentProjectName(null);
+    applyProjectData({ beats: [], characters: [], moodboard: [] });
+  }
+  updateProjectLabel();
+  saveProject();
+  if (typeof switchPage === 'function') switchPage('writing');
+  alert(t('backup.imported').replace('{n}', names.length));
+}
+
 function importProjectFromFile() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -255,6 +342,12 @@ function importProjectFromFile() {
         const data = JSON.parse(reader.result);
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('not a project file');
         if (typeof flushEditor === 'function') flushEditor();
+
+        if (data.backup && data.projects && typeof data.projects === 'object') {
+          restoreFullBackup(data);
+          return;
+        }
+
         setCurrentProjectName(file.name.replace(/\.json$/i, ''));
         applyProjectData(data);
         updateProjectLabel();
@@ -507,6 +600,12 @@ const TR = {
     'writing.delete.chapter': 'Delete chapter', 'writing.delete.scene': 'Delete scene',
     'writing.confirm.delete.chapter': 'Delete chapter "{title}" and all its scenes?',
     'writing.untitled': 'Untitled',
+    'privacy.delete.button': 'Delete all data from this browser…',
+    'privacy.delete.title': 'Delete all data from this browser?',
+    'privacy.delete.msg': 'This removes every project, the idea pool, and all settings InkTink has stored in this browser — on this device only. Exported .json files are not affected. Download a full backup first if you want to keep anything.',
+    'privacy.delete.backup': '⬇ Download full backup',
+    'privacy.delete.confirm': 'Delete everything',
+    'backup.imported': 'Backup restored — {n} project(s) are back.',
     'split.toggle.title': 'Split view: two pages side by side',
     'split.select.title': 'Page shown on the right',
     'sidebar.collapse': 'Collapse sidebar', 'sidebar.expand': 'Expand sidebar',
@@ -742,6 +841,12 @@ const TR = {
     'writing.delete.chapter': 'Kapitel löschen', 'writing.delete.scene': 'Szene löschen',
     'writing.confirm.delete.chapter': 'Kapitel „{title}" und alle seine Szenen löschen?',
     'writing.untitled': 'ohne Titel',
+    'privacy.delete.button': 'Alle Daten aus diesem Browser löschen…',
+    'privacy.delete.title': 'Alle Daten aus diesem Browser löschen?',
+    'privacy.delete.msg': 'Das entfernt alle Projekte, den Ideen-Pool und sämtliche Einstellungen, die InkTink in diesem Browser gespeichert hat — nur auf diesem Gerät. Exportierte .json-Dateien sind nicht betroffen. Lade vorher ein komplettes Backup herunter, wenn du etwas behalten möchtest.',
+    'privacy.delete.backup': '⬇ Komplettes Backup herunterladen',
+    'privacy.delete.confirm': 'Alles löschen',
+    'backup.imported': 'Backup wiederhergestellt — {n} Projekt(e) sind zurück.',
     'split.toggle.title': 'Geteilte Ansicht: zwei Seiten nebeneinander',
     'split.select.title': 'Seite in der rechten Hälfte',
     'sidebar.collapse': 'Seitenleiste einklappen', 'sidebar.expand': 'Seitenleiste ausklappen',
@@ -5618,6 +5723,7 @@ document.getElementById('btn-export-word').addEventListener('click', exportToDoc
 document.getElementById('btn-export-project').addEventListener('click', exportProjectToFile);
 document.getElementById('btn-import-project').addEventListener('click', importProjectFromFile);
 document.getElementById('save-warning-backup').addEventListener('click', exportProjectToFile);
+document.getElementById('btn-delete-all').addEventListener('click', openDeleteAllModal);
 
 // Sidebar title: click to rename — doubles as the project name (and export filename)
 const projTitleEl = document.getElementById('proj-title');

@@ -372,6 +372,34 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   transition: all 0.15s;
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-danger:hover { background: var(--danger-hover); }
+
+/* Quiet "leave no trace" action at the bottom of the home page */
+.home-danger {
+  margin-top: 26px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.home-danger:hover { color: var(--danger); }
+
 .btn-secondary:hover {
   background: var(--bg-hover);
   border-color: var(--accent);
