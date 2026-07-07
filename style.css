@@ -313,6 +313,13 @@ html[data-theme="dark"] body::after { opacity: 0.05; }
   background: var(--bg-hover);
 }
 
+a.tb-util {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 /* Thin divider between utilities and actions */
 .tb-divider {
   width: 1px;
@@ -4061,8 +4068,27 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 }
 .idea-dev-list-item { display: flex; align-items: center; gap: 10px; }
 .idea-dev-list-check {
-  width: 17px; height: 17px; flex-shrink: 0; cursor: pointer;
-  accent-color: var(--accent);
+  appearance: none;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.15s;
+}
+.idea-dev-list-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.idea-dev-list-check:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 13px;
+  color: var(--on-accent);
 }
 .idea-dev-list-text {
   flex: 1; min-width: 0; background: none; border: none;
