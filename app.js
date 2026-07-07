@@ -397,7 +397,7 @@ let storyTheme = { statement: '', question: '', claim: '', lesson: '', belief: '
 // depending on the (language-specific) content in IDEA_WORKSHOP_FIELDS.
 const WORKSHOP_SHAPES = {
   develop: [
-    { structured: false },
+    { structured: false, list: true },
     { structured: false },
     { structured: false },
     { structured: true, partKeys: ['beginning', 'middle', 'end'] },
@@ -414,6 +414,7 @@ function ideaWorkshopDefault(name) {
   return { step: 0, fields: WORKSHOP_SHAPES[name].map(s => ({
     notes: '', conclusion: '',
     ...(s.structured ? { parts: Object.fromEntries(s.partKeys.map(k => [k, ''])) } : {}),
+    ...(s.list ? { items: [] } : {}),
   })) };
 }
 
@@ -424,6 +425,13 @@ function ideaWorkshopFromData(saved, name) {
   const fields = saved.fields.map((f, i) => {
     const base = { notes: f.notes || '', conclusion: f.conclusion || '' };
     if (shape[i].structured) base.parts = { ...def.fields[i].parts, ...(f.parts || {}) };
+    if (shape[i].list) {
+      // Prefer saved checklist items; otherwise migrate any legacy free-text
+      // notes into unchecked items (one per non-empty line).
+      base.items = Array.isArray(f.items)
+        ? f.items.map(it => ({ text: String(it.text || ''), done: !!it.done }))
+        : (f.notes || '').split('\n').map(s => s.trim()).filter(Boolean).map(text => ({ text, done: false }));
+    }
     return base;
   });
   // `seeded` must be preserved explicitly — this rebuild drops unknown props,
@@ -752,6 +760,7 @@ const TR = {
     'ideas.develop.field': 'Field', 'ideas.develop.finish': 'Finish',
     'ideas.develop.sidebar.title': 'Conclusions so far',
     'ideas.develop.empty': 'Not written yet.',
+    'ideas.develop.list.add': 'Add a point + Enter', 'ideas.develop.list.remove': 'Remove point',
     'ideas.section.find': 'Find & Develop Ideas', 'ideas.section.flow': 'Get Words Flowing',
     'flow.tagline': 'You don\'t need a finished idea or your "real" style to start. These are just for loosening up — nothing here has to be good.',
     'flow.home.title': 'Pick a way in',
@@ -992,6 +1001,7 @@ const TR = {
     'ideas.develop.field': 'Feld', 'ideas.develop.finish': 'Abschließen',
     'ideas.develop.sidebar.title': 'Bisherige Conclusions',
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
+    'ideas.develop.list.add': 'Punkt hinzufügen + Enter', 'ideas.develop.list.remove': 'Punkt entfernen',
     'ideas.section.find': 'Ideen finden und entwickeln', 'ideas.section.flow': 'Ins Schreiben kommen',
     'flow.tagline': 'Du brauchst weder eine fertige Idee noch deinen „echten“ Stil, um anzufangen. Das hier ist nur zum Lockern — nichts davon muss gut sein.',
     'flow.home.title': 'Wähl dir einen Einstieg',
@@ -1114,6 +1124,7 @@ const IDEA_WORKSHOP_FIELDS = {
           'Jot down bullet points: tropes, archetypes, settings — anything you love.',
           'Then combine your bullets into a Premise — a few sentences that capture the spirit of the story.',
         ],
+        list: true,
         notesPlaceholder: 'Tropes, archetypes, settings, ...',
         conclusionLabel: 'Premise',
         conclusionPlaceholder: 'A few sentences that capture the spirit of your story...' },
@@ -1155,6 +1166,7 @@ const IDEA_WORKSHOP_FIELDS = {
           'Sammle stichpunktartig: Tropes, Archetypen, Settings — alles, was du liebst.',
           'Verwandle deine Stichpunkte dann in eine Prämisse — ein paar Sätze, die den Spirit der Geschichte einfangen.',
         ],
+        list: true,
         notesPlaceholder: 'Tropes, Archetypen, Settings, ...',
         conclusionLabel: 'Prämisse',
         conclusionPlaceholder: 'Ein paar Sätze, die den Spirit deiner Geschichte einfangen...' },
@@ -1413,6 +1425,22 @@ function ideaWorkshopRender(name) {
       (f.stakesPrompt ? '<div class="idea-dev-stakes">' + ideaEsc(f.stakesPrompt) + '</div>' : '')
     : f.simple
     ? '<textarea class="idea-answer idea-dev-conclusion" id="idea-dev-conclusion" rows="6" placeholder="' + ideaEsc(f.conclusionPlaceholder) + '">' + ideaEsc(fd.conclusion) + '</textarea>'
+    : f.list
+    ? '<div class="idea-dev-list" id="idea-dev-list">' +
+        (fd.items || []).map((it, i) =>
+          '<div class="idea-dev-list-item' + (it.done ? ' done' : '') + '" data-i="' + i + '">' +
+            '<input type="checkbox" class="idea-dev-list-check"' + (it.done ? ' checked' : '') + '>' +
+            '<input type="text" class="idea-dev-list-text" value="' + ideaEsc(it.text) + '">' +
+            '<button class="idea-dev-list-del" title="' + ideaEsc(t('ideas.develop.list.remove')) + '">&times;</button>' +
+          '</div>'
+        ).join('') +
+        '<div class="idea-dev-list-addrow">' +
+          '<span class="idea-dev-list-plus">+</span>' +
+          '<input type="text" class="idea-dev-list-add" id="idea-dev-list-add" placeholder="' + ideaEsc(t('ideas.develop.list.add')) + '">' +
+        '</div>' +
+      '</div>' +
+      '<div class="idea-dev-conclusion-label">' + ideaEsc(f.conclusionLabel) + '</div>' +
+      '<textarea class="idea-answer idea-dev-conclusion" id="idea-dev-conclusion" rows="3" placeholder="' + ideaEsc(f.conclusionPlaceholder) + '">' + ideaEsc(fd.conclusion) + '</textarea>'
     : '<textarea class="idea-answer idea-dev-notes" id="idea-dev-notes" rows="4" placeholder="' + ideaEsc(f.notesPlaceholder) + '">' + ideaEsc(fd.notes) + '</textarea>' +
       '<div class="idea-dev-conclusion-label">' + ideaEsc(f.conclusionLabel) + '</div>' +
       '<textarea class="idea-answer idea-dev-conclusion" id="idea-dev-conclusion" rows="3" placeholder="' + ideaEsc(f.conclusionPlaceholder) + '">' + ideaEsc(fd.conclusion) + '</textarea>';
@@ -1452,6 +1480,58 @@ function ideaWorkshopRender(name) {
     const tab = stage.querySelector('.idea-dev-tab[data-i="' + step + '"]');
     if (tab) tab.classList.toggle('filled', !!(fd.conclusion.trim() || fd.notes.trim()));
   };
+
+  if (f.list) {
+    // Keep fd.notes in sync (joined item texts) so the "filled" tab dot and any
+    // legacy readers of `notes` keep working without changes.
+    const syncNotes = () => { fd.notes = (fd.items || []).map(it => it.text).filter(s => s.trim()).join('\n'); };
+    stage.querySelectorAll('.idea-dev-list-item').forEach(row => {
+      const i = parseInt(row.dataset.i, 10);
+      const check = row.querySelector('.idea-dev-list-check');
+      const text = row.querySelector('.idea-dev-list-text');
+      const del = row.querySelector('.idea-dev-list-del');
+      check.addEventListener('change', () => {
+        fd.items[i].done = check.checked;
+        row.classList.toggle('done', check.checked);
+        saveProjectDebounced();
+      });
+      text.addEventListener('input', () => {
+        fd.items[i].text = text.value;
+        syncNotes();
+        saveProjectDebounced();
+        refreshSummary();
+      });
+      text.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const add = stage.querySelector('#idea-dev-list-add');
+          if (add) add.focus();
+        }
+      });
+      del.addEventListener('click', () => {
+        fd.items.splice(i, 1);
+        syncNotes();
+        saveProjectDebounced();
+        ideaWorkshopRender(name);
+      });
+    });
+    const addInput = stage.querySelector('#idea-dev-list-add');
+    if (addInput) {
+      addInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && addInput.value.trim()) {
+          e.preventDefault();
+          fd.items = fd.items || [];
+          fd.items.push({ text: addInput.value.trim(), done: false });
+          syncNotes();
+          saveProjectDebounced();
+          refreshSummary();
+          ideaWorkshopRender(name);
+          const add = stage.querySelector('#idea-dev-list-add');
+          if (add) add.focus();
+        }
+      });
+    }
+  }
 
   if (f.structured) {
     stage.querySelectorAll('.idea-dev-bme-area').forEach(area => {

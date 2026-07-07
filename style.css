@@ -4054,6 +4054,38 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 .idea-dev-conclusion-label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 6px; }
 .idea-dev-conclusion { border-color: var(--accent); }
 
+.idea-dev-list {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg-card); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); padding: 10px; margin-bottom: 16px;
+}
+.idea-dev-list-item { display: flex; align-items: center; gap: 10px; }
+.idea-dev-list-check {
+  width: 17px; height: 17px; flex-shrink: 0; cursor: pointer;
+  accent-color: var(--accent);
+}
+.idea-dev-list-text {
+  flex: 1; min-width: 0; background: none; border: none;
+  border-bottom: 1px solid transparent; color: var(--text);
+  font: inherit; font-size: 14px; padding: 4px 2px; outline: none;
+}
+.idea-dev-list-text:focus { border-bottom-color: var(--border-strong); }
+.idea-dev-list-item.done .idea-dev-list-text {
+  text-decoration: line-through; color: var(--text-muted);
+}
+.idea-dev-list-del {
+  flex-shrink: 0; background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 4px;
+}
+.idea-dev-list-del:hover { color: var(--danger); background: rgba(255,255,255,0.08); }
+.idea-dev-list-addrow { display: flex; align-items: center; gap: 10px; }
+.idea-dev-list-plus { width: 17px; text-align: center; color: var(--text-muted); flex-shrink: 0; }
+.idea-dev-list-add {
+  flex: 1; min-width: 0; background: none; border: none;
+  color: var(--text); font: inherit; font-size: 14px; padding: 4px 2px; outline: none;
+}
+.idea-dev-list-add::placeholder { color: var(--text-muted); opacity: 0.7; }
+
 .idea-dev-bme { display: flex; flex-direction: column; gap: 16px; margin: 4px 0 14px; }
 .idea-dev-bme-col { display: flex; flex-direction: column; }
 .idea-dev-bme-label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 4px; }
