@@ -1473,11 +1473,11 @@ function renderRedThreadScenes() {
       '<div class="rt-scene-body">' +
         '<textarea class="rt-desc" rows="1" placeholder="' + ideaEsc(t('redthread.desc')) + '">' + ideaEsc(sc.desc) + '</textarea>' +
         '<div class="rt-sentence">' +
-          '<input class="rt-in rt-x" data-k="x" placeholder="' + ideaEsc(t('redthread.x')) + '" value="' + ideaEsc(sc.x) + '">' +
+          '<textarea class="rt-in rt-x" data-k="x" rows="1" placeholder="' + ideaEsc(t('redthread.x')) + '">' + ideaEsc(sc.x) + '</textarea>' +
           '<span class="rt-word">' + t('redthread.connector.wants') + '</span>' +
-          '<input class="rt-in rt-y" data-k="y" placeholder="' + ideaEsc(t('redthread.y')) + '" value="' + ideaEsc(sc.y) + '">' +
+          '<textarea class="rt-in rt-y" data-k="y" rows="1" placeholder="' + ideaEsc(t('redthread.y')) + '">' + ideaEsc(sc.y) + '</textarea>' +
           '<span class="rt-word">, ' + t('redthread.connector.but') + '</span>' +
-          '<input class="rt-in rt-z" data-k="z" placeholder="' + ideaEsc(t('redthread.z')) + '" value="' + ideaEsc(sc.z) + '">' +
+          '<textarea class="rt-in rt-z" data-k="z" rows="1" placeholder="' + ideaEsc(t('redthread.z')) + '">' + ideaEsc(sc.z) + '</textarea>' +
           '<span class="rt-word">.</span>' +
         '</div>' +
       '</div>' +
@@ -1491,6 +1491,7 @@ function renderRedThreadScenes() {
     card.querySelectorAll('.rt-in').forEach(inp => {
       inp.addEventListener('input', () => {
         redThread.scenes[i][inp.dataset.k] = inp.value;
+        autoResize(inp);
         renderRedThreadThread();
         saveProjectDebounced();
       });
@@ -1503,7 +1504,7 @@ function renderRedThreadScenes() {
     });
     wrap.appendChild(card);
   });
-  requestAnimationFrame(() => wrap.querySelectorAll('.rt-desc').forEach(autoResize));
+  requestAnimationFrame(() => wrap.querySelectorAll('.rt-desc, .rt-in').forEach(autoResize));
   renderRedThreadThread();
 }
 

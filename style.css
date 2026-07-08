@@ -4174,14 +4174,15 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 .rt-desc:focus { border-color: var(--accent); }
 .rt-desc::placeholder { color: var(--text-muted); opacity: .7; }
 .rt-sentence {
-  min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+  min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px;
   font-size: 15px; line-height: 1.9;
 }
-.rt-word { color: var(--text-muted); }
+.rt-word { color: var(--text-muted); line-height: 1.5; }
 .rt-in {
   background: none; border: none; border-bottom: 1px solid var(--border-strong);
   color: var(--text); font: inherit; font-size: 15px; padding: 1px 2px; min-width: 60px;
   outline: none; transition: border-color .1s ease;
+  resize: none; overflow: hidden; line-height: 1.5;
 }
 .rt-in:focus { border-bottom-color: var(--accent); }
 .rt-in::placeholder { color: var(--text-muted); opacity: .7; }
