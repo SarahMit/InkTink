@@ -18,7 +18,7 @@ function setCurrentProjectName(name) {
 }
 
 function collectProjectData() {
-  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, storyTheme, ideaWorkshops };
+  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
 }
 
 function readProjectsStore() {
@@ -387,6 +387,18 @@ let wordHistory = []; // [{ date: "YYYY-MM-DD", words: number }]
 let selectedStructure = null;
 let worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
 let ideaMap = { nodes: [] };
+// "Find the Red Thread" exercise: a handful of scenes phrased as "X wants Y, but Z".
+// The Ys (wants) and Zs (obstacles) surface a throughline; takeaway captures it.
+let redThread = redThreadDefault();
+function redThreadScene() { return { x: '', y: '', z: '' }; }
+function redThreadDefault() { return { scenes: [redThreadScene(), redThreadScene(), redThreadScene()], takeaway: '' }; }
+function redThreadFromData(d) {
+  if (!d || !Array.isArray(d.scenes)) return redThreadDefault();
+  return {
+    scenes: d.scenes.map(s => ({ x: s.x || '', y: s.y || '', z: s.z || '' })),
+    takeaway: d.takeaway || '',
+  };
+}
 let storyTheme = { statement: '', question: '', claim: '', lesson: '', belief: '', motif: '', message: '' };
 // Each guided workshop ("develop", "char") is a fixed sequence of fields, worked
 // through in any order, each pairing free notes with a conclusion. Some fields are
@@ -461,16 +473,6 @@ const BS2_COLORS = [
   { main: '#fb923c', dim: 'rgba(251,146,60,0.15)'  },  // orange
 ];
 
-const WHATIF_PRESETS = [
-  'this fails horribly',
-  'the opposite were true',
-  'someone else was in charge',
-  'there were no consequences',
-  'this worked perfectly',
-  'everything changed overnight',
-  'time ran out',
-  'there were unlimited resources',
-];
 let wbFilter = 'Alle';
 
 const WB_BUILTIN_CATS = ['Orte', 'Völker & Fraktionen', 'Geschichte & Lore', 'Magie & Technologie', 'Sonstiges'];
@@ -694,7 +696,21 @@ const TR = {
     'mood.comment.placeholder': 'Comment...',
     'brainstorming.add': '+ New Idea', 'brainstorming.empty': 'No ideas yet — click "+ New Idea" to start.',
     'bs2.root.placeholder': 'Enter idea…', 'bs2.child.placeholder': 'Enter thought…',
-    'bs2.add.child': '+ Idea', 'bs2.add.whatif': '+ What if…', 'bs2.whatif.placeholder': 'custom scenario',
+    'bs2.add.child': '+ Idea', 'bs2.add.why': '+ Why?', 'bs2.add.whatif': '+ What if…', 'bs2.whatif.placeholder': 'custom scenario',
+    'bs2.whatif.prefix': 'What if…',
+    'bs2.whatif.presets': [
+      'this fails horribly',
+      'the opposite were true',
+      'someone else was in charge',
+      'there were no consequences',
+      'this worked perfectly',
+      'everything changed overnight',
+      'time ran out',
+      'there were unlimited resources',
+    ],
+    'bs2.type.why': 'WHY?', 'bs2.type.whatif.prefix': 'WHAT IF …', 'bs2.type.whatif.because': 'BECAUSE',
+    'bs2.add.andthen': '+ But/So…', 'bs2.andthen.but': 'But', 'bs2.andthen.so': 'So',
+    'bs2.andthen.hint': 'Focus on causality — what does this scene cause, or what does it undo?',
     'bs2.delete.title': 'Delete this branch?',
     'bs2.delete.msg': 'This idea has branches — deleting it also removes every idea that grew from it.',
     'bs2.delete.confirm': 'Delete',
@@ -762,6 +778,16 @@ const TR = {
     'ideas.develop.empty': 'Not written yet.',
     'ideas.develop.list.add': 'Add a point + Enter', 'ideas.develop.list.remove': 'Remove point',
     'ideas.section.find': 'Find & Develop Ideas', 'ideas.section.flow': 'Get Words Flowing',
+    'redthread.title': 'Find the Throughline',
+    'redthread.exercise': 'A small exercise, if you want to try it: take three of the scenes you already have in your head and write one sentence for each in the pattern “X wants Y, but Z.” Often the Ys and Zs already show you where a red thread lies.',
+    'redthread.x': 'who', 'redthread.y': 'wants what', 'redthread.z': 'what stands in the way',
+    'redthread.connector.wants': 'wants', 'redthread.connector.but': 'but',
+    'redthread.add': '+ Add scene', 'redthread.remove': 'Remove scene',
+    'redthread.thread.empty': 'Fill in a scene above and the Ys and Zs will gather here.',
+    'redthread.thread.hint': 'Look across the Ys and Zs — where do they point?',
+    'redthread.thread.ys': 'The Ys — what they want', 'redthread.thread.zs': 'The Zs — what stands in the way',
+    'redthread.takeaway.label': 'Where does your red thread lie?',
+    'redthread.takeaway.placeholder': 'The throughline you see running across these scenes...',
     'flow.tagline': 'You don\'t need a finished idea or your "real" style to start. These are just for loosening up — nothing here has to be good.',
     'flow.home.title': 'Pick a way in',
     'flow.back': '← Home',
@@ -935,7 +961,21 @@ const TR = {
     'mood.comment.placeholder': 'Kommentar...',
     'brainstorming.add': '+ Neue Idee', 'brainstorming.empty': 'Noch keine Ideen — klicke "+ Neue Idee" um zu starten.',
     'bs2.root.placeholder': 'Idee eingeben…', 'bs2.child.placeholder': 'Gedanke eingeben…',
-    'bs2.add.child': '+ Idee', 'bs2.add.whatif': '+ Was wäre wenn…', 'bs2.whatif.placeholder': 'eigenes Szenario',
+    'bs2.add.child': '+ Idee', 'bs2.add.why': '+ Warum?', 'bs2.add.whatif': '+ Was wäre wenn…', 'bs2.whatif.placeholder': 'eigenes Szenario',
+    'bs2.whatif.prefix': 'Was wäre wenn…',
+    'bs2.whatif.presets': [
+      'das hier furchtbar schiefgeht',
+      'das Gegenteil wahr wäre',
+      'jemand anderes das Sagen hätte',
+      'es keine Konsequenzen gäbe',
+      'das hier perfekt funktioniert',
+      'sich über Nacht alles ändert',
+      'die Zeit abläuft',
+      'unbegrenzte Ressourcen zur Verfügung stünden',
+    ],
+    'bs2.type.why': 'WARUM?', 'bs2.type.whatif.prefix': 'WAS WÄRE WENN …', 'bs2.type.whatif.because': 'WEIL',
+    'bs2.add.andthen': '+ Aber/Also…', 'bs2.andthen.but': 'Aber', 'bs2.andthen.so': 'Also',
+    'bs2.andthen.hint': 'Fokussiere dich auf die Kausalität — was löst diese Szene aus, oder was macht sie zunichte?',
     'bs2.delete.title': 'Diesen Zweig löschen?',
     'bs2.delete.msg': 'Diese Idee hat Verzweigungen — beim Löschen verschwinden auch alle Ideen, die daraus entstanden sind.',
     'bs2.delete.confirm': 'Löschen',
@@ -1003,6 +1043,16 @@ const TR = {
     'ideas.develop.empty': 'Noch nicht ausgefüllt.',
     'ideas.develop.list.add': 'Punkt hinzufügen + Enter', 'ideas.develop.list.remove': 'Punkt entfernen',
     'ideas.section.find': 'Ideen finden und entwickeln', 'ideas.section.flow': 'Ins Schreiben kommen',
+    'redthread.title': 'Den roten Faden finden',
+    'redthread.exercise': 'Eine kleine Übung, falls du sie ausprobieren willst: Nimm drei der Szenen, die du schon im Kopf hast, und schreib zu jeder einen Satz nach dem Muster „X will Y, aber Z.“ Oft zeigen dir die Ys und Zs schon, wo ein roter Faden liegt.',
+    'redthread.x': 'wer', 'redthread.y': 'will was', 'redthread.z': 'was im Weg steht',
+    'redthread.connector.wants': 'will', 'redthread.connector.but': 'aber',
+    'redthread.add': '+ Szene hinzufügen', 'redthread.remove': 'Szene entfernen',
+    'redthread.thread.empty': 'Füll oben eine Szene aus, dann sammeln sich hier die Ys und Zs.',
+    'redthread.thread.hint': 'Schau über die Ys und Zs — worauf deuten sie hin?',
+    'redthread.thread.ys': 'Die Ys — was sie wollen', 'redthread.thread.zs': 'Die Zs — was im Weg steht',
+    'redthread.takeaway.label': 'Wo liegt dein roter Faden?',
+    'redthread.takeaway.placeholder': 'Der rote Faden, den du quer durch diese Szenen laufen siehst...',
     'flow.tagline': 'Du brauchst weder eine fertige Idee noch deinen „echten“ Stil, um anzufangen. Das hier ist nur zum Lockern — nichts davon muss gut sein.',
     'flow.home.title': 'Wähl dir einen Einstieg',
     'flow.back': '← Zurück',
@@ -1083,12 +1133,13 @@ const IDEA_ICONS = {
   spark:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>',
   layers:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
   tree:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+  thread:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v3.5a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4V20"/><circle cx="6" cy="4" r="1.6"/><circle cx="18" cy="20" r="1.6"/></svg>',
 };
 
 // 'ideapool' and 'brainstorming' are handled specially in ideaHome() — they
 // open inline tools instead of a guided workshop — but ride along on the same
 // starter card grid and icon/meta lookup as 'develop' and 'char'.
-const IDEA_STARTERS = ['develop', 'char', 'brainstorming', 'ideapool'];
+const IDEA_STARTERS = ['develop', 'char', 'brainstorming', 'redthread', 'ideapool'];
 
 // Metadata for the starter cards on the "Find & Develop Ideas" home screen.
 // The actual field content for the two guided workshops lives in IDEA_WORKSHOP_FIELDS.
@@ -1099,7 +1150,8 @@ const IDEA_WORKSHOP_META = {
     char: { icon: 'user', title: 'Who Is My Character', sub: 'What drives the character',
       doneClose: 'You have worked out what set your character\'s story in motion, what holds them in place, what they\'re already up against, and why we\'d follow them.' },
     ideapool: { icon: 'layers', title: 'Idea Pool', sub: 'Too many project ideas at once? Collect, combine, and choose what to focus on' },
-    brainstorming: { icon: 'tree', title: 'Idea Tree', sub: 'Branch one idea into a tree with Why?, What if…, and And then?' },
+    brainstorming: { icon: 'tree', title: 'Idea Tree', sub: 'Branch one idea into a tree with Why?, What if…, and But/So?' },
+    redthread: { icon: 'thread', title: 'Find the Throughline', sub: 'Turn the scenes already in your head into a throughline for the plot' },
   },
   de: {
     develop: { icon: 'spark', title: 'Erste Idee ausarbeiten', sub: 'Mach aus verstreuten Notizen ein tragfähiges Fundament',
@@ -1107,7 +1159,8 @@ const IDEA_WORKSHOP_META = {
     char: { icon: 'user', title: 'Wer ist mein Charakter', sub: 'Was den Charakter antreibt',
       doneClose: 'Du hast herausgearbeitet, was die Geschichte deines Charakters ins Rollen brachte, was ihn in der Patt-Situation hält, womit er bereits zu kämpfen hat und warum wir ihn begleiten wollen.' },
     ideapool: { icon: 'layers', title: 'Ideen-Pool', sub: 'Zu viele Projektideen im Kopf? Sammeln, kombinieren und wählen, worauf du dich konzentrierst' },
-    brainstorming: { icon: 'tree', title: 'Ideen-Baum', sub: 'Eine Idee mit Warum?, Was wäre wenn… und Und dann? zum Baum verzweigen' },
+    brainstorming: { icon: 'tree', title: 'Ideen-Baum', sub: 'Eine Idee mit Warum?, Was wäre wenn… und Aber/Also? zum Baum verzweigen' },
+    redthread: { icon: 'thread', title: 'Den roten Faden finden', sub: 'Aus den Szenen, die du schon im Kopf hast, einen roten Faden für den Plot entwickeln' },
   },
 };
 
@@ -1339,6 +1392,7 @@ function ideaHome() {
     b.addEventListener('click', () => {
       if (key === 'ideapool') ideaPoolStageRender();
       else if (key === 'brainstorming') ideaBrainstormingStageRender();
+      else if (key === 'redthread') ideaRedThreadStageRender();
       else ideaWorkshopRender(key);
     });
     grid.appendChild(b);
@@ -1367,6 +1421,104 @@ function ideaBrainstormingStageRender() {
     if (newText) newText.focus();
   });
   renderBrainstorming();
+}
+
+// "Find the Red Thread", inline within the "Find & Develop Ideas" stage.
+// The writer phrases scenes they already have as "X wants Y, but Z"; the Ys
+// (wants) and Zs (obstacles) are pulled into a live panel to surface a
+// throughline, which they name in the takeaway box.
+function ideaRedThreadStageRender() {
+  const stage = ideaStage();
+  if (!stage) return;
+  stage.innerHTML =
+    '<div class="idea-lead-row">' +
+      '<div class="idea-lead">' + t('redthread.title') + '</div>' +
+    '</div>' +
+    '<div class="idea-dev-stakes rt-exercise"><span>' + t('redthread.exercise') + '</span></div>' +
+    '<div class="rt-scenes" id="rt-scenes"></div>' +
+    '<button class="idea-ghost rt-add" id="rt-add">' + t('redthread.add') + '</button>' +
+    '<div class="rt-thread" id="rt-thread"></div>' +
+    '<div class="rt-takeaway">' +
+      '<div class="idea-dev-conclusion-label">' + t('redthread.takeaway.label') + '</div>' +
+      '<textarea class="idea-answer idea-dev-conclusion" id="rt-takeaway" rows="4" placeholder="' + ideaEsc(t('redthread.takeaway.placeholder')) + '">' + ideaEsc(redThread.takeaway) + '</textarea>' +
+    '</div>' +
+    '<div class="idea-actions"><button class="idea-ghost" id="idea-rt-back">' + t('ideas.back') + '</button></div>';
+
+  stage.querySelector('#idea-rt-back').addEventListener('click', ideaHome);
+  stage.querySelector('#rt-add').addEventListener('click', () => {
+    redThread.scenes.push(redThreadScene());
+    saveProject();
+    renderRedThreadScenes();
+  });
+  const takeaway = stage.querySelector('#rt-takeaway');
+  takeaway.addEventListener('input', () => { redThread.takeaway = takeaway.value; autoResize(takeaway); saveProjectDebounced(); });
+  requestAnimationFrame(() => autoResize(takeaway));
+  renderRedThreadScenes();
+}
+
+// Rebuilds the scene cards (used on add/remove, which change the DOM structure).
+// Typing inside a card updates data + the thread panel only, so focus is kept.
+function renderRedThreadScenes() {
+  const wrap = document.getElementById('rt-scenes');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const canDelete = redThread.scenes.length > 1;
+  redThread.scenes.forEach((sc, i) => {
+    const card = document.createElement('div');
+    card.className = 'rt-scene';
+    card.innerHTML =
+      '<div class="rt-scene-num">' + (i + 1) + '</div>' +
+      '<div class="rt-sentence">' +
+        '<input class="rt-in rt-x" data-k="x" placeholder="' + ideaEsc(t('redthread.x')) + '" value="' + ideaEsc(sc.x) + '">' +
+        '<span class="rt-word">' + t('redthread.connector.wants') + '</span>' +
+        '<input class="rt-in rt-y" data-k="y" placeholder="' + ideaEsc(t('redthread.y')) + '" value="' + ideaEsc(sc.y) + '">' +
+        '<span class="rt-word">, ' + t('redthread.connector.but') + '</span>' +
+        '<input class="rt-in rt-z" data-k="z" placeholder="' + ideaEsc(t('redthread.z')) + '" value="' + ideaEsc(sc.z) + '">' +
+        '<span class="rt-word">.</span>' +
+      '</div>' +
+      (canDelete ? '<button class="rt-del" title="' + ideaEsc(t('redthread.remove')) + '">&times;</button>' : '');
+    card.querySelectorAll('.rt-in').forEach(inp => {
+      inp.addEventListener('input', () => {
+        redThread.scenes[i][inp.dataset.k] = inp.value;
+        renderRedThreadThread();
+        saveProjectDebounced();
+      });
+    });
+    const del = card.querySelector('.rt-del');
+    if (del) del.addEventListener('click', () => {
+      redThread.scenes.splice(i, 1);
+      saveProject();
+      renderRedThreadScenes();
+    });
+    wrap.appendChild(card);
+  });
+  renderRedThreadThread();
+}
+
+// Live panel collecting the Ys (wants) and Zs (obstacles) across all scenes —
+// the exercise's payoff: seeing them side by side hints at the throughline.
+function renderRedThreadThread() {
+  const el = document.getElementById('rt-thread');
+  if (!el) return;
+  const ys = redThread.scenes.map(s => s.y.trim()).filter(Boolean);
+  const zs = redThread.scenes.map(s => s.z.trim()).filter(Boolean);
+  if (!ys.length && !zs.length) {
+    el.innerHTML = '<div class="rt-thread-empty">' + t('redthread.thread.empty') + '</div>';
+    return;
+  }
+  const col = (label, items) =>
+    '<div class="rt-thread-col">' +
+      '<div class="rt-thread-label">' + label + '</div>' +
+      (items.length
+        ? items.map(x => '<div class="rt-thread-chip">' + ideaEsc(x) + '</div>').join('')
+        : '<div class="rt-thread-empty">—</div>') +
+    '</div>';
+  el.innerHTML =
+    '<div class="rt-thread-hint">' + t('redthread.thread.hint') + '</div>' +
+    '<div class="rt-thread-cols">' +
+      col(t('redthread.thread.ys'), ys) +
+      col(t('redthread.thread.zs'), zs) +
+    '</div>';
 }
 
 // Idea Pool, inline within the "Find & Develop Ideas" stage: a back button
@@ -2147,7 +2299,7 @@ function createBs2Card(node, colorMap = {}) {
     wrap.style.setProperty('--bs2-color-dim', c.dim);
   }
 
-  const TYPE_LABEL = { why: 'WHY?', 'what-if': `WHAT IF … ${node.prompt}?`, 'and-then': 'AND THEN?' };
+  const TYPE_LABEL = { why: t('bs2.type.why'), 'what-if': `${t('bs2.type.whatif.prefix')} ${node.prompt} … ${t('bs2.type.whatif.because')} …?`, 'and-then': `${(node.prompt || '').toUpperCase()}` };
 
   wrap.innerHTML = `
     ${node.parentId ? '<div class="bs2-connector"></div>' : ''}
@@ -2155,19 +2307,26 @@ function createBs2Card(node, colorMap = {}) {
       ${TYPE_LABEL[node.type] ? `<div class="bs2-type-label">${TYPE_LABEL[node.type]}</div>` : ''}
       <textarea class="bs2-text" rows="1" placeholder="${node.type === 'root' ? t('bs2.root.placeholder') : t('bs2.child.placeholder')}">${ideaEsc(node.text)}</textarea>
       <div class="bs2-actions">
-        <button class="bs2-btn bs2-btn-why">+ Why?</button>
-        <button class="bs2-btn bs2-btn-whatif">+ What if…</button>
-        <button class="bs2-btn bs2-btn-andthen">+ And then?</button>
+        <button class="bs2-btn bs2-btn-why">${t('bs2.add.why')}</button>
+        <button class="bs2-btn bs2-btn-whatif">${t('bs2.add.whatif')}</button>
+        <button class="bs2-btn bs2-btn-andthen">${t('bs2.add.andthen')}</button>
         <button class="bs2-btn bs2-btn-del" title="${t('beat.delete.title')}">&times;</button>
       </div>
       <div class="bs2-picker" style="display:none">
         <div class="bs2-picker-chips">
-          ${WHATIF_PRESETS.map(p => `<button class="bs2-chip" data-p="${p}">${p}</button>`).join('')}
+          ${t('bs2.whatif.presets').map(p => `<button class="bs2-chip" data-p="${p}">${p}</button>`).join('')}
         </div>
         <div class="bs2-picker-row">
-          <span class="bs2-picker-prefix">What if…</span>
+          <span class="bs2-picker-prefix">${t('bs2.whatif.prefix')}</span>
           <input class="bs2-picker-input" placeholder="${t('bs2.whatif.placeholder')}" maxlength="80">
           <button class="bs2-picker-go">→</button>
+        </div>
+      </div>
+      <div class="bs2-picker bs2-picker-andthen" style="display:none">
+        <div class="bs2-picker-hint">${t('bs2.andthen.hint')}</div>
+        <div class="bs2-picker-chips">
+          <button class="bs2-chip" data-p="${t('bs2.andthen.but')}">${t('bs2.andthen.but')}</button>
+          <button class="bs2-chip" data-p="${t('bs2.andthen.so')}">${t('bs2.andthen.so')}</button>
         </div>
       </div>
     </div>
@@ -2184,17 +2343,26 @@ function createBs2Card(node, colorMap = {}) {
   textarea.addEventListener('blur', () => autoResize(textarea));
 
   wrap.querySelector('.bs2-btn-why').addEventListener('click', () => bs2AddChild(node.id, 'why', null));
-  wrap.querySelector('.bs2-btn-andthen').addEventListener('click', () => bs2AddChild(node.id, 'and-then', null));
 
-  const picker = wrap.querySelector('.bs2-picker');
+  const picker = wrap.querySelector('.bs2-picker:not(.bs2-picker-andthen)');
   wrap.querySelector('.bs2-btn-whatif').addEventListener('click', e => {
     e.stopPropagation();
     picker.style.display = picker.style.display === 'none' ? '' : 'none';
     if (picker.style.display !== 'none') wrap.querySelector('.bs2-picker-input').focus();
   });
 
-  wrap.querySelectorAll('.bs2-chip').forEach(chip => {
+  picker.querySelectorAll('.bs2-chip').forEach(chip => {
     chip.addEventListener('click', () => { picker.style.display = 'none'; bs2AddChild(node.id, 'what-if', chip.dataset.p); });
+  });
+
+  const andthenPicker = wrap.querySelector('.bs2-picker-andthen');
+  wrap.querySelector('.bs2-btn-andthen').addEventListener('click', e => {
+    e.stopPropagation();
+    andthenPicker.style.display = andthenPicker.style.display === 'none' ? '' : 'none';
+  });
+
+  andthenPicker.querySelectorAll('.bs2-chip').forEach(chip => {
+    chip.addEventListener('click', () => { andthenPicker.style.display = 'none'; bs2AddChild(node.id, 'and-then', chip.dataset.p); });
   });
 
   const pickerInput = wrap.querySelector('.bs2-picker-input');
@@ -2828,7 +2996,7 @@ function ideaPoolToProject(idea, keepInPool) {
     timeline: { columns: [], rows: [] }, inspiration: [], todos: [],
     writingGoal: 0, wordHistory: [], selectedStructure: null,
     worldbuilding: { entries: [], customCategories: [], hiddenBuiltins: [] },
-    ideaMap: { nodes: [] }, storyTheme: {}, ideaWorkshops: {},
+    ideaMap: { nodes: [] }, redThread: redThreadDefault(), storyTheme: {}, ideaWorkshops: {},
   };
   setCurrentProjectName(null);
   applyProjectData(fresh);
@@ -5668,6 +5836,7 @@ function applyProjectData(data) {
     : { entries: [], customCategories: [], hiddenBuiltins: [] };
   wbFilter = 'Alle';
   ideaMap = data.ideaMap && Array.isArray(data.ideaMap.nodes) ? data.ideaMap : { nodes: [] };
+  redThread = redThreadFromData(data.redThread);
   ideaWorkshops = {
     develop: ideaWorkshopFromData((data.ideaWorkshops || {}).develop || data.ideaDevelop, 'develop'),
     char: ideaWorkshopFromData((data.ideaWorkshops || {}).char, 'char'),
@@ -5817,6 +5986,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
     selectedStructure = null;
     worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
     ideaMap = { nodes: [] };
+    redThread = redThreadDefault();
     ideaWorkshops = { develop: ideaWorkshopDefault('develop'), char: ideaWorkshopDefault('char') };
     wbFilter = 'Alle';
     structureSelect.value = '';

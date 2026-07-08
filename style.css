@@ -3083,6 +3083,12 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   gap: 6px;
 }
 
+.bs2-picker-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .bs2-chip {
   background: var(--bg-hover);
   border: 1px solid var(--border);
@@ -4142,6 +4148,57 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 @media (max-width: 860px) {
   .idea-dev-layout { grid-template-columns: 1fr; }
   .idea-dev-sidebar { position: static; }
+}
+
+/* ── Find the Red Thread ── */
+.rt-exercise { margin-bottom: 18px; }
+.rt-scenes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.rt-scene {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.rt-scene-num {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; margin-top: 2px;
+  background: var(--c-terracotta); color: var(--on-accent);
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;
+}
+.rt-sentence {
+  flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+  font-size: 15px; line-height: 1.9;
+}
+.rt-word { color: var(--text-muted); }
+.rt-in {
+  background: none; border: none; border-bottom: 1px solid var(--border-strong);
+  color: var(--text); font: inherit; font-size: 15px; padding: 1px 2px; min-width: 60px;
+  outline: none; transition: border-color .1s ease;
+}
+.rt-in:focus { border-bottom-color: var(--accent); }
+.rt-in::placeholder { color: var(--text-muted); opacity: .7; }
+.rt-x { flex: 1 1 90px; }
+.rt-y { flex: 2 1 130px; }
+.rt-z { flex: 2 1 130px; }
+.rt-del {
+  flex: none; background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; border-radius: 4px;
+}
+.rt-del:hover { color: var(--danger); background: rgba(255,255,255,0.08); }
+.rt-add { margin-bottom: 22px; }
+
+.rt-thread {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 22px;
+}
+.rt-thread-empty { color: var(--text-muted); font-style: italic; font-size: 13px; line-height: 1.5; }
+.rt-thread-hint { font-size: 13px; color: var(--text); margin-bottom: 14px; line-height: 1.45; }
+.rt-thread-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rt-thread-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 8px; }
+.rt-thread-chip {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 10px; font-size: 13px; line-height: 1.4; margin-bottom: 6px; word-break: break-word;
+}
+@media (max-width: 560px) {
+  .rt-thread-cols { grid-template-columns: 1fr; }
 }
 
 /* ── Ideas page section tabs (Find Ideas / Get Words Flowing) ── */
