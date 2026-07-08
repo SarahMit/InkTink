@@ -4163,8 +4163,18 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   background: var(--accent); color: var(--on-accent);
   display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;
 }
+.rt-scene-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.rt-desc {
+  width: 100%; box-sizing: border-box; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); font: inherit; font-size: 14px; padding: 9px 11px;
+  resize: none; overflow: hidden; line-height: 1.5; outline: none;
+  transition: border-color .1s ease;
+}
+.rt-desc:focus { border-color: var(--accent); }
+.rt-desc::placeholder { color: var(--text-muted); opacity: .7; }
 .rt-sentence {
-  flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+  min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
   font-size: 15px; line-height: 1.9;
 }
 .rt-word { color: var(--text-muted); }

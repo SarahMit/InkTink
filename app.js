@@ -390,12 +390,12 @@ let ideaMap = { nodes: [] };
 // "Find the Red Thread" exercise: a handful of scenes phrased as "X wants Y, but Z".
 // The Ys (wants) and Zs (obstacles) surface a throughline; takeaway captures it.
 let redThread = redThreadDefault();
-function redThreadScene() { return { x: '', y: '', z: '' }; }
+function redThreadScene() { return { desc: '', x: '', y: '', z: '' }; }
 function redThreadDefault() { return { scenes: [redThreadScene(), redThreadScene(), redThreadScene()], takeaway: '' }; }
 function redThreadFromData(d) {
   if (!d || !Array.isArray(d.scenes)) return redThreadDefault();
   return {
-    scenes: d.scenes.map(s => ({ x: s.x || '', y: s.y || '', z: s.z || '' })),
+    scenes: d.scenes.map(s => ({ desc: s.desc || '', x: s.x || '', y: s.y || '', z: s.z || '' })),
     takeaway: d.takeaway || '',
   };
 }
@@ -780,6 +780,7 @@ const TR = {
     'ideas.section.find': 'Find & Develop Ideas', 'ideas.section.flow': 'Get Words Flowing',
     'redthread.title': 'Find the Throughline',
     'redthread.exercise': 'A small exercise, if you want to try it: take three of the scenes you already have in your head and write one sentence for each in the pattern “X wants Y, but Z.” Often the Ys and Zs already show you where a red thread lies.',
+    'redthread.desc': 'Describe the scene…',
     'redthread.x': 'who', 'redthread.y': 'wants what', 'redthread.z': 'what stands in the way',
     'redthread.connector.wants': 'wants', 'redthread.connector.but': 'but',
     'redthread.add': '+ Add scene', 'redthread.remove': 'Remove scene',
@@ -1045,6 +1046,7 @@ const TR = {
     'ideas.section.find': 'Ideen finden und entwickeln', 'ideas.section.flow': 'Ins Schreiben kommen',
     'redthread.title': 'Den roten Faden finden',
     'redthread.exercise': 'Eine kleine Übung, falls du sie ausprobieren willst: Nimm drei der Szenen, die du schon im Kopf hast, und schreib zu jeder einen Satz nach dem Muster „X will Y, aber Z.“ Oft zeigen dir die Ys und Zs schon, wo ein roter Faden liegt.',
+    'redthread.desc': 'Beschreibe die Szene…',
     'redthread.x': 'wer', 'redthread.y': 'will was', 'redthread.z': 'was im Weg steht',
     'redthread.connector.wants': 'will', 'redthread.connector.but': 'aber',
     'redthread.add': '+ Szene hinzufügen', 'redthread.remove': 'Szene entfernen',
@@ -1468,15 +1470,24 @@ function renderRedThreadScenes() {
     card.className = 'rt-scene';
     card.innerHTML =
       '<div class="rt-scene-num">' + (i + 1) + '</div>' +
-      '<div class="rt-sentence">' +
-        '<input class="rt-in rt-x" data-k="x" placeholder="' + ideaEsc(t('redthread.x')) + '" value="' + ideaEsc(sc.x) + '">' +
-        '<span class="rt-word">' + t('redthread.connector.wants') + '</span>' +
-        '<input class="rt-in rt-y" data-k="y" placeholder="' + ideaEsc(t('redthread.y')) + '" value="' + ideaEsc(sc.y) + '">' +
-        '<span class="rt-word">, ' + t('redthread.connector.but') + '</span>' +
-        '<input class="rt-in rt-z" data-k="z" placeholder="' + ideaEsc(t('redthread.z')) + '" value="' + ideaEsc(sc.z) + '">' +
-        '<span class="rt-word">.</span>' +
+      '<div class="rt-scene-body">' +
+        '<textarea class="rt-desc" rows="1" placeholder="' + ideaEsc(t('redthread.desc')) + '">' + ideaEsc(sc.desc) + '</textarea>' +
+        '<div class="rt-sentence">' +
+          '<input class="rt-in rt-x" data-k="x" placeholder="' + ideaEsc(t('redthread.x')) + '" value="' + ideaEsc(sc.x) + '">' +
+          '<span class="rt-word">' + t('redthread.connector.wants') + '</span>' +
+          '<input class="rt-in rt-y" data-k="y" placeholder="' + ideaEsc(t('redthread.y')) + '" value="' + ideaEsc(sc.y) + '">' +
+          '<span class="rt-word">, ' + t('redthread.connector.but') + '</span>' +
+          '<input class="rt-in rt-z" data-k="z" placeholder="' + ideaEsc(t('redthread.z')) + '" value="' + ideaEsc(sc.z) + '">' +
+          '<span class="rt-word">.</span>' +
+        '</div>' +
       '</div>' +
       (canDelete ? '<button class="rt-del" title="' + ideaEsc(t('redthread.remove')) + '">&times;</button>' : '');
+    const desc = card.querySelector('.rt-desc');
+    desc.addEventListener('input', () => {
+      redThread.scenes[i].desc = desc.value;
+      autoResize(desc);
+      saveProjectDebounced();
+    });
     card.querySelectorAll('.rt-in').forEach(inp => {
       inp.addEventListener('input', () => {
         redThread.scenes[i][inp.dataset.k] = inp.value;
@@ -1492,6 +1503,7 @@ function renderRedThreadScenes() {
     });
     wrap.appendChild(card);
   });
+  requestAnimationFrame(() => wrap.querySelectorAll('.rt-desc').forEach(autoResize));
   renderRedThreadThread();
 }
 
