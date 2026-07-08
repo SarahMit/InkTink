@@ -4182,7 +4182,7 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   flex: none; background: none; border: none; color: var(--text-muted);
   cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; border-radius: 4px;
 }
-.rt-del:hover { color: var(--danger); background: rgba(255,255,255,0.08); }
+.rt-del:hover { color: var(--danger); background: var(--bg-hover); }
 .rt-add { margin-bottom: 22px; }
 
 .rt-thread {
