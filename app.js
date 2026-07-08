@@ -688,6 +688,7 @@ const TR = {
     'char.list.item.placeholder': 'Bullet point...',
     'char.add.section': '+ Section', 'char.add.list': '+ Bullet list',
     'char.section.delete': 'Delete section', 'char.list.add.item': '+ Point',
+    'char.section.reorder': 'Drag to reorder',
     'wb.all': 'All', 'wb.add.entry': '+ Entry', 'wb.add.category': '+ Category',
     'wb.empty': 'No entries yet.\nClick "+ Entry" to start.',
     'wb.cat.placeholder': 'New category…', 'wb.entry.title.placeholder': 'Title…', 'wb.entry.text.placeholder': 'Description, notes, details…',
@@ -958,6 +959,7 @@ const TR = {
     'char.list.item.placeholder': 'Stichpunkt...',
     'char.add.section': '+ Abschnitt', 'char.add.list': '+ Stichpunktliste',
     'char.section.delete': 'Abschnitt löschen', 'char.list.add.item': '+ Punkt',
+    'char.section.reorder': 'Ziehen zum Neuanordnen',
     'wb.all': 'Alle', 'wb.add.entry': '+ Eintrag', 'wb.add.category': '+ Kategorie',
     'wb.empty': 'Noch keine Einträge.\nKlicke auf "+ Eintrag" um zu starten.',
     'wb.cat.placeholder': 'Neue Kategorie…', 'wb.entry.title.placeholder': 'Titel…', 'wb.entry.text.placeholder': 'Beschreibung, Notizen, Details…',
@@ -4151,14 +4153,25 @@ function normalizeCharSections(char) {
 // after a re-render (e.g. after Enter/Backspace/adding a point).
 function renderCharSections(char, container, focus) {
   container.innerHTML = '';
+  let secDragFrom = null;
 
   char.sections.forEach((section, si) => {
     const secEl = document.createElement('div');
     secEl.className = 'char-section';
     secEl.dataset.si = si;
+    // Draggable only while its handle is grabbed, so text fields stay clickable.
+    secEl.draggable = false;
 
     const head = document.createElement('div');
     head.className = 'char-section-head';
+
+    const secHandle = document.createElement('span');
+    secHandle.className = 'char-section-drag';
+    secHandle.innerHTML = '&#8942;&#8942;';
+    secHandle.title = t('char.section.reorder');
+    secHandle.addEventListener('mousedown', () => { secEl.draggable = true; });
+    secHandle.addEventListener('mouseup', () => { secEl.draggable = false; });
+    head.appendChild(secHandle);
 
     const titleInput = document.createElement('input');
     titleInput.className = 'char-section-title';
@@ -4236,6 +4249,36 @@ function renderCharSections(char, container, focus) {
       secEl.appendChild(ta);
     }
 
+    secEl.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      secDragFrom = si;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => secEl.classList.add('dragging'), 0);
+    });
+    secEl.addEventListener('dragend', () => {
+      secEl.draggable = false;
+      secEl.classList.remove('dragging');
+      container.querySelectorAll('.char-section').forEach(s => s.classList.remove('sec-drag-over'));
+    });
+    secEl.addEventListener('dragover', e => {
+      if (secDragFrom === null) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (secDragFrom !== si) secEl.classList.add('sec-drag-over');
+    });
+    secEl.addEventListener('dragleave', () => secEl.classList.remove('sec-drag-over'));
+    secEl.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      secEl.classList.remove('sec-drag-over');
+      if (secDragFrom === null || secDragFrom === si) return;
+      const [moved] = char.sections.splice(secDragFrom, 1);
+      char.sections.splice(si, 0, moved);
+      secDragFrom = null;
+      saveProject();
+      renderCharSections(char, container);
+    });
+
     container.appendChild(secEl);
   });
 
@@ -4287,7 +4330,9 @@ function renderCharacters() {
     normalizeCharSections(char);
     const card = document.createElement('div');
     card.className = 'char-card';
-    card.draggable = true;
+    // Kept false so clicks land in the card's text fields (a draggable ancestor
+    // blocks cursor placement); the drag handle flips it on only while grabbed.
+    card.draggable = false;
 
     const fileId = 'char-file-' + i;
     card.innerHTML = `
@@ -4311,12 +4356,17 @@ function renderCharacters() {
       </div>
     `;
 
+    const cardHandle = card.querySelector('.char-drag-handle');
+    cardHandle.addEventListener('mousedown', () => { card.draggable = true; });
+    cardHandle.addEventListener('mouseup', () => { card.draggable = false; });
+
     card.addEventListener('dragstart', e => {
       charDragFrom = i;
       e.dataTransfer.effectAllowed = 'move';
       setTimeout(() => card.classList.add('dragging'), 0);
     });
     card.addEventListener('dragend', () => {
+      card.draggable = false;
       card.classList.remove('dragging');
       charsGrid.querySelectorAll('.char-card').forEach(c => c.classList.remove('drag-over'));
     });

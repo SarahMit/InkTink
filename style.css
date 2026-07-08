@@ -1239,7 +1239,7 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 /* ── Characters ── */
 .characters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 20px;
 }
 
@@ -1282,7 +1282,10 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 
 .char-image-wrap {
   width: 100%;
-  height: 200px;
+  /* Height tracks width so the crop keeps a natural aspect ratio as cards widen;
+     capped so very wide single-column cards don't get an oversized image band. */
+  aspect-ratio: 4 / 3;
+  max-height: 420px;
   background: var(--bg);
   display: flex;
   align-items: center;
@@ -1374,10 +1377,42 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   gap: 4px;
 }
 
+.char-section {
+  border-radius: var(--radius-sm);
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+.char-section.dragging {
+  opacity: 0.5;
+}
+
+.char-section.sec-drag-over {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
 .char-section-head {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.char-section-drag {
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 1px;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.char-section-drag:active {
+  cursor: grabbing;
+}
+
+.char-section:hover .char-section-drag {
+  opacity: 1;
 }
 
 .char-section-title {
