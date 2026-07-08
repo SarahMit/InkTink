@@ -684,6 +684,10 @@ const TR = {
     'char.name.placeholder': 'Name...', 'char.desc.placeholder': 'Description, background, traits...',
     'char.add.image': 'Add image', 'char.delete': 'Delete character',
     'char.img.drag': 'Drag to reposition',
+    'char.section.title.placeholder': 'Heading...', 'char.section.text.placeholder': 'Text...',
+    'char.list.item.placeholder': 'Bullet point...',
+    'char.add.section': '+ Section', 'char.add.list': '+ Bullet list',
+    'char.section.delete': 'Delete section', 'char.list.add.item': '+ Point',
     'wb.all': 'All', 'wb.add.entry': '+ Entry', 'wb.add.category': '+ Category',
     'wb.empty': 'No entries yet.\nClick "+ Entry" to start.',
     'wb.cat.placeholder': 'New category…', 'wb.entry.title.placeholder': 'Title…', 'wb.entry.text.placeholder': 'Description, notes, details…',
@@ -950,6 +954,10 @@ const TR = {
     'char.name.placeholder': 'Name...', 'char.desc.placeholder': 'Beschreibung, Hintergrund, Eigenschaften...',
     'char.add.image': 'Bild hinzufügen', 'char.delete': 'Charakter löschen',
     'char.img.drag': 'Ziehen zum Positionieren',
+    'char.section.title.placeholder': 'Überschrift...', 'char.section.text.placeholder': 'Text...',
+    'char.list.item.placeholder': 'Stichpunkt...',
+    'char.add.section': '+ Abschnitt', 'char.add.list': '+ Stichpunktliste',
+    'char.section.delete': 'Abschnitt löschen', 'char.list.add.item': '+ Punkt',
     'wb.all': 'Alle', 'wb.add.entry': '+ Eintrag', 'wb.add.category': '+ Kategorie',
     'wb.empty': 'Noch keine Einträge.\nKlicke auf "+ Eintrag" um zu starten.',
     'wb.cat.placeholder': 'Neue Kategorie…', 'wb.entry.title.placeholder': 'Titel…', 'wb.entry.text.placeholder': 'Beschreibung, Notizen, Details…',
@@ -2646,6 +2654,9 @@ function renderPageHooks(page) {
   if (page === 'ideas') renderIdeas();
   if (page === 'theme') renderTheme();
   if (page === 'brainstorm') requestAnimationFrame(() => { bsCanvas.querySelectorAll('.bs-note-text').forEach(autoResize); expandCanvas(); });
+  // Section textareas render at height 0 while the page is hidden (scrollHeight
+  // is 0 off-screen); recompute once it's visible.
+  if (page === 'characters') requestAnimationFrame(() => charsGrid.querySelectorAll('textarea').forEach(autoResize));
 }
 
 function switchPage(page) {
@@ -4112,6 +4123,135 @@ function autoResize(textarea) {
   textarea.style.height = textarea.scrollHeight + 'px';
 }
 
+// Ensure a character carries a `sections` array. Migrates the legacy single
+// `description` string into one text section the first time it is seen.
+function normalizeCharSections(char) {
+  if (!Array.isArray(char.sections)) {
+    char.sections = [];
+    if (char.description && char.description.trim()) {
+      char.sections.push({ id: Date.now() + Math.random(), type: 'text', title: '', content: char.description });
+    }
+    delete char.description;
+  }
+  char.sections.forEach(s => {
+    if (s.id == null) s.id = Date.now() + Math.random();
+    if (typeof s.title !== 'string') s.title = '';
+    if (s.type === 'list') {
+      if (!Array.isArray(s.items)) s.items = (typeof s.content === 'string' && s.content) ? [s.content] : [''];
+      if (s.items.length === 0) s.items = [''];
+    } else {
+      s.type = 'text';
+      if (typeof s.content !== 'string') s.content = '';
+    }
+  });
+}
+
+// Render the editable heading/text/bullet-list sections of one character into
+// `container`. Optional `focus` = { si, ii } places the caret in a list item
+// after a re-render (e.g. after Enter/Backspace/adding a point).
+function renderCharSections(char, container, focus) {
+  container.innerHTML = '';
+
+  char.sections.forEach((section, si) => {
+    const secEl = document.createElement('div');
+    secEl.className = 'char-section';
+    secEl.dataset.si = si;
+
+    const head = document.createElement('div');
+    head.className = 'char-section-head';
+
+    const titleInput = document.createElement('input');
+    titleInput.className = 'char-section-title';
+    titleInput.type = 'text';
+    titleInput.placeholder = t('char.section.title.placeholder');
+    titleInput.value = section.title;
+    titleInput.addEventListener('input', () => { section.title = titleInput.value; saveProjectDebounced(); });
+    head.appendChild(titleInput);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'char-section-del';
+    delBtn.title = t('char.section.delete');
+    delBtn.innerHTML = '&times;';
+    delBtn.addEventListener('click', () => {
+      char.sections.splice(si, 1);
+      saveProject();
+      renderCharSections(char, container);
+    });
+    head.appendChild(delBtn);
+    secEl.appendChild(head);
+
+    if (section.type === 'list') {
+      const ul = document.createElement('ul');
+      ul.className = 'char-list';
+
+      section.items.forEach((item, ii) => {
+        const li = document.createElement('li');
+        li.className = 'char-list-item';
+
+        const bullet = document.createElement('span');
+        bullet.className = 'char-list-bullet';
+        bullet.textContent = '•';
+        li.appendChild(bullet);
+
+        const input = document.createElement('textarea');
+        input.className = 'char-list-input';
+        input.rows = 1;
+        input.dataset.ii = ii;
+        input.placeholder = t('char.list.item.placeholder');
+        input.value = item;
+        input.addEventListener('input', () => { section.items[ii] = input.value; autoResize(input); saveProjectDebounced(); });
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            section.items.splice(ii + 1, 0, '');
+            saveProject();
+            renderCharSections(char, container, { si, ii: ii + 1 });
+          } else if (e.key === 'Backspace' && input.value === '' && section.items.length > 1) {
+            e.preventDefault();
+            section.items.splice(ii, 1);
+            saveProject();
+            renderCharSections(char, container, { si, ii: Math.max(0, ii - 1) });
+          }
+        });
+        li.appendChild(input);
+        ul.appendChild(li);
+      });
+      secEl.appendChild(ul);
+
+      const addItem = document.createElement('button');
+      addItem.className = 'char-list-add';
+      addItem.textContent = t('char.list.add.item');
+      addItem.addEventListener('click', () => {
+        section.items.push('');
+        saveProject();
+        renderCharSections(char, container, { si, ii: section.items.length - 1 });
+      });
+      secEl.appendChild(addItem);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.className = 'char-section-text';
+      ta.placeholder = t('char.section.text.placeholder');
+      ta.value = section.content;
+      ta.addEventListener('input', () => { section.content = ta.value; autoResize(ta); saveProjectDebounced(); });
+      secEl.appendChild(ta);
+    }
+
+    container.appendChild(secEl);
+  });
+
+  requestAnimationFrame(() => {
+    container.querySelectorAll('textarea').forEach(autoResize);
+    if (focus) {
+      const target = container.querySelector(`.char-section[data-si="${focus.si}"] .char-list-input[data-ii="${focus.ii}"]`);
+      if (target) {
+        target.focus();
+        const end = target.value.length;
+        target.setSelectionRange(end, end);
+      }
+    }
+  });
+}
+
 document.getElementById('add-beat').addEventListener('click', () => {
   beats.push({ id: Date.now(), text: '' });
   saveProject();
@@ -4144,6 +4284,7 @@ function renderCharacters() {
   let charDragFrom = null;
 
   characters.forEach((char, i) => {
+    normalizeCharSections(char);
     const card = document.createElement('div');
     card.className = 'char-card';
     card.draggable = true;
@@ -4161,7 +4302,11 @@ function renderCharacters() {
       <input type="file" accept="image/*" class="hidden-input" id="${fileId}">
       <div class="char-body">
         <input class="char-name" type="text" placeholder="${t('char.name.placeholder')}" value="${ideaEsc(char.name)}">
-        <textarea class="char-desc" placeholder="${t('char.desc.placeholder')}">${ideaEsc(char.description)}</textarea>
+        <div class="char-sections"></div>
+        <div class="char-section-add">
+          <button class="char-add-section">${t('char.add.section')}</button>
+          <button class="char-add-list">${t('char.add.list')}</button>
+        </div>
         <button class="char-delete">${t('char.delete')}</button>
       </div>
     `;
@@ -4255,9 +4400,25 @@ function renderCharacters() {
       saveProject();
     });
 
-    card.querySelector('.char-desc').addEventListener('input', e => {
-      characters[i].description = e.target.value;
+    const sectionsEl = card.querySelector('.char-sections');
+    renderCharSections(char, sectionsEl);
+
+    card.querySelector('.char-add-section').addEventListener('click', () => {
+      char.sections.push({ id: Date.now() + Math.random(), type: 'text', title: '', content: '' });
       saveProject();
+      renderCharSections(char, sectionsEl);
+      const titles = sectionsEl.querySelectorAll('.char-section-title');
+      const last = titles[titles.length - 1];
+      if (last) last.focus();
+    });
+
+    card.querySelector('.char-add-list').addEventListener('click', () => {
+      char.sections.push({ id: Date.now() + Math.random(), type: 'list', title: '', items: [''] });
+      saveProject();
+      renderCharSections(char, sectionsEl);
+      const titles = sectionsEl.querySelectorAll('.char-section-title');
+      const last = titles[titles.length - 1];
+      if (last) last.focus();
     });
 
     card.querySelector('.char-delete').addEventListener('click', async () => {
