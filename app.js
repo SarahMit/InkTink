@@ -637,6 +637,7 @@ const TR = {
     'beats.write.scene': 'Write this scene',
     'beats.drafted': 'Drafted · {n} words',
     'beats.drafted.jump': 'Jump to this scene in the manuscript',
+    'beats.link.scene': 'Link scene', 'beats.unlink': 'Unlink scene',
     'beats.coverage': '{n} of {m} beats drafted',
     'beats.write.newchapter': 'Chapter 1',
     'beat.drag.title': 'Drag to reorder', 'beat.delete.title': 'Delete',
@@ -689,6 +690,13 @@ const TR = {
     'char.add.section': '+ Section', 'char.add.list': '+ Bullet list',
     'char.section.delete': 'Delete section', 'char.list.add.item': '+ Point',
     'char.section.reorder': 'Drag to reorder',
+    'char.quote.placeholder': 'A quote that captures this character…',
+    'char.add.links': '+ Links', 'char.add.chart': '+ Chart',
+    'char.links.add.item': '+ Link',
+    'char.chart.add.trait': '+ Trait', 'char.chart.trait.placeholder': 'Trait…',
+    'char.chart.remove.trait': 'Remove trait',
+    'char.chart.hint': 'Name at least 3 traits to see the chart.',
+    'char.chart.defaults': ['Courage', 'Empathy', 'Humor', 'Logic', 'Strength'],
     'wb.all': 'All', 'wb.add.entry': '+ Entry', 'wb.add.category': '+ Category',
     'wb.empty': 'No entries yet.\nClick "+ Entry" to start.',
     'wb.cat.placeholder': 'New category…', 'wb.entry.title.placeholder': 'Title…', 'wb.entry.text.placeholder': 'Description, notes, details…',
@@ -728,11 +736,16 @@ const TR = {
     'notes.btn.resize': 'Drag to resize', 'notes.btn.hyperlink': 'Add hyperlink',
     'notes.hyperlink.url': 'https://…', 'notes.hyperlink.label': 'Link text (optional)',
     'notes.hyperlink.done': 'Save link', 'notes.hyperlink.edit': 'Edit link', 'notes.hyperlink.remove': 'Remove link',
+    'notes.btn.ref': 'Link to a scene, character, or world entry', 'notes.ref.remove': 'Remove link',
+    'picker.scene.title': 'Link a scene', 'picker.scene.empty': 'No scenes yet — create one on the Writing page first.',
+    'picker.ref.title': 'Link to…', 'picker.none': 'Nothing here yet.',
+    'picker.group.scenes': 'Scenes', 'picker.group.characters': 'Characters', 'picker.group.world': 'Worldbuilding',
     'timeline.add.col': '+ Column', 'timeline.add.row': '+ Thread',
     'timeline.col.placeholder': 'Chapter', 'timeline.row.placeholder': 'Thread',
     'timeline.card.placeholder': 'What happens here?',
     'timeline.delete.col': 'Delete column', 'timeline.delete.row': 'Delete row', 'timeline.delete.card': 'Delete card',
     'timeline.change.color': 'Change color', 'timeline.new.row': 'New thread',
+    'timeline.link.scene': 'Link scene',
     'timeline.hint': 'Add chapter columns with + top right\nand story threads (rows) with + bottom left.\nThen click a cell to place a card.',
     'theme.h1': 'Theme', 'theme.statement.title': 'Theme Statement',
     'theme.statement.placeholder': 'This story is about…',
@@ -911,6 +924,7 @@ const TR = {
     'beats.write.scene': 'Diese Szene schreiben',
     'beats.drafted': 'Geschrieben · {n} Wörter',
     'beats.drafted.jump': 'Zu dieser Szene im Manuskript springen',
+    'beats.link.scene': 'Szene verknüpfen', 'beats.unlink': 'Verknüpfung lösen',
     'beats.coverage': '{n} von {m} Beats geschrieben',
     'beats.write.newchapter': 'Kapitel 1',
     'beat.drag.title': 'Ziehen zum Umsortieren', 'beat.delete.title': 'Löschen',
@@ -960,6 +974,13 @@ const TR = {
     'char.add.section': '+ Abschnitt', 'char.add.list': '+ Stichpunktliste',
     'char.section.delete': 'Abschnitt löschen', 'char.list.add.item': '+ Punkt',
     'char.section.reorder': 'Ziehen zum Neuanordnen',
+    'char.quote.placeholder': 'Ein Zitat, das diese Figur einfängt…',
+    'char.add.links': '+ Links', 'char.add.chart': '+ Diagramm',
+    'char.links.add.item': '+ Link',
+    'char.chart.add.trait': '+ Eigenschaft', 'char.chart.trait.placeholder': 'Eigenschaft…',
+    'char.chart.remove.trait': 'Eigenschaft entfernen',
+    'char.chart.hint': 'Benenne mindestens 3 Eigenschaften, um das Diagramm zu sehen.',
+    'char.chart.defaults': ['Mut', 'Empathie', 'Humor', 'Verstand', 'Stärke'],
     'wb.all': 'Alle', 'wb.add.entry': '+ Eintrag', 'wb.add.category': '+ Kategorie',
     'wb.empty': 'Noch keine Einträge.\nKlicke auf "+ Eintrag" um zu starten.',
     'wb.cat.placeholder': 'Neue Kategorie…', 'wb.entry.title.placeholder': 'Titel…', 'wb.entry.text.placeholder': 'Beschreibung, Notizen, Details…',
@@ -999,11 +1020,16 @@ const TR = {
     'notes.btn.resize': 'Zum Skalieren ziehen', 'notes.btn.hyperlink': 'Hyperlink hinzufügen',
     'notes.hyperlink.url': 'https://…', 'notes.hyperlink.label': 'Linktext (optional)',
     'notes.hyperlink.done': 'Link speichern', 'notes.hyperlink.edit': 'Link bearbeiten', 'notes.hyperlink.remove': 'Link entfernen',
+    'notes.btn.ref': 'Mit Szene, Charakter oder Weltenbau verknüpfen', 'notes.ref.remove': 'Verknüpfung entfernen',
+    'picker.scene.title': 'Szene verknüpfen', 'picker.scene.empty': 'Noch keine Szenen — lege zuerst eine auf der Schreiben-Seite an.',
+    'picker.ref.title': 'Verknüpfen mit…', 'picker.none': 'Noch nichts vorhanden.',
+    'picker.group.scenes': 'Szenen', 'picker.group.characters': 'Charaktere', 'picker.group.world': 'Weltenbau',
     'timeline.add.col': '+ Spalte', 'timeline.add.row': '+ Strang',
     'timeline.col.placeholder': 'Kapitel', 'timeline.row.placeholder': 'Strang',
     'timeline.card.placeholder': 'Was passiert hier?',
     'timeline.delete.col': 'Kapitel-Spalte löschen', 'timeline.delete.row': 'Strang löschen', 'timeline.delete.card': 'Karte löschen',
     'timeline.change.color': 'Farbe wechseln', 'timeline.new.row': 'Neuer Strang',
+    'timeline.link.scene': 'Szene verknüpfen',
     'timeline.hint': 'Lege mit + oben rechts Kapitel-Spalten an\nund mit + unten links Story-Stränge (Zeilen).\nDann klicke in eine Zelle, um eine Karte zu setzen.',
     'theme.h1': 'Theme', 'theme.statement.title': 'Thema-Satz',
     'theme.statement.placeholder': 'Diese Geschichte handelt von…',
@@ -1876,6 +1902,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "Everyone romanticizes a duel to the death, and everyone is an idiot, because nobody mentions the smoke. Zane was flinging a forbidden fire-rite that'll cost him his soul in a decade — not that the showoff thinks that far ahead — and it slid right off the coat my grandmother threaded with copper. A rafter nearly settled the matter for both of us. So I quit fencing like a gentlewoman and drove my shoulder into his ribs instead." },
         { label: 'Storybook & Atmospheric', text: "The fire bloomed against the high windows like a second, hungrier sunset, and for a heartbeat the burning hall was almost beautiful. Zane's spell rushed at Nora — and slid from the copper her grandmother had threaded into her coat, one patient row each winter evening, as if the old woman's hands were still keeping her warm. A rafter fell where her head had been, trailing sparks like startled fireflies. He smiled, certain. Nora stepped inside that certainty and drove her shoulder into his ribs." },
         { label: 'Cheeky & Warm', text: "So the great hall was on fire, which — dramatic, Zane, really. He flung a fire-spell at me with this insufferably smug little flourish, and it just... slid off my coat. Thanks, Grandma, and your nine hundred hours of copper thread. A rafter came down exactly where my head used to be, which I chose not to think about. He grinned like he'd already won. Cute. I put my shoulder into his ribs and wiped the grin right off." },
+        { label: 'Wry & Ruthless', text: "Nora had priced the fight the moment Zane raised his hand: one coat, copper-threaded by a grandmother who never met a debt she didn't hedge, against one fire-spell thrown by a boy who never met a bill he meant to pay. The flames broke on the weave and went looking for someone else to ruin. A rafter came down where her head had been — sloppy, she thought, of the architecture. Zane grinned like the hall was already his. Nora let him keep the grin and took his ribs. In her experience, the ones who smiled first fell hardest." },
+        { label: 'Kinetic & Precise', text: "Zane's spell hit the copper weave and slid, its heat spending itself along the threads exactly as the metal was made to force it. Nora felt the pull and turned with the slide instead of against it. Above her a beam gave — she had already stepped, so it fell through the empty air where she'd been. Two paces closed the distance. She dropped her weight, drove off her back foot, and put her shoulder square into his ribs. Bone shifted. His grin broke a half-second before his guard did." },
       ],
     },
     {
@@ -1887,6 +1915,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "Here's what nobody tells you about ancient rope bridges: they're maintained by exactly nobody and held together by tradition and optimism. So when it dropped me, I wasn't surprised — furious, dangling, palms bleeding, but not surprised. The one mercy was the rope: my father re-bound these knots, and his held. I got one knee up, then the other, purely out of spite. Spite, it turns out, has an excellent grip." },
         { label: 'Storybook & Atmospheric', text: "The bridge gave way beneath Nora like a held breath finally let go, and the gorge opened its long blue throat below her. Her hands found the last plank — old cedar, smooth as a story told too many times — and the wood bit her palms even as it saved her. Her father had re-bound these ropes; she knew his clumsy, faithful knot the way one knows a voice in the dark. One knee, then the other, and she climbed back into the living world." },
         { label: 'Cheeky & Warm', text: "The bridge just... left. One second a bridge, next second a strongly worded suggestion that I learn to fly. I grabbed the last plank — wood, splinters, blood, the works — and honestly? Rude. But my dad re-bound these ropes when I was small, and I'd know his lumpy knot anywhere. Below me the gorge made its case. I declined. One knee up, then the other, and I hauled myself back to the ledge, swearing the entire way." },
+        { label: 'Wry & Ruthless', text: "The bridge failed the way bad plans do — all at once, and taking someone down with it. Nora caught the last plank and left the cost to register later: two palms, one bridge, no way back by the pretty route. Old cedar, worn smooth by a hundred people who had trusted it more than she did. She found her father's knot by feel — clumsy, honest, the only honest thing for a hundred miles — and made it carry her. One knee. The other. She climbed out of the gorge the way she did everything: unpaid for, and furious about it." },
+        { label: 'Kinetic & Precise', text: "The planks dropped in sequence, and Nora's hand closed on the last one before her mind had finished the fall. The cedar took skin off her palms — friction, the price of stopping — but it held. She swung once to kill the momentum, waited out the arc, then reached with her free hand for the rope. Her father's knot sat where it always had. She loaded it, tested it, trusted it. Knee to the plank. Weight up. Second knee. Each move small, each move certain, until the ledge was under her and the gorge was only a drop again." },
       ],
     },
     {
@@ -1898,6 +1928,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "Picking a lock with someone is supposedly a great bonding exercise. What it actually is, is two people pretending the only reason their hands keep touching is the lock. I knew this mechanism — left, left, hard right — and could've done it alone in three seconds. With Zane's shoulder against mine I took thirty. The thing clicked; he grinned and said \"teamwork.\" I told him to shut up. He smells like rain and bad decisions, and I've always been weak for both — so no, I didn't move away." },
         { label: 'Storybook & Atmospheric', text: "The doorway was built for one repentant monk and held two thieves instead, shoulder warm against shoulder in the dark. Their hands kept meeting on the pick like moths at the same small flame; the brass tumblers had gone warm beneath their fingers. \"You're doing it wrong,\" Nora breathed, and turned Zane's hand a half-turn, and the lock sighed open at the very moment she forgot to breathe. \"Teamwork,\" he whispered, and she did not move away." },
         { label: 'Cheeky & Warm', text: "Okay, picture it: one doorway, built for a single very small monk, and somehow both of us in it, shoulder to shoulder, way too close. Our hands kept bumping on the pick and I was Not Going To Think About That. \"You're doing it wrong.\" \"I had it.\" \"You absolutely did not have it.\" The lock clicked. We froze — grinning like idiots, neither admitting anything. \"Teamwork,\" Zane breathed. I told him to shut up. And no, I did not move away." },
+        { label: 'Wry & Ruthless', text: "Two thieves, one doorway built for a single repentant monk, one lock that neither of them actually needed help with. Nora had run this mechanism blind a dozen times; she could have had it open before Zane finished crowding her. She didn't. Their hands kept meeting on the pick, and she kept letting them, which was its own kind of confession she had no intention of signing. The tumblers went warm. The lock gave. \"Teamwork,\" Zane murmured — insufferable, and close. She told him to shut up. She had already decided the exit could wait, and she did not move away." },
+        { label: 'Kinetic & Precise', text: "Nora seated the pick, felt the first pin set, and held the tension steady with her thumb. Zane's shoulder pressed hers — a variable she chose to ignore. Second pin. Third. The brass warmed under the repeated contact, tolerances tightening as the metal worked. Their hands collided; she adjusted her grip a half-turn and the last pin dropped into line. The bolt slid. She counted the mechanism solved and the doorway, at this width, unsolvable. \"Teamwork,\" Zane said. She didn't answer, and she did not move away." },
       ],
     },
     {
@@ -1909,6 +1941,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "People think wartime friendship is all noble speeches. It's not. It's Zane, your idiot best friend, splitting one sad heel of waybread and insisting his half is smaller when it obviously isn't. I let him win that lie. You learn which fights matter. This one — the bread, the sitting-down-next-to-me, the both-of-us-still-breathing — this one I lose on purpose, every time." },
         { label: 'Storybook & Atmospheric', text: "Zane broke the last waybread along the seam they'd both learned from the same dead cook, and the crumbs fell between them like a small and ordinary mercy. \"They're the same size,\" he said, which was a kind lie, and folded Nora's fingers around the larger half. He spoke of neither the battle nor the empty places where friends had sat. He only let the warmth of his hand finish the sentence — and they breathed, the two of them, which the evening had promised no one." },
         { label: 'Cheeky & Warm', text: "We were both still shaking, which I was pretending not to notice about myself. Zane dropped down next to me, ripped the last waybread in half, and shoved the bigger piece at my chest. \"They're the same,\" he said, lying directly to my face. \"Eat.\" \"You eat.\" \"Eat, or I sit on you.\" I ate. He watched me like it was the one thing that had gone right all day — and we were both still breathing, so. Maybe it was." },
+        { label: 'Wry & Ruthless', text: "Zane broke the last waybread along the seam and pulled the oldest trick in his short, felonious repertoire: pressed the bigger half into Nora's hand and swore they were the same size. She had watched him lie to magistrates with less conviction. The battle had cost them names she was not going to say aloud, and the arithmetic of who was left did not bear a second check. So she took the bread, and the lie, and the shoulder against hers. Some debts you settle. This one — him, sitting down, both of them still counted among the breathing — this one she let ride." },
+        { label: 'Kinetic & Precise', text: "Zane set the waybread on his knee, found the seam, and snapped it clean — one motion, learned from the same cook they had both buried. The halves came apart uneven; he traded them without comment and pushed the larger into Nora's hand. \"They're the same.\" They weren't. She ate, because arguing cost more energy than chewing did. Around them the hall had come down in a predictable order: the load-bearing first, the rest after. They had not. That was the whole of it — the break, the trade, two people still drawing breath in the wreckage." },
       ],
     },
     {
@@ -1920,6 +1954,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "Night watch is punishment duty dressed up as honor, and everyone above me knows it. You stand six hours on a freezing tower so that if something terrible comes, you can scream about it slightly before it kills everyone. That's the whole job. So there I was — my mother's scarf doubled at my throat, back to the cold stone, gloriously expendable — and, fine, yes, looking up, because nobody warns you how unfair the stars are from up here." },
         { label: 'Storybook & Atmospheric', text: "High on the tower the night was vast and old, and Zane stood alone inside it with his mother's woolen scarf wound twice at his throat. He kept finding the place where the dye had run, a small faded map of some long-ago rainstorm. The wind went by like something with somewhere to be; the stars hung far and patient. He set his back to the cold stone and looked up, and for a while the wool remembered a warmth his hands had forgotten." },
         { label: 'Cheeky & Warm', text: "Just me up here. Me, the wind, the dark, and whatever the dark's hiding tonight — fabulous. My mother's scarf is wound twice around my neck and it's going to have to be enough, because the tower's idea of hospitality is 'freezing.' I put my back to the cold stone and looked up. And, fine, yes — the stars were ridiculous. Nobody warns you about that part. I'd never give the night the satisfaction of saying so out loud." },
+        { label: 'Wry & Ruthless', text: "Night watch: the post they hand the expendable, so that when the worst arrives someone is already in position to scream about it first. Zane knew his market value to the coin. He wound his mother's scarf twice at his throat — the dye run at one end like a map of a storm nobody had survived to remember — and set his back to the stone. The stars performed their usual trick of being magnificent and no use whatsoever. He looked up anyway. A man could be bought cheap and still keep the one luxury no one had thought to bill him for." },
+        { label: 'Kinetic & Precise', text: "Zane walked the top of the tower first — corners, stair, the long sightline north — the way he cleared any post: known quantities before unknown ones. Cold worked in through the seams of his coat, so he pulled his mother's scarf higher and doubled it, cutting the heat loss at the throat. Then he set his back to the stone, which broke the wind on one side and halved the problem. Watch was mostly waiting, and waiting was mostly staying warm enough to still act. He looked up. The stars gave him nothing to do, which meant nothing had gone wrong yet." },
       ],
     },
     {
@@ -1931,6 +1967,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Caustic & Candid', text: "Nobody warns you that the dying keep talking. In the songs they get one clean line and a tasteful fade. In real life Zane was bleeding into the snow and apologizing — apologizing, the maddening fool — for the blood on my sleeve, the carved bird I'd given him still in his fist. I told him the sleeve was already ruined. I told him to shut up and stay. He did one of those things. I'm still angry about which one." },
         { label: 'Storybook & Atmospheric', text: "The snow came down soft as forgetting, settling in Zane's hair without melting. Nora pressed one hand to the wound and with the other folded the little wooden bird — carved on a hundred kinder nights — into his failing fingers. He apologized, the fool, for the blood on her sleeve, and smiled as though the whole white world were not coming apart. \"Stay,\" she told him. He made one more small joke into the falling snow. He did not make another." },
         { label: 'Cheeky & Warm', text: "I always thought, when it came to it, I'd say something perfect. Instead I said \"don't you dare\" about four times, which is not in any of the songs. Zane was bleeding into the snow and using his last breaths to apologize for my sleeve — my sleeve! — the carved bird I'd given him still tucked in his fist. \"Stay,\" I told him. He smiled like it was all fine, the absolute menace. He got out one more joke. He didn't get out a second." },
+        { label: 'Wry & Ruthless', text: "Nora had learned the exits to every room she had ever entered, and there was no exit from this one. So she stopped hunting for the angle and pressed both hands to the wound instead, the only trade left on the table. The little carved bird sat in Zane's fist — her work, the one soft thing she had ever admitted to making. He spent a dying breath apologizing for the blood on her sleeve. Of course he did. \"Stay,\" she said, as though it were a job she could hire him for. He got out one last joke. He did not get out a second, and there was nothing to be clever about after that." },
+        { label: 'Kinetic & Precise', text: "Nora kept pressure on the wound — heel of the hand, full weight, the way you slow a bleed you cannot stop — and knew, from how fast the warmth was leaving him, that pressure would not be enough. Snow settled in Zane's hair and stayed; his skin had already given up the heat that would have melted it. She folded the carved bird into his fingers because her hands needed a task and there were none left. He apologized for her sleeve. She told him to stay. He made one more joke, spent the breath it took, and did not draw another." },
       ],
     },
   ],
@@ -1944,6 +1982,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Zane schleuderte einen verbotenen Feuerritus, der ihn in einem Jahrzehnt die Seele kostet — nicht, dass der Angeber so weit dächte —, und der glitt einfach an dem Mantel ab, den meine Großmutter mit Kupfer durchwirkt hatte. Ein Dachbalken hätte die Sache fast für uns beide entschieden. Also hörte ich auf, wie eine Dame zu fechten, und rammte ihm stattdessen die Schulter in die Rippen." },
         { label: 'Märchenhaft & atmosphärisch', text: "Das Feuer blühte an den hohen Fenstern auf wie ein zweiter, hungrigerer Sonnenuntergang, und einen Herzschlag lang war die brennende Halle beinahe schön. Zane' Zauber schoss auf Nora zu — und glitt von dem Kupfer ab, das ihre Großmutter Winterabend für Winterabend in ihren Mantel gefädelt hatte, als hielten die Hände der alten Frau sie noch immer warm. Ein Dachbalken fiel dorthin, wo eben ihr Kopf gewesen war, und zog Funken hinter sich her wie aufgeschreckte Glühwürmchen. Zane lächelte, seiner Sache sicher. Nora trat in diese Sicherheit hinein und rammte ihm die Schulter in die Rippen." },
         { label: 'Frech & herzlich', text: "Die große Halle stand also in Flammen — sehr dramatisch, Zane, wirklich. Er schleuderte mir mit einer unerträglich selbstgefälligen kleinen Geste einen Feuerzauber entgegen, und der... glitt einfach an meinem Mantel ab. Danke, Oma, und danke für deine neunhundert Stunden Kupferfaden. Ein Dachbalken krachte genau dorthin, wo eben mein Kopf gewesen war, worüber ich beschloss, nicht nachzudenken. Er grinste, als hätte er schon gewonnen. Süß. Ich rammte ihm die Schulter in die Rippen und wischte ihm das Grinsen aus dem Gesicht." },
+        { label: 'Spöttisch & skrupellos', text: "Nora hatte den Kampf in dem Moment durchgerechnet, in dem Zane die Hand hob: ein Mantel, von einer Großmutter mit Kupfer durchwirkt, die nie eine Schuld einging, ohne sich abzusichern, gegen einen Feuerzauber, geworfen von einem Jungen, der nie eine Rechnung zu zahlen gedachte. Die Flammen zerbrachen am Gewebe und suchten sich jemand anderen zum Ruinieren. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war — schlampig, fand sie, von der Architektur. Zane grinste, als gehörte ihm die Halle schon. Nora ließ ihm das Grinsen und nahm sich seine Rippen. Nach ihrer Erfahrung fielen die, die zuerst lächelten, am härtesten." },
+        { label: 'Kinetisch & präzise', text: "Zanes Zauber traf das Kupfergewebe und glitt ab, seine Hitze verlief sich in den Fäden, genau wie das Metall es erzwingen sollte. Nora spürte den Zug und drehte sich mit dem Abgleiten, nicht dagegen. Über ihr gab ein Balken nach — sie war schon zur Seite getreten, also fiel er durch die leere Luft, wo sie eben gewesen war. Zwei Schritte schlossen den Abstand. Sie ließ ihr Gewicht sinken, stieß sich vom hinteren Fuß ab und rammte ihm die Schulter mitten in die Rippen. Knochen verschob sich. Sein Grinsen zerbrach einen halben Herzschlag vor seiner Deckung." },
       ],
     },
     {
@@ -1955,6 +1995,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet und nur von Tradition und Optimismus zusammengehalten. Als sie mich also fallen ließ, war ich nicht überrascht — wütend, baumelnd, mit blutenden Handflächen, aber nicht überrascht. Die einzige Gnade war das Seil: Mein Vater hatte diese Knoten neu gebunden, und seiner hielt. Ich brachte ein Knie hoch, dann das andere, aus reinem Trotz. Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
         { label: 'Märchenhaft & atmosphärisch', text: "Die Brücke gab unter Nora nach wie ein zu lange angehaltener Atem, der endlich entweicht, und unter ihr öffnete die Schlucht ihren langen blauen Schlund. Ihre Hände fanden die letzte Planke — altes Zedernholz, glatt wie eine zu oft erzählte Geschichte —, und das Holz biss ihr in die Handflächen, noch während es sie rettete. Ihr Vater hatte diese Seile neu gebunden; sie kannte seinen ungeschickten, treuen Knoten, wie man eine Stimme im Dunkeln kennt. Ein Knie, dann das andere, und sie kletterte zurück in die Welt der Lebenden." },
         { label: 'Frech & herzlich', text: "Die Brücke war einfach... weg. Eben noch eine Brücke, im nächsten Moment ein nachdrücklicher Vorschlag, doch bitte fliegen zu lernen. Ich packte die letzte Planke — Holz, Splitter, Blut, das ganze Programm — und ehrlich? Unverschämt. Aber mein Vater hatte diese Seile neu gebunden, als ich klein war, und seinen knubbeligen Knoten würde ich überall erkennen. Unter mir hielt die Schlucht ihr Plädoyer. Ich lehnte ab. Ein Knie hoch, dann das andere, und ich zog mich zurück auf den Sims, fluchend den ganzen Weg." },
+        { label: 'Spöttisch & skrupellos', text: "Die Brücke versagte, wie schlechte Pläne es tun — alles auf einmal und jemanden mit sich reißend. Nora fing die letzte Planke und überließ die Rechnung dem Später: zwei Handflächen, eine Brücke, kein bequemer Weg zurück. Altes Zedernholz, glatt geschliffen von hundert Leuten, die ihm mehr vertraut hatten als sie. Sie fand den Knoten ihres Vaters am Griff — ungeschickt, ehrlich, das einzig Ehrliche auf hundert Meilen — und ließ ihn sie tragen. Ein Knie. Das andere. Sie kletterte aus der Schlucht, wie sie alles tat: unbezahlt und wütend darüber." },
+        { label: 'Kinetisch & präzise', text: "Die Planken fielen der Reihe nach, und Noras Hand schloss sich um die letzte, bevor ihr Verstand den Sturz zu Ende gedacht hatte. Das Zedernholz nahm ihr Haut von den Handflächen — Reibung, der Preis des Anhaltens —, aber es hielt. Sie schwang einmal aus, um den Schwung zu töten, wartete den Bogen ab und griff dann mit der freien Hand nach dem Seil. Der Knoten ihres Vaters saß, wo er immer gesessen hatte. Sie belastete ihn, prüfte ihn, vertraute ihm. Knie auf die Planke. Gewicht hoch. Zweites Knie. Jede Bewegung klein, jede Bewegung sicher, bis der Sims unter ihr war und die Schlucht nur noch ein Abgrund." },
       ],
     },
     {
@@ -1966,6 +2008,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte diesen Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Mit Zanes Schulter an meiner brauchte ich dreißig. Das Ding klickte; er grinste und sagte „Teamwork“. Ich sagte ihm, er solle den Mund halten. Er riecht nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach — also nein, ich rückte nicht weg." },
         { label: 'Märchenhaft & atmosphärisch', text: "Der Türrahmen war für einen einzigen reuigen Mönch gebaut und beherbergte stattdessen zwei Diebe, Schulter warm an Schulter im Dunkeln. Ihre Hände trafen sich am Dietrich immer wieder wie Motten an derselben kleinen Flamme; die messingnen Zuhaltungen waren unter ihren Fingern warm geworden. „Du machst es falsch“, hauchte Nora und drehte Zanes Hand eine halbe Umdrehung, und das Schloss seufzte sich auf — genau in dem Moment, in dem sie vergaß zu atmen. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
         { label: 'Frech & herzlich', text: "Stell dir das vor: ein Türrahmen, gebaut für einen einzigen, sehr kleinen Mönch, und trotzdem irgendwie wir beide darin, Schulter an Schulter, viel zu nah. Unsere Hände stießen ständig am Dietrich zusammen, und ich Würde Da Jetzt Nicht Drüber Nachdenken. „Du machst es falsch.“ „Ich hatt's.“ „Du hattest es ganz sicher nicht.“ Das Schloss klickte. Wir erstarrten — grinsend wie zwei Idioten, keiner gab irgendwas zu. „Teamwork“, hauchte Zane. Ich sagte ihm, er solle den Mund halten. Und nein, ich rückte nicht weg." },
+        { label: 'Spöttisch & skrupellos', text: "Zwei Diebe, ein Türrahmen, gebaut für einen einzigen reuigen Mönch, ein Schloss, bei dem keiner von beiden wirklich Hilfe brauchte. Nora hatte diesen Mechanismus ein Dutzend Mal blind geknackt; sie hätte ihn offen gehabt, bevor Zane sie überhaupt fertig eingeengt hätte. Tat sie nicht. Ihre Hände trafen sich immer wieder am Dietrich, und sie ließ es immer wieder zu — ein Geständnis für sich, das zu unterschreiben sie nicht gedachte. Die Zuhaltungen wurden warm. Das Schloss gab nach. „Teamwork“, murmelte Zane — unerträglich, und nah. Sie sagte ihm, er solle den Mund halten. Sie hatte längst beschlossen, dass der Fluchtweg warten konnte, und sie rückte nicht weg." },
+        { label: 'Kinetisch & präzise', text: "Nora setzte den Dietrich an, spürte den ersten Stift einrasten und hielt die Spannung mit dem Daumen ruhig. Zanes Schulter drückte gegen ihre — eine Variable, die sie zu ignorieren wählte. Zweiter Stift. Dritter. Das Messing wurde warm unter der wiederholten Berührung, die Passung enger, während das Metall arbeitete. Ihre Hände stießen zusammen; sie korrigierte ihren Griff um eine halbe Drehung, und der letzte Stift fiel in die Reihe. Der Riegel glitt. Sie verbuchte den Mechanismus als gelöst und den Türrahmen, bei dieser Breite, als unlösbar. „Teamwork“, sagte Zane. Sie antwortete nicht, und sie rückte nicht weg." },
       ],
     },
     {
@@ -1977,6 +2021,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus Zane, deinem trotteligen besten Freund, der einen traurigen Wegbrotkanten teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihm diese Lüge. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Wir-beide-atmen-noch — den verliere ich mit Absicht, jedes Mal." },
         { label: 'Märchenhaft & atmosphärisch', text: "Zane brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie eine kleine, alltägliche Gnade. „Die sind gleich groß“, sagte er, was eine gütige Lüge war, und schloss Noras Finger um die größere Hälfte. Er sprach weder von der Schlacht noch von den leeren Plätzen, an denen Freunde gesessen hatten. Er ließ nur die Wärme seiner Hand den Satz zu Ende bringen — und sie atmeten, die beiden, was der Abend niemandem versprochen hatte." },
         { label: 'Frech & herzlich', text: "Wir zitterten beide noch, was ich an mir selbst gekonnt zu ignorieren versuchte. Zane ließ sich neben mir fallen, riss das letzte Wegbrot entzwei und drückte mir das größere Stück gegen die Brust. „Die sind gleich groß“, log er mir mitten ins Gesicht. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es das Einzige, was den ganzen Tag richtig gelaufen war — und wir atmeten beide noch, also. Vielleicht war es das ja." },
+        { label: 'Spöttisch & skrupellos', text: "Zane brach das letzte Wegbrot entlang der Naht und zog den ältesten Trick aus seinem kurzen, kriminellen Repertoire: drückte Nora die größere Hälfte in die Hand und schwor, sie seien gleich groß. Sie hatte ihn Richter mit weniger Überzeugung anlügen sehen. Die Schlacht hatte sie Namen gekostet, die sie nicht laut aussprechen würde, und die Rechnung, wer noch übrig war, ertrug keine zweite Prüfung. Also nahm sie das Brot, und die Lüge, und die Schulter an ihrer. Manche Schulden begleicht man. Diese hier — er, wie er sich hinsetzte, beide noch unter den Atmenden gezählt — diese ließ sie laufen." },
+        { label: 'Kinetisch & präzise', text: "Zane legte das Wegbrot aufs Knie, fand die Naht und brach es sauber — eine Bewegung, gelernt von derselben Köchin, die sie beide begraben hatten. Die Hälften kamen ungleich auseinander; er tauschte sie kommentarlos und schob Nora die größere in die Hand. „Die sind gleich groß.“ Waren sie nicht. Sie aß, weil Streiten mehr Kraft kostete als Kauen. Um sie herum war die Halle in vorhersehbarer Reihenfolge eingestürzt: das Tragende zuerst, der Rest danach. Sie beide nicht. Das war alles — der Bruch, der Tausch, zwei Menschen, die im Trümmerfeld noch Atem holten." },
       ],
     },
     {
@@ -1988,6 +2034,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da — den Schal meiner Mutter doppelt um den Hals, den Rücken am kalten Stein, herrlich entbehrlich — und, ja, gut, sah hinauf, weil dir niemand sagt, wie ungerecht die Sterne von hier oben sind." },
         { label: 'Märchenhaft & atmosphärisch', text: "Hoch oben auf dem Turm war die Nacht weit und alt, und Zane stand ganz allein in ihr, den Wollschal seiner Mutter zweimal um den Hals geschlungen. Immer wieder fand er die Stelle, an der die Farbe verlaufen war, eine kleine verblasste Landkarte irgendeines längst vergangenen Regensturms. Der Wind zog vorüber wie etwas, das anderswo erwartet wurde; die Sterne hingen fern und geduldig. Er lehnte den Rücken an den kalten Stein und sah hinauf, und eine Weile erinnerte sich die Wolle an eine Wärme, die seine Hände vergessen hatten." },
         { label: 'Frech & herzlich', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht versteckt — wunderbar. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er wird reichen müssen, denn die Gastfreundschaft dieses Turms heißt „eiskalt“. Ich lehnte den Rücken an den kalten Stein und sah hinauf. Und, na gut, ja — die Sterne waren lächerlich schön. Vor dem Teil warnt einen keiner. Der Nacht würde ich nie die Genugtuung geben, das laut zuzugeben." },
+        { label: 'Spöttisch & skrupellos', text: "Nachtwache: der Posten, den man den Entbehrlichen gibt, damit, wenn das Schlimmste kommt, jemand schon in Position ist, um zuerst darüber zu schreien. Zane kannte seinen Marktwert auf die Münze genau. Er schlang den Schal seiner Mutter zweimal um den Hals — die Farbe an einem Ende verlaufen wie die Karte eines Sturms, den keiner überlebt hatte, um sich zu erinnern — und lehnte den Rücken an den Stein. Die Sterne vollführten ihren üblichen Trick, prächtig und zu nichts zu gebrauchen zu sein. Er sah trotzdem hinauf. Ein Mann konnte billig zu haben sein und sich den einen Luxus bewahren, den niemand ihm in Rechnung zu stellen gedacht hatte." },
+        { label: 'Kinetisch & präzise', text: "Zane ging zuerst die Turmspitze ab — Ecken, Treppe, die lange Sichtlinie nach Norden —, so wie er jeden Posten sicherte: bekannte Größen vor unbekannten. Die Kälte drang durch die Nähte seines Mantels, also zog er den Schal seiner Mutter höher und legte ihn doppelt, um den Wärmeverlust am Hals zu senken. Dann lehnte er den Rücken an den Stein, der auf einer Seite den Wind brach und das Problem halbierte. Wache war meist Warten, und Warten war meist, warm genug zu bleiben, um noch handeln zu können. Er sah hinauf. Die Sterne gaben ihm nichts zu tun, was hieß, dass noch nichts schiefgegangen war." },
       ],
     },
     {
@@ -1997,6 +2045,8 @@ const WRITING_STYLE_SCENES = {
         { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir, Zane. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. Der kleine Vogel, den ich geschnitzt hatte, lag noch in seiner Hand. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte — das war das Schlimmste — und entschuldigte sich für meinen Ärmel. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
         { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Zane hervor, Blut auf den Zähnen, Schnee in den Wimpern, der kleine geschnitzte Vogel lose in seiner Hand. „Sterben. Im Winter. So dramatisch.“ Nora sagte ihm, er solle seinen Atem sparen, und drückte fester auf die Wunde; er sagte, der Atem sei ja genau das Problem, nicht wahr, und entschuldigte sich für ihren Ärmel. Der Schnee fiel weiter, gleichgültig und rein. Er machte noch einen Witz. Einen zweiten machte er nicht." },
         { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Zane im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
+        { label: 'Spöttisch & skrupellos', text: "Nora hatte die Ausgänge jedes Raumes gelernt, den sie je betreten hatte, und aus diesem gab es keinen. Also hörte sie auf, nach dem Winkel zu suchen, und presste stattdessen beide Hände auf die Wunde — der einzige Handel, der noch auf dem Tisch lag. Der kleine geschnitzte Vogel lag in Zanes Faust — ihre Arbeit, das eine Weiche, das gemacht zu haben sie je zugegeben hatte. Er verbrachte einen sterbenden Atemzug damit, sich für das Blut auf ihrem Ärmel zu entschuldigen. Natürlich tat er das. „Bleib“, sagte sie, als wäre es ein Auftrag, für den sie ihn anheuern könnte. Er brachte einen letzten Witz heraus. Einen zweiten brachte er nicht mehr heraus, und danach gab es nichts mehr, worüber man klug hätte sein können." },
+        { label: 'Kinetisch & präzise', text: "Nora hielt Druck auf die Wunde — Handballen, volles Gewicht, so wie man eine Blutung verlangsamt, die man nicht stoppen kann — und wusste, an der Geschwindigkeit, mit der die Wärme ihn verließ, dass Druck nicht reichen würde. Schnee legte sich in Zanes Haar und blieb; seine Haut hatte die Wärme, die ihn geschmolzen hätte, schon aufgegeben. Sie faltete den geschnitzten Vogel in seine Finger, weil ihre Hände eine Aufgabe brauchten und keine andere übrig war. Er entschuldigte sich für ihren Ärmel. Sie sagte ihm, er solle bleiben. Er machte noch einen Witz, verbrauchte den Atem, den er kostete, und holte keinen weiteren." },
       ],
     },
   ],
@@ -2563,11 +2613,18 @@ function renderWorldbuilding() {
   if (visibleEntries.length === 0) {
     grid.innerHTML = `<div class="empty-state">${t('wb.empty').replace('\n', '<br>')}</div>`;
   } else {
+    let wbDragFrom = null; // index into worldbuilding.entries (not the filtered view)
     visibleEntries.forEach(entry => {
       const idx = worldbuilding.entries.indexOf(entry);
+      normalizeCharSections(entry, 'text');
       const card = document.createElement('div');
       card.className = 'wb-card';
+      card.dataset.id = entry.id;
+      // Like character cards: draggable only while the handle is grabbed, so
+      // clicks land in the card's text fields.
+      card.draggable = false;
       card.innerHTML = `
+        <div class="wb-drag-handle" title="${t('char.section.reorder')}">&#8942;&#8942;&#8942;</div>
         <div class="wb-card-header">
           <input class="wb-card-title" value="${ideaEsc(entry.title)}" placeholder="${t('wb.entry.title.placeholder')}">
           <span class="wb-card-cat">${t('wb.builtin.' + entry.category) || entry.category}</span>
@@ -2579,7 +2636,12 @@ function renderWorldbuilding() {
             <button class="wb-card-img-del" title="Remove image">&times;</button>
           </div>
         ` : ''}
-        <textarea class="wb-card-text" placeholder="${t('wb.entry.text.placeholder')}" rows="4">${ideaEsc(entry.text)}</textarea>
+        <div class="char-sections wb-sections"></div>
+        <div class="char-section-add">
+          <button class="char-add-section">${t('char.add.section')}</button>
+          <button class="char-add-list">${t('char.add.list')}</button>
+          <button class="char-add-links">${t('char.add.links')}</button>
+        </div>
         <label class="wb-card-img-add" title="${t('char.add.image')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           ${entry.image ? t('wb.img.replace') : t('char.add.image')}
@@ -2590,10 +2652,68 @@ function renderWorldbuilding() {
         worldbuilding.entries[idx].title = e.target.value;
         saveProjectDebounced();
       });
-      card.querySelector('.wb-card-text').addEventListener('input', e => {
-        worldbuilding.entries[idx].text = e.target.value;
-        saveProjectDebounced();
+
+      const wbSectionsEl = card.querySelector('.wb-sections');
+      renderCharSections(entry, wbSectionsEl);
+
+      const focusLastTitle = () => {
+        const titles = wbSectionsEl.querySelectorAll('.char-section-title');
+        const last = titles[titles.length - 1];
+        if (last) last.focus();
+      };
+      card.querySelector('.char-add-section').addEventListener('click', () => {
+        entry.sections.push({ id: Date.now() + Math.random(), type: 'text', title: '', content: '' });
+        saveProject();
+        renderCharSections(entry, wbSectionsEl);
+        focusLastTitle();
       });
+      card.querySelector('.char-add-list').addEventListener('click', () => {
+        entry.sections.push({ id: Date.now() + Math.random(), type: 'list', title: '', items: [''] });
+        saveProject();
+        renderCharSections(entry, wbSectionsEl);
+        focusLastTitle();
+      });
+      card.querySelector('.char-add-links').addEventListener('click', () => {
+        const lk = { label: '', url: '' };
+        entry.sections.push({ id: Date.now() + Math.random(), type: 'links', title: '', items: [lk] });
+        charLinkEditing.add(lk);
+        saveProject();
+        renderCharSections(entry, wbSectionsEl);
+        const rows = wbSectionsEl.querySelectorAll('.char-link');
+        const input = rows.length && rows[rows.length - 1].querySelector('input');
+        if (input) input.focus();
+      });
+
+      const wbHandle = card.querySelector('.wb-drag-handle');
+      wbHandle.addEventListener('mousedown', () => { card.draggable = true; });
+      wbHandle.addEventListener('mouseup', () => { card.draggable = false; });
+      card.addEventListener('dragstart', e => {
+        wbDragFrom = idx;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      card.addEventListener('dragend', () => {
+        card.draggable = false;
+        card.classList.remove('dragging');
+        grid.querySelectorAll('.wb-card').forEach(c => c.classList.remove('drag-over'));
+      });
+      card.addEventListener('dragover', e => {
+        if (wbDragFrom === null) return;
+        e.preventDefault();
+        if (wbDragFrom !== idx) card.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (wbDragFrom === null || wbDragFrom === idx) return;
+        const [moved] = worldbuilding.entries.splice(wbDragFrom, 1);
+        worldbuilding.entries.splice(idx, 0, moved);
+        wbDragFrom = null;
+        saveProject();
+        renderWorldbuilding();
+      });
+
       card.querySelector('.wb-card-delete').addEventListener('click', () => {
         if (entry.image) deleteImage(entry.image.split('/').pop());
         worldbuilding.entries.splice(idx, 1);
@@ -2621,7 +2741,7 @@ function renderWorldbuilding() {
   }
 
   main.querySelector('#wb-add-btn').addEventListener('click', () => {
-    worldbuilding.entries.push({ id: Date.now(), category: addCat, title: '', text: '' });
+    worldbuilding.entries.push({ id: Date.now(), category: addCat, title: '', sections: [] });
     if (wbFilter !== 'Alle' && wbFilter !== addCat) wbFilter = addCat;
     saveProject();
     renderWorldbuilding();
@@ -3842,6 +3962,105 @@ const beatsList = document.getElementById('beats-list');
 // A beat can point at the scene that drafts it (beat.sceneId). The scene keeps
 // no back-reference: deleting either side leaves the other untouched, and a
 // dangling sceneId is cleared lazily when the beat card renders.
+// ── Internal linking (scene pickers, cross-page navigation) ──
+
+// Modal listing every scene grouped by chapter; calls onPick(sceneId).
+function openScenePicker(onPick) {
+  const container = document.createElement('div');
+  const hasScenes = (writing.chapters || []).some(ch => (ch.scenes || []).length);
+  const listHtml = hasScenes
+    ? `<div class="picker-list">${writing.chapters.map(ch => {
+        const scenes = ch.scenes || [];
+        if (!scenes.length) return '';
+        return `<div class="picker-ch">${ideaEsc(ch.title) || t('writing.untitled.chapter')}</div>` +
+          scenes.map(sc => `<button class="picker-item" data-id="${sc.id}">${ideaEsc(sc.title) || t('writing.untitled.scene')}</button>`).join('');
+      }).join('')}</div>`
+    : `<div class="modal-empty">${t('picker.scene.empty')}</div>`;
+  container.innerHTML = `<div class="modal-title">${t('picker.scene.title')}</div>${listHtml}`;
+  container.querySelectorAll('.picker-item').forEach(btn => btn.addEventListener('click', () => {
+    closeModal();
+    onPick(Number(btn.dataset.id));
+  }));
+  openModal(container);
+}
+
+// Modal listing scenes, characters, and worldbuilding entries;
+// calls onPick({ type: 'scene' | 'char' | 'world', id }).
+function openRefPicker(onPick) {
+  const container = document.createElement('div');
+  const scenesHtml = (writing.chapters || []).map(ch => {
+    const scenes = ch.scenes || [];
+    if (!scenes.length) return '';
+    return `<div class="picker-ch">${ideaEsc(ch.title) || t('writing.untitled.chapter')}</div>` +
+      scenes.map(sc => `<button class="picker-item" data-type="scene" data-id="${sc.id}">${ideaEsc(sc.title) || t('writing.untitled.scene')}</button>`).join('');
+  }).join('');
+  const charsHtml = characters.map(c =>
+    `<button class="picker-item" data-type="char" data-id="${c.id}">${ideaEsc(c.name) || t('writing.untitled')}</button>`).join('');
+  const worldHtml = worldbuilding.entries.map(w =>
+    `<button class="picker-item" data-type="world" data-id="${w.id}">${ideaEsc(w.title) || t('writing.untitled')}</button>`).join('');
+  const none = `<div class="picker-none">${t('picker.none')}</div>`;
+  container.innerHTML = `
+    <div class="modal-title">${t('picker.ref.title')}</div>
+    <div class="picker-list">
+      <div class="picker-group">${t('picker.group.scenes')}</div>${scenesHtml || none}
+      <div class="picker-group">${t('picker.group.characters')}</div>${charsHtml || none}
+      <div class="picker-group">${t('picker.group.world')}</div>${worldHtml || none}
+    </div>`;
+  container.querySelectorAll('.picker-item').forEach(btn => btn.addEventListener('click', () => {
+    closeModal();
+    onPick({ type: btn.dataset.type, id: Number(btn.dataset.id) });
+  }));
+  openModal(container);
+}
+
+// Resolve a ref to a display label, or null if its target was deleted.
+function resolveRef(ref) {
+  if (ref.type === 'scene') {
+    const { scene } = findSceneAnywhere(ref.id);
+    return scene ? { label: scene.title || t('writing.untitled.scene') } : null;
+  }
+  if (ref.type === 'char') {
+    const c = characters.find(c => c.id === ref.id);
+    return c ? { label: c.name || t('writing.untitled') } : null;
+  }
+  if (ref.type === 'world') {
+    const w = worldbuilding.entries.find(e => e.id === ref.id);
+    return w ? { label: w.title || t('writing.untitled') } : null;
+  }
+  return null;
+}
+
+// Scroll a just-rendered card into view and pulse its outline.
+function flashCard(selector) {
+  requestAnimationFrame(() => {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('card-flash');
+    setTimeout(() => el.classList.remove('card-flash'), 1600);
+  });
+}
+
+// Navigate to whatever a ref points at.
+function goToRef(ref) {
+  if (ref.type === 'scene') {
+    const { chapter, scene } = findSceneAnywhere(ref.id);
+    if (!scene) return;
+    switchPage('writing');
+    selectScene(chapter.id, scene.id);
+  } else if (ref.type === 'char') {
+    switchPage('characters');
+    flashCard(`.char-card[data-id="${ref.id}"]`);
+  } else if (ref.type === 'world') {
+    const entry = worldbuilding.entries.find(e => e.id === ref.id);
+    if (!entry) return;
+    // Reset any category filter that would hide the target card.
+    if (wbFilter !== 'Alle' && wbFilter !== entry.category) wbFilter = 'Alle';
+    switchPage('worldbuilding'); // re-renders the page via renderPageHooks
+    flashCard(`.wb-card[data-id="${ref.id}"]`);
+  }
+}
+
 function beatSceneTitle(beat) {
   if (beat.structBeat && selectedStructure)
     return ts(selectedStructure, 'beat.' + beat.structBeat + '.name', beat.structBeat);
@@ -3881,14 +4100,28 @@ function createBeatCard(beat, i) {
       <textarea class="beat-text" rows="1" placeholder="${t('beats.placeholder')}">${ideaEsc(beat.text)}</textarea>
       <textarea class="beat-theme" rows="1" placeholder="${t('beats.theme.placeholder')}">${ideaEsc(beat.theme)}</textarea>
       <div class="beat-scene-row">${linked.scene
-        ? `<button class="beat-drafted-chip" title="${t('beats.drafted.jump')}">&#10003; ${t('beats.drafted').replace('{n}', countWords(linked.scene.content || ''))}</button>`
-        : `<button class="btn-mini beat-write-btn">&#9998; ${t('beats.write.scene')}</button>`}</div>
+        ? `<button class="beat-drafted-chip" title="${t('beats.drafted.jump')}">&#10003; ${t('beats.drafted').replace('{n}', countWords(linked.scene.content || ''))}</button>
+           <button class="beat-unlink" title="${t('beats.unlink')}">&times;</button>`
+        : `<button class="btn-mini beat-write-btn">&#9998; ${t('beats.write.scene')}</button>
+           <button class="btn-mini beat-link-btn" title="${t('picker.scene.title')}">&#128279; ${t('beats.link.scene')}</button>`}</div>
     </div>
     <button class="beat-delete" title="${t('beat.delete.title')}">&times;</button>
   `;
 
   const writeBtn = card.querySelector('.beat-write-btn');
   if (writeBtn) writeBtn.addEventListener('click', () => beatWriteScene(beat));
+  const linkBtn = card.querySelector('.beat-link-btn');
+  if (linkBtn) linkBtn.addEventListener('click', () => openScenePicker(scId => {
+    beat.sceneId = scId;
+    saveProject();
+    renderBeats();
+  }));
+  const unlinkBtn = card.querySelector('.beat-unlink');
+  if (unlinkBtn) unlinkBtn.addEventListener('click', () => {
+    beat.sceneId = undefined;
+    saveProject();
+    renderBeats();
+  });
   const draftedChip = card.querySelector('.beat-drafted-chip');
   if (draftedChip) draftedChip.addEventListener('click', () => {
     switchPage('writing');
@@ -4125,15 +4358,16 @@ function autoResize(textarea) {
   textarea.style.height = textarea.scrollHeight + 'px';
 }
 
-// Ensure a character carries a `sections` array. Migrates the legacy single
-// `description` string into one text section the first time it is seen.
-function normalizeCharSections(char) {
+// Ensure a card object carries a `sections` array. Migrates the legacy single
+// string field (`description` on characters, `text` on worldbuilding entries)
+// into one text section the first time it is seen.
+function normalizeCharSections(char, legacyField = 'description') {
   if (!Array.isArray(char.sections)) {
     char.sections = [];
-    if (char.description && char.description.trim()) {
-      char.sections.push({ id: Date.now() + Math.random(), type: 'text', title: '', content: char.description });
+    if (char[legacyField] && char[legacyField].trim()) {
+      char.sections.push({ id: Date.now() + Math.random(), type: 'text', title: '', content: char[legacyField] });
     }
-    delete char.description;
+    delete char[legacyField];
   }
   char.sections.forEach(s => {
     if (s.id == null) s.id = Date.now() + Math.random();
@@ -4141,11 +4375,59 @@ function normalizeCharSections(char) {
     if (s.type === 'list') {
       if (!Array.isArray(s.items)) s.items = (typeof s.content === 'string' && s.content) ? [s.content] : [''];
       if (s.items.length === 0) s.items = [''];
+    } else if (s.type === 'links') {
+      if (!Array.isArray(s.items)) s.items = [];
+      s.items = s.items.filter(it => it && typeof it === 'object');
+    } else if (s.type === 'chart') {
+      if (!Array.isArray(s.items)) s.items = [];
+      s.items = s.items.filter(it => it && typeof it === 'object');
+      s.items.forEach(it => {
+        if (typeof it.label !== 'string') it.label = '';
+        it.value = clamp(Number(it.value) || 0, 0, 10);
+      });
     } else {
       s.type = 'text';
       if (typeof s.content !== 'string') s.content = '';
     }
   });
+}
+
+// Link rows currently in edit mode (label/url inputs open). Lives outside the
+// render function so the state survives re-renders; keyed on the item object,
+// so nothing edit-related ever leaks into the saved project JSON.
+const charLinkEditing = new WeakSet();
+
+// Radar ("spider") chart of a card's traits. Needs at least three named
+// traits — a radar with fewer has no polygon to show, so a hint renders instead.
+function charTraitChartSvg(items) {
+  const traits = items.filter(it => (it.label || '').trim());
+  if (traits.length < 3) return `<div class="char-chart-hint">${t('char.chart.hint')}</div>`;
+  const cx = 130, cy = 103, R = 66, n = traits.length;
+  const pt = (i, r) => {
+    const a = (Math.PI * 2 * i) / n - Math.PI / 2; // first axis points straight up
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  };
+  const poly = f => traits.map((_, i) => pt(i, R * f).map(v => v.toFixed(1)).join(',')).join(' ');
+  const value = traits.map((tr, i) => pt(i, R * clamp(tr.value, 0, 10) / 10).map(v => v.toFixed(1)).join(',')).join(' ');
+  const spokes = traits.map((_, i) => {
+    const [x, y] = pt(i, R);
+    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+  }).join('');
+  const dots = traits.map((tr, i) => {
+    const [x, y] = pt(i, R * clamp(tr.value, 0, 10) / 10);
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5"/>`;
+  }).join('');
+  const labels = traits.map((tr, i) => {
+    const [x, y] = pt(i, R + 12);
+    const anchor = Math.abs(x - cx) < 6 ? 'middle' : (x > cx ? 'start' : 'end');
+    return `<text x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="${anchor}">${ideaEsc(tr.label.trim())}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 260 206" class="char-chart-radar" aria-hidden="true">
+    <g class="chart-grid">${[0.25, 0.5, 0.75, 1].map(f => `<polygon points="${poly(f)}"/>`).join('')}${spokes}</g>
+    <polygon class="chart-value" points="${value}"/>
+    <g class="chart-dots">${dots}</g>
+    <g class="chart-labels">${labels}</g>
+  </svg>`;
 }
 
 // Render the editable heading/text/bullet-list sections of one character into
@@ -4240,6 +4522,160 @@ function renderCharSections(char, container, focus) {
         renderCharSections(char, container, { si, ii: section.items.length - 1 });
       });
       secEl.appendChild(addItem);
+    } else if (section.type === 'links') {
+      const list = document.createElement('div');
+      list.className = 'char-links';
+
+      section.items.forEach(lk => {
+        const row = document.createElement('div');
+        row.className = 'char-link';
+        if (charLinkEditing.has(lk)) {
+          const label = document.createElement('input');
+          label.type = 'text';
+          label.className = 'char-link-input';
+          label.placeholder = t('notes.hyperlink.label');
+          label.value = lk.label || '';
+          const url = document.createElement('input');
+          url.type = 'url';
+          url.className = 'char-link-input';
+          url.placeholder = t('notes.hyperlink.url');
+          url.value = lk.url || '';
+          const done = document.createElement('button');
+          done.className = 'char-link-btn';
+          done.textContent = '✓';
+          done.title = t('notes.hyperlink.done');
+          const commit = () => {
+            lk.url = normalizeUrl(url.value.trim());
+            lk.label = label.value.trim();
+            if (!lk.url) section.items = section.items.filter(x => x !== lk);
+            charLinkEditing.delete(lk);
+            saveProject();
+            renderCharSections(char, container);
+          };
+          const cancel = () => {
+            if (!lk.url) section.items = section.items.filter(x => x !== lk);
+            charLinkEditing.delete(lk);
+            renderCharSections(char, container);
+          };
+          [label, url].forEach(inp => inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+            else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+          }));
+          done.addEventListener('click', commit);
+          row.appendChild(label);
+          row.appendChild(url);
+          row.appendChild(done);
+        } else {
+          const a = document.createElement('a');
+          a.className = 'char-link-a';
+          a.href = lk.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = lk.label || lk.url;
+          a.title = lk.url;
+          const edit = document.createElement('button');
+          edit.className = 'char-link-btn';
+          edit.textContent = '✎';
+          edit.title = t('notes.hyperlink.edit');
+          edit.addEventListener('click', () => {
+            charLinkEditing.add(lk);
+            renderCharSections(char, container);
+          });
+          const rm = document.createElement('button');
+          rm.className = 'char-link-btn rm';
+          rm.textContent = '×';
+          rm.title = t('notes.hyperlink.remove');
+          rm.addEventListener('click', () => {
+            section.items = section.items.filter(x => x !== lk);
+            saveProject();
+            renderCharSections(char, container);
+          });
+          row.appendChild(a);
+          row.appendChild(edit);
+          row.appendChild(rm);
+        }
+        list.appendChild(row);
+      });
+      secEl.appendChild(list);
+
+      const addLk = document.createElement('button');
+      addLk.className = 'char-list-add';
+      addLk.textContent = t('char.links.add.item');
+      addLk.addEventListener('click', () => {
+        const lk = { label: '', url: '' };
+        section.items.push(lk);
+        charLinkEditing.add(lk);
+        renderCharSections(char, container);
+        const rows = container.querySelectorAll(`.char-section[data-si="${si}"] .char-link`);
+        const input = rows.length && rows[rows.length - 1].querySelector('input');
+        if (input) input.focus();
+      });
+      secEl.appendChild(addLk);
+    } else if (section.type === 'chart') {
+      const chartWrap = document.createElement('div');
+      chartWrap.className = 'char-chart';
+      const svgWrap = document.createElement('div');
+      svgWrap.className = 'char-chart-svg';
+      const updateSvg = () => { svgWrap.innerHTML = charTraitChartSvg(section.items); };
+      updateSvg();
+      chartWrap.appendChild(svgWrap);
+
+      const rows = document.createElement('div');
+      rows.className = 'char-traits';
+      section.items.forEach((tr, ti) => {
+        const row = document.createElement('div');
+        row.className = 'char-trait-row';
+        const name = document.createElement('input');
+        name.type = 'text';
+        name.className = 'char-trait-name';
+        name.placeholder = t('char.chart.trait.placeholder');
+        name.value = tr.label;
+        name.addEventListener('input', () => { tr.label = name.value; updateSvg(); saveProjectDebounced(); });
+        const range = document.createElement('input');
+        range.type = 'range';
+        range.min = '0';
+        range.max = '10';
+        range.step = '1';
+        range.className = 'char-trait-range';
+        range.value = tr.value;
+        const val = document.createElement('span');
+        val.className = 'char-trait-val';
+        val.textContent = tr.value;
+        range.addEventListener('input', () => {
+          tr.value = Number(range.value);
+          val.textContent = range.value;
+          updateSvg();
+          saveProjectDebounced();
+        });
+        const rm = document.createElement('button');
+        rm.className = 'char-trait-del';
+        rm.title = t('char.chart.remove.trait');
+        rm.innerHTML = '&times;';
+        rm.addEventListener('click', () => {
+          section.items.splice(ti, 1);
+          saveProject();
+          renderCharSections(char, container);
+        });
+        row.appendChild(name);
+        row.appendChild(range);
+        row.appendChild(val);
+        row.appendChild(rm);
+        rows.appendChild(row);
+      });
+      chartWrap.appendChild(rows);
+
+      const addTrait = document.createElement('button');
+      addTrait.className = 'char-list-add';
+      addTrait.textContent = t('char.chart.add.trait');
+      addTrait.addEventListener('click', () => {
+        section.items.push({ label: '', value: 5 });
+        saveProject();
+        renderCharSections(char, container);
+        const names = container.querySelectorAll(`.char-section[data-si="${si}"] .char-trait-name`);
+        if (names.length) names[names.length - 1].focus();
+      });
+      chartWrap.appendChild(addTrait);
+      secEl.appendChild(chartWrap);
     } else {
       const ta = document.createElement('textarea');
       ta.className = 'char-section-text';
@@ -4328,8 +4764,10 @@ function renderCharacters() {
 
   characters.forEach((char, i) => {
     normalizeCharSections(char);
+    if (char.id == null) char.id = Date.now() + i; // pre-id characters need one for internal links
     const card = document.createElement('div');
     card.className = 'char-card';
+    card.dataset.id = char.id;
     // Kept false so clicks land in the card's text fields (a draggable ancestor
     // blocks cursor placement); the drag handle flips it on only while grabbed.
     card.draggable = false;
@@ -4347,10 +4785,16 @@ function renderCharacters() {
       <input type="file" accept="image/*" class="hidden-input" id="${fileId}">
       <div class="char-body">
         <input class="char-name" type="text" placeholder="${t('char.name.placeholder')}" value="${ideaEsc(char.name)}">
+        <div class="char-quote">
+          <span class="char-quote-mark">&#8220;</span>
+          <textarea class="char-quote-text" rows="1" placeholder="${t('char.quote.placeholder')}">${ideaEsc(char.quote || '')}</textarea>
+        </div>
         <div class="char-sections"></div>
         <div class="char-section-add">
           <button class="char-add-section">${t('char.add.section')}</button>
           <button class="char-add-list">${t('char.add.list')}</button>
+          <button class="char-add-links">${t('char.add.links')}</button>
+          <button class="char-add-chart">${t('char.add.chart')}</button>
         </div>
         <button class="char-delete">${t('char.delete')}</button>
       </div>
@@ -4450,6 +4894,14 @@ function renderCharacters() {
       saveProject();
     });
 
+    const quoteTa = card.querySelector('.char-quote-text');
+    requestAnimationFrame(() => autoResize(quoteTa));
+    quoteTa.addEventListener('input', () => {
+      char.quote = quoteTa.value;
+      autoResize(quoteTa);
+      saveProjectDebounced();
+    });
+
     const sectionsEl = card.querySelector('.char-sections');
     renderCharSections(char, sectionsEl);
 
@@ -4469,6 +4921,25 @@ function renderCharacters() {
       const titles = sectionsEl.querySelectorAll('.char-section-title');
       const last = titles[titles.length - 1];
       if (last) last.focus();
+    });
+
+    card.querySelector('.char-add-links').addEventListener('click', () => {
+      const lk = { label: '', url: '' };
+      char.sections.push({ id: Date.now() + Math.random(), type: 'links', title: '', items: [lk] });
+      charLinkEditing.add(lk);
+      saveProject();
+      renderCharSections(char, sectionsEl);
+      const rows = sectionsEl.querySelectorAll('.char-link');
+      const input = rows.length && rows[rows.length - 1].querySelector('input');
+      if (input) input.focus();
+    });
+
+    card.querySelector('.char-add-chart').addEventListener('click', () => {
+      const defaults = t('char.chart.defaults');
+      const items = (Array.isArray(defaults) ? defaults : []).map(l => ({ label: l, value: 5 }));
+      char.sections.push({ id: Date.now() + Math.random(), type: 'chart', title: '', items });
+      saveProject();
+      renderCharSections(char, sectionsEl);
     });
 
     card.querySelector('.char-delete').addEventListener('click', async () => {
@@ -5331,11 +5802,13 @@ function createNoteEl(note) {
       <div class="bs-note-spacer"></div>
       <label class="bs-note-btn img" title="${t('notes.btn.image')}">&#128247;<input type="file" accept="image/*" class="bs-note-img-input" style="display:none"></label>
       <button class="bs-note-btn hyperlink" title="${t('notes.btn.hyperlink')}">&#127760;</button>
+      <button class="bs-note-btn ref" title="${t('notes.btn.ref')}">&#128278;</button>
       <button class="bs-note-btn link" title="${t('notes.btn.link')}">&#128279;</button>
       <button class="bs-note-btn del" title="${t('notes.btn.delete')}">&times;</button>
     </div>
     <div class="bs-note-img-wrap"></div>
     <textarea class="bs-note-text" placeholder="${t('notes.note.placeholder')}">${ideaEsc(note.text)}</textarea>
+    <div class="bs-note-refs"></div>
     <div class="bs-note-links"></div>
     <div class="bs-note-resize" title="${t('notes.btn.resize')}"></div>
   `;
@@ -5481,6 +5954,56 @@ function createNoteEl(note) {
     });
   }
   renderNoteLinks();
+
+  // Internal references: chips that jump to a scene, character, or world entry
+  const refsWrap = el.querySelector('.bs-note-refs');
+  if (!Array.isArray(note.refs)) note.refs = [];
+  const REF_ICONS = { scene: '\u{1F4C4}', char: '\u{1F464}', world: '\u{1F30D}' };
+
+  function renderNoteRefs() {
+    refsWrap.innerHTML = '';
+    note.refs.forEach(ref => {
+      const target = resolveRef(ref);
+      if (!target) return; // target was deleted — chip simply disappears
+      const row = document.createElement('div');
+      row.className = 'bs-note-ref';
+      const go = document.createElement('button');
+      go.className = 'bs-note-ref-a';
+      go.textContent = (REF_ICONS[ref.type] || '') + ' ' + target.label;
+      go.title = t('notes.btn.ref');
+      go.addEventListener('click', e => {
+        e.stopPropagation();
+        goToRef(ref);
+      });
+      const rm = document.createElement('button');
+      rm.className = 'bs-note-ref-rm';
+      rm.textContent = '×';
+      rm.title = t('notes.ref.remove');
+      rm.addEventListener('click', e => {
+        e.stopPropagation();
+        note.refs = note.refs.filter(x => x !== ref);
+        renderNoteRefs();
+        drawLinks();
+        expandCanvas();
+        saveProject();
+      });
+      row.appendChild(go);
+      row.appendChild(rm);
+      refsWrap.appendChild(row);
+    });
+  }
+  renderNoteRefs();
+
+  el.querySelector('.bs-note-btn.ref').addEventListener('click', e => {
+    e.stopPropagation();
+    openRefPicker(ref => {
+      if (!note.refs.some(r => r.type === ref.type && r.id === ref.id)) note.refs.push(ref);
+      renderNoteRefs();
+      drawLinks();
+      expandCanvas();
+      saveProject();
+    });
+  });
 
   el.querySelector('.bs-note-btn.hyperlink').addEventListener('click', e => {
     e.stopPropagation();
@@ -5791,7 +6314,10 @@ function renderTimeline() {
     });
     head.querySelector('.tl-col-del').addEventListener('click', () => {
       timeline.columns = timeline.columns.filter(c => c.id !== col.id);
-      timeline.rows.forEach(r => { delete r.cells[col.id]; });
+      timeline.rows.forEach(r => {
+        delete r.cells[col.id];
+        if (r.cellLinks) delete r.cellLinks[col.id];
+      });
       saveProject();
       renderTimeline();
     });
@@ -5882,9 +6408,19 @@ function renderTimeline() {
       if (hasCard) {
         const card = document.createElement('div');
         card.className = 'tl-card';
+        let linkedScene = (row.cellLinks && row.cellLinks[col.id] != null)
+          ? findSceneAnywhere(row.cellLinks[col.id]) : {};
+        if (row.cellLinks && row.cellLinks[col.id] != null && !linkedScene.scene) {
+          delete row.cellLinks[col.id]; // scene was deleted
+          linkedScene = {};
+        }
         card.innerHTML = `
           <button class="tl-card-del" title="${t('timeline.delete.card')}">&times;</button>
           <textarea class="tl-card-text" placeholder="${t('timeline.card.placeholder')}">${ideaEsc(row.cells[col.id])}</textarea>
+          <div class="tl-card-scene">${linkedScene.scene
+            ? `<button class="tl-scene-chip" title="${t('beats.drafted.jump')}">&#10003; ${ideaEsc(linkedScene.scene.title || t('writing.untitled.scene'))}</button>
+               <button class="tl-scene-unlink" title="${t('beats.unlink')}">&times;</button>`
+            : `<button class="tl-scene-link" title="${t('picker.scene.title')}">&#128279; ${t('timeline.link.scene')}</button>`}</div>
         `;
         const ta = card.querySelector('.tl-card-text');
         requestAnimationFrame(() => autoResize(ta));
@@ -5895,9 +6431,28 @@ function renderTimeline() {
         });
         card.querySelector('.tl-card-del').addEventListener('click', () => {
           delete row.cells[col.id];
+          if (row.cellLinks) delete row.cellLinks[col.id];
           saveProject();
           renderTimeline();
         });
+        const chip = card.querySelector('.tl-scene-chip');
+        if (chip) chip.addEventListener('click', () => {
+          switchPage('writing');
+          selectScene(linkedScene.chapter.id, linkedScene.scene.id);
+        });
+        const unlink = card.querySelector('.tl-scene-unlink');
+        if (unlink) unlink.addEventListener('click', () => {
+          delete row.cellLinks[col.id];
+          saveProject();
+          renderTimeline();
+        });
+        const linkBtn = card.querySelector('.tl-scene-link');
+        if (linkBtn) linkBtn.addEventListener('click', () => openScenePicker(scId => {
+          row.cellLinks = row.cellLinks || {};
+          row.cellLinks[col.id] = scId;
+          saveProject();
+          renderTimeline();
+        }));
         cell.appendChild(card);
       } else {
         cell.classList.add('empty');
