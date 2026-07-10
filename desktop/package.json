@@ -1,0 +1,59 @@
+{
+  "name": "inktink-desktop",
+  "productName": "InkTink",
+  "version": "0.1.0",
+  "description": "InkTink — a creative writing workspace (desktop app)",
+  "author": "SarahMit",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "io.github.sarahmit.inktink",
+    "productName": "InkTink",
+    "files": [
+      "main.js",
+      "preload.js",
+      "storage.js"
+    ],
+    "extraResources": [
+      {
+        "from": "../",
+        "to": "web",
+        "filter": [
+          "index.html",
+          "app.js",
+          "style.css",
+          "manifest.json",
+          "assets/**/*",
+          "vendor/**/*"
+        ]
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "SarahMit",
+      "repo": "InkTink",
+      "releaseType": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Office"
+    }
+  }
+}

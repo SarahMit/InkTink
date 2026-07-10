@@ -1,7 +1,13 @@
 // ── Storage (browser-local, no server) ──
 // Working state lives in localStorage so a reload keeps your place.
-// Named projects also live in localStorage. Moving work between devices
+// Named projects also live in appStorage. Moving work between devices
 // is done with explicit Export/Import to a .json file (images embedded).
+//
+// window.inktinkDesktop is injected by the desktop app's (Electron) preload
+// script and backs the same keys with .json files on disk (no quota). Absent
+// (web): appStorage IS localStorage — behavior identical to a plain browser.
+const IS_DESKTOP = !!window.inktinkDesktop;
+const appStorage = IS_DESKTOP ? window.inktinkDesktop.storage : localStorage;
 const LS_CURRENT = 'inktink.current';
 const LS_PROJECTS = 'inktink.projects'; // { [name]: { data, modified } }
 const LS_CURRENT_NAME = 'inktink.currentName'; // which named project is open
@@ -12,8 +18,8 @@ const LS_CURRENT_NAME = 'inktink.currentName'; // which named project is open
 function setCurrentProjectName(name) {
   currentProjectName = name || null;
   try {
-    if (currentProjectName) localStorage.setItem(LS_CURRENT_NAME, currentProjectName);
-    else localStorage.removeItem(LS_CURRENT_NAME);
+    if (currentProjectName) appStorage.setItem(LS_CURRENT_NAME, currentProjectName);
+    else appStorage.removeItem(LS_CURRENT_NAME);
   } catch {}
 }
 
@@ -22,11 +28,11 @@ function collectProjectData() {
 }
 
 function readProjectsStore() {
-  try { return JSON.parse(localStorage.getItem(LS_PROJECTS) || '{}'); }
+  try { return JSON.parse(appStorage.getItem(LS_PROJECTS) || '{}'); }
   catch { return {}; }
 }
 function writeProjectsStore(store) {
-  localStorage.setItem(LS_PROJECTS, JSON.stringify(store));
+  appStorage.setItem(LS_PROJECTS, JSON.stringify(store));
 }
 
 // Boot loader. Prefers the v2 layout (pointer + named store). Falls back to the
@@ -38,17 +44,17 @@ async function loadInitialProject() {
 
   // v2: pointer to a named project
   try {
-    const pointer = localStorage.getItem(LS_CURRENT_NAME);
+    const pointer = appStorage.getItem(LS_CURRENT_NAME);
     if (pointer && store[pointer] && store[pointer].data) {
       currentProjectName = pointer;
       return store[pointer].data;
     }
-    if (pointer) localStorage.removeItem(LS_CURRENT_NAME); // dangling pointer
+    if (pointer) appStorage.removeItem(LS_CURRENT_NAME); // dangling pointer
   } catch {}
 
   // v1: full data in LS_CURRENT; adopt the matching name if one exists
   try {
-    const raw = localStorage.getItem(LS_CURRENT);
+    const raw = appStorage.getItem(LS_CURRENT);
     if (raw) {
       const data = JSON.parse(raw);
       for (const name of Object.keys(store)) {
@@ -88,11 +94,11 @@ function saveProject() {
       const store = readProjectsStore();
       store[currentProjectName] = { data: JSON.parse(json), modified: new Date().toISOString() };
       writeProjectsStore(store); // may throw on quota — previous layout intact
-      localStorage.setItem(LS_CURRENT_NAME, currentProjectName);
-      localStorage.removeItem(LS_CURRENT); // only after the store write succeeded
+      appStorage.setItem(LS_CURRENT_NAME, currentProjectName);
+      appStorage.removeItem(LS_CURRENT); // only after the store write succeeded
     } else {
-      localStorage.setItem(LS_CURRENT, json);
-      localStorage.removeItem(LS_CURRENT_NAME);
+      appStorage.setItem(LS_CURRENT, json);
+      appStorage.removeItem(LS_CURRENT_NAME);
     }
     isDirty = false;
     hideSaveWarning();
@@ -200,7 +206,7 @@ function saveProjectAs(name) {
     store[name] = { data: collectProjectData(), modified: new Date().toISOString() };
     writeProjectsStore(store); // may throw on quota — previous layout intact
     setCurrentProjectName(name);
-    localStorage.removeItem(LS_CURRENT);
+    appStorage.removeItem(LS_CURRENT);
     isDirty = false;
     hideSaveWarning();
     return { ok: true, name };
@@ -275,7 +281,7 @@ function deleteAllLocalData() {
   isDirty = false;
   ['inktink.current', 'inktink.currentName', 'inktink.projects', 'inktink.ideapool',
    'inktink-ui', 'inktink-theme', 'inktink-lang'].forEach(k => {
-    try { localStorage.removeItem(k); } catch {}
+    try { appStorage.removeItem(k); } catch {}
   });
   location.reload();
 }
@@ -305,7 +311,7 @@ function restoreFullBackup(data) {
   }
   writeProjectsStore(store);
   if (data.ideaPool && typeof data.ideaPool === 'object') {
-    try { localStorage.setItem(LS_IDEAPOOL, JSON.stringify(data.ideaPool)); } catch {}
+    try { appStorage.setItem(LS_IDEAPOOL, JSON.stringify(data.ideaPool)); } catch {}
     loadIdeaPool();
   }
   const names = Object.keys(store)
@@ -537,7 +543,7 @@ const STRUCTURES = {
 // ══════════════════════════════════
 // ── INTERNATIONALISATION ──
 // ══════════════════════════════════
-let currentLang = localStorage.getItem('inktink-lang') || 'en';
+let currentLang = appStorage.getItem('inktink-lang') || 'en';
 
 const TR = {
   en: {
@@ -611,6 +617,7 @@ const TR = {
     'writing.confirm.delete.chapter': 'Delete chapter "{title}" and all its scenes?',
     'writing.untitled': 'Untitled',
     'home.storage': 'InkTink is currently using {size} of storage in this browser.',
+    'home.desktop': 'Projects outgrowing the browser? There is also a {link}desktop version{/link} with no storage limit.',
     'privacy.delete.button': 'Delete all data from this browser…',
     'privacy.delete.title': 'Delete all data from this browser?',
     'privacy.delete.msg': 'This removes every project, the idea pool, and all settings InkTink has stored in this browser — on this device only. Exported .json files are not affected. Download a full backup first if you want to keep anything.',
@@ -898,6 +905,7 @@ const TR = {
     'writing.confirm.delete.chapter': 'Kapitel „{title}" und alle seine Szenen löschen?',
     'writing.untitled': 'ohne Titel',
     'home.storage': 'InkTink belegt in diesem Browser gerade {size} Speicher.',
+    'home.desktop': 'Projekte wachsen über den Browser hinaus? InkTink gibt es auch als {link}Desktop-Version{/link} ohne Speicherlimit.',
     'privacy.delete.button': 'Alle Daten aus diesem Browser löschen…',
     'privacy.delete.title': 'Alle Daten aus diesem Browser löschen?',
     'privacy.delete.msg': 'Das entfernt alle Projekte, den Ideen-Pool und sämtliche Einstellungen, die InkTink in diesem Browser gespeichert hat — nur auf diesem Gerät. Exportierte .json-Dateien sind nicht betroffen. Lade vorher ein komplettes Backup herunter, wenn du etwas behalten möchtest.',
@@ -1150,7 +1158,7 @@ function applyI18n() {
 
 function setLang(lang) {
   currentLang = lang;
-  localStorage.setItem('inktink-lang', lang);
+  appStorage.setItem('inktink-lang', lang);
   applyI18n();
   if (typeof renderInspiration === 'function') renderInspiration();
   if (typeof renderTodos === 'function') renderTodos();
@@ -2756,9 +2764,9 @@ function renderWorldbuilding() {
 // the project data, so they live in their own localStorage key.
 const LS_UI = 'inktink-ui';
 let uiPrefs = { split: false, splitPage: 'brainstorm', splitLeft: 55, sbCollapsed: false, chnavCollapsed: false, bsZoom: 1 };
-try { uiPrefs = { ...uiPrefs, ...(JSON.parse(localStorage.getItem(LS_UI)) || {}) }; } catch {}
+try { uiPrefs = { ...uiPrefs, ...(JSON.parse(appStorage.getItem(LS_UI)) || {}) }; } catch {}
 function saveUiPrefs() {
-  try { localStorage.setItem(LS_UI, JSON.stringify(uiPrefs)); } catch {}
+  try { appStorage.setItem(LS_UI, JSON.stringify(uiPrefs)); } catch {}
 }
 
 function activePageName() {
@@ -2949,9 +2957,9 @@ document.getElementById('chnav-expand').addEventListener('click', () => {
 // deleting images/projects actually frees space (strings are UTF-16, 2 B/char).
 function inktinkStorageSize() {
   let chars = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith('inktink')) chars += k.length + (localStorage.getItem(k) || '').length;
+  for (let i = 0; i < appStorage.length; i++) {
+    const k = appStorage.key(i);
+    if (k && k.startsWith('inktink')) chars += k.length + (appStorage.getItem(k) || '').length;
   }
   return chars * 2;
 }
@@ -2964,6 +2972,15 @@ function formatBytes(b) {
 async function renderHome() {
   const storageEl = document.getElementById('home-storage');
   if (storageEl) storageEl.textContent = t('home.storage').replace('{size}', formatBytes(inktinkStorageSize()));
+
+  // Pointless inside the desktop app itself — it has no storage limit.
+  const desktopEl = document.getElementById('home-desktop');
+  if (desktopEl) {
+    desktopEl.hidden = IS_DESKTOP;
+    desktopEl.innerHTML = t('home.desktop')
+      .replace('{link}', '<a href="https://github.com/SarahMit/InkTink#desktop-app" target="_blank" rel="noopener">')
+      .replace('{/link}', '</a>');
+  }
 
   const container = document.getElementById('home-recent');
   container.innerHTML = '';
@@ -3031,7 +3048,7 @@ let ideaPoolSuggestId = null;      // transient "decide for me" highlight
 
 function loadIdeaPool() {
   try {
-    const raw = localStorage.getItem(LS_IDEAPOOL);
+    const raw = appStorage.getItem(LS_IDEAPOOL);
     if (raw) {
       const d = JSON.parse(raw);
       ideaPool = {
@@ -3044,7 +3061,7 @@ function loadIdeaPool() {
 }
 
 function saveIdeaPool() {
-  try { localStorage.setItem(LS_IDEAPOOL, JSON.stringify(ideaPool)); } catch {}
+  try { appStorage.setItem(LS_IDEAPOOL, JSON.stringify(ideaPool)); } catch {}
 }
 
 function ideaPoolId() {
@@ -3923,14 +3940,14 @@ document.getElementById('home-btn-import').addEventListener('click', () => docum
 function applyTheme(theme) {
   const dark = theme === 'dark';
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  localStorage.setItem('inktink-theme', dark ? 'dark' : 'light');
+  appStorage.setItem('inktink-theme', dark ? 'dark' : 'light');
   const btn = document.getElementById('theme-switch');
   if (btn) {
     btn.textContent = dark ? '☀' : '☾';
     btn.title = dark ? 'Switch to light' : 'Switch to dark';
   }
 }
-applyTheme(localStorage.getItem('inktink-theme') || 'light');
+applyTheme(appStorage.getItem('inktink-theme') || 'light');
 document.getElementById('theme-switch').addEventListener('click', () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   applyTheme(isDark ? 'light' : 'dark');
@@ -5071,6 +5088,9 @@ function flushPendingSave() {
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   if (typeof flushEditor === 'function') flushEditor(); // pull live editor DOM into state
   if (isDirty) saveProject();
+  // Desktop writes to disk asynchronously; block until everything is on disk
+  // so closing the window can never lose the last keystrokes.
+  if (IS_DESKTOP) window.inktinkDesktop.flushSync();
 }
 window.addEventListener('pagehide', flushPendingSave);
 window.addEventListener('beforeunload', e => {

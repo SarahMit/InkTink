@@ -1,0 +1,39 @@
+# Builds and publishes the desktop app to GitHub Releases.
+# Trigger: push a tag like `desktop-v0.1.0` — the tag is the single source of
+# truth for the version (desktop/package.json is synced from it, never edit it
+# by hand). Web deploys stay independent (push to main → pages.yml).
+name: Desktop release
+
+on:
+  push:
+    tags: ['desktop-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync version from tag
+        shell: bash
+        run: npm version --no-git-tag-version "${GITHUB_REF_NAME#desktop-v}"
+
+      - run: npm ci
+
+      - name: Build and publish
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

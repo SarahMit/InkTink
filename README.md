@@ -35,3 +35,11 @@ And as with anything that lives in a browser: clearing your browsing data delete
 ## Offline & mobile
 
 InkTink works as a [Progressive Web App](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps). After your first visit it loads without an internet connection. On a phone or tablet you can add it to your home screen for a full-screen, app-like experience.
+
+## Desktop app
+
+The same InkTink without the browser's storage limit: projects live as plain `.json` files in `Documents/InkTink/` (deleted ones go to `trash/`, never destroyed). [Download an installer](https://github.com/SarahMit/InkTink/releases) — on Windows it auto-updates.
+
+Web and desktop are fully compatible: the files use the exact same format as **Export**/**Import**. To move in, export a backup in the browser and import it in the app (or drop `.json` exports into `Documents/InkTink/projects/`).
+
+**Development:** `cd desktop && npm install && npm start`. **Release:** `git tag desktop-v0.1.0 && git push --tags` — GitHub Actions builds the installers and publishes the Release; the tag sets the version. macOS builds are unsigned: no auto-update, first launch via right-click → Open.

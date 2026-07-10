@@ -396,11 +396,26 @@ a.tb-util {
 }
 .btn-danger:hover { background: var(--danger-hover); }
 
-.home-storage {
+.home-smallprint {
   margin-top: 26px;
+  text-align: center;
+}
+
+.home-storage {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.home-desktop {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.home-desktop a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.home-desktop a:hover { color: var(--text); }
 
 /* Quiet "leave no trace" action at the bottom of the home page */
 .home-danger {
@@ -4092,31 +4107,52 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   margin-bottom: 14px;
 }
 
+/* A little letter from the maker: a warm paper card with a faint ink
+   squiggle (the app logo) bleeding out of the corner. */
 .home-note {
+  position: relative;
   width: 100%;
-  max-width: 540px;
+  max-width: 560px;
   margin: 40px auto 0;
-  padding-left: 18px;
-  border-left: 2px solid var(--border-strong);
+  padding: 26px 30px 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   text-align: left;
+  overflow: hidden;
+}
+.home-note::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  background: url('assets/favicon.svg') no-repeat center / contain;
+  opacity: 0.07;
+  transform: rotate(14deg);
+  pointer-events: none;
 }
 .home-note-label {
   font-family: var(--font-head);
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 600;
   color: var(--accent);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .home-note-text {
   font-size: 13.5px;
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--text-muted);
 }
 .home-note-sign {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-  opacity: 0.8;
+  margin-top: 12px;
+  font-family: var(--font-head);
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--c-terracotta);
+  text-align: right;
 }
 
 .home-projects-grid {
