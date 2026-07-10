@@ -29,7 +29,9 @@ jobs:
 
       - name: Sync version from tag
         shell: bash
-        run: npm version --no-git-tag-version "${GITHUB_REF_NAME#desktop-v}"
+        # --allow-same-version: don't fail when package.json already matches
+        # the tag (e.g. the very first release).
+        run: npm version --no-git-tag-version --allow-same-version "${GITHUB_REF_NAME#desktop-v}"
 
       - run: npm ci
 
