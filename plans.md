@@ -1,0 +1,8 @@
+- [x] links bei den charakterkarten einfügen können
+- [x] ein cooles chart pro character (→ Eigenschafts-Radar mit Slidern)
+- [x] bei den charakterkarten einen gestylten bereich für ein zitat am anfang
+- [x] bei den karten für den weltenbau die gleichen verschiebbaren abschnitte wie bei den charakterkarten
+- [x] einzelne weltenbau karten in der reihenfolge vertauschbar machen, so wie bei den charakter-karten
+- [x] bei storybeats/ zeitstrahl die möglichkeit haben auf szenen zu linken
+- [x] im notizenboard auf szenen, charaktere, orte oder was sonst noch sinnvoll ist linken können
+- [x] beim stil-sampler einen Six-of-Crows-ähnlichen und einen Mistborn-ähnlichen Stil hinzufügen

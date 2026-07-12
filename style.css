@@ -4698,6 +4698,32 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 }
 .idea-bullet-q { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 3px; }
 
+/* ── Idea generator ── */
+.gen-blurb {
+  font-family: var(--font-head); font-size: 19px; line-height: 1.65;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.gen-slot { background: var(--bg-hover); border-radius: 4px; padding: 0 3px; transition: background .1s ease, box-shadow .1s ease; }
+.gen-slot.locked { box-shadow: inset 0 -2px var(--accent); }
+.gen-slot.hl { background: var(--border); }
+.gen-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.gen-chip {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 999px;
+  padding: 3px 6px 3px 12px; font-size: 12px; color: var(--text);
+}
+.gen-chip.locked { border-color: var(--accent); }
+.gen-chip-label { margin-right: 4px; }
+.gen-chip-btn {
+  border: none; background: none; color: var(--text-muted); cursor: pointer;
+  font: inherit; font-size: 14px; line-height: 1; padding: 3px 4px; border-radius: 999px;
+  display: inline-flex; align-items: center;
+}
+.gen-chip-btn:hover { color: var(--accent); background: var(--bg-hover); }
+.gen-chip.locked .gen-lock { color: var(--accent); }
+.gen-chip-btn svg { width: 13px; height: 13px; }
+
 /* ── Develop the Initial Idea (multi-field workshop) ── */
 .idea-stage:has(.idea-dev-layout) { max-width: 980px; }
 .idea-stage:has(.ip-grid) { max-width: 980px; }
@@ -4820,7 +4846,10 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
   flex: none; width: 22px; height: 22px; border-radius: 50%; margin-top: 2px;
   background: var(--accent); color: var(--on-accent);
   display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;
+  cursor: grab; user-select: none;
 }
+.rt-scene.dragging { opacity: 0.5; }
+.rt-scene.drag-over { border-color: var(--accent); opacity: 0.6; }
 .rt-scene-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .rt-desc {
   width: 100%; box-sizing: border-box; background: var(--bg-surface);
@@ -5043,17 +5072,20 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 }
 .ip-card-image-add:hover { border-color: var(--accent); color: var(--text); }
 
-.ip-card-link {
-  width: 100%; font-size: 12px; background: transparent;
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); padding: 6px 9px;
+/* Idea links reuse the char-link rows; only the add button needs pool spacing. */
+.ip-card-links:empty { display: none; }
+.ip-card-link-add { align-self: flex-start; margin-top: -4px; }
+
+.ip-drag-handle {
+  display: flex; justify-content: center; align-items: center;
+  height: 14px; margin: -8px 0 -6px;
+  color: var(--text-muted); font-size: 13px; letter-spacing: 2px;
+  cursor: grab; user-select: none; opacity: 0;
+  transition: opacity .15s;
 }
-.ip-card-link:focus { outline: none; border-color: var(--accent); }
-.ip-card-link-open {
-  font-size: 12px; color: var(--accent); text-decoration: none;
-  align-self: flex-start;
-}
-.ip-card-link-open:hover { text-decoration: underline; }
+.ip-card:hover .ip-drag-handle { opacity: 1; }
+.ip-card.dragging { opacity: 0.5; }
+.ip-card.drag-over { border-color: var(--accent); opacity: 0.6; }
 
 .ip-ratings { display: flex; flex-direction: column; gap: 6px; }
 .ip-rating { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

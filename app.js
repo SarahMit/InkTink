@@ -565,6 +565,7 @@ const TR = {
     'ideapool.focus.clear': 'Release focus',
     'ideapool.focus.parked': 'Parked while you focus — still here when you want it.',
     'ideapool.sort.label': 'Sort:',
+    'ideapool.sort.custom': 'My order',
     'ideapool.sort.created': 'Newest',
     'ideapool.sort.spark': 'Most exciting',
     'ideapool.sort.ready': 'Most ready',
@@ -793,6 +794,12 @@ const TR = {
     'ideas.done': 'Done', 'ideas.done.empty': 'Nothing noted yet — go back and fill in a few answers.',
     'ideas.to.notes': 'Send to Notes', 'ideas.to.character': 'Save as Character Entry', 'ideas.restart': 'Another starting point',
     'ideas.seed': 'Seed project structure',
+    'gen.reroll': 'Reroll everything', 'gen.reroll.one': 'Reroll',
+    'gen.lock': 'Keep this', 'gen.unlock': 'Unlock',
+    'gen.save': 'Save to Idea Pool', 'gen.saved': 'Saved ✓',
+    'gen.slot.char': 'Character', 'gen.slot.goal': 'Goal', 'gen.slot.obstacle': 'Obstacle',
+    'gen.slot.inner': 'Inner conflict', 'gen.slot.action': 'Trigger', 'gen.slot.twist': 'Twist',
+    'gen.slot.turn': 'Dilemma',
     'ideas.seed.title': 'Your premise becomes the project description; beginning, middle & end become story beats.',
     'ideas.seed.done': 'Added to your project ✓',
     'ideas.seed.beginning': 'Beginning:', 'ideas.seed.middle': 'Middle:', 'ideas.seed.end': 'End:',
@@ -853,6 +860,7 @@ const TR = {
     'ideapool.focus.clear': 'Fokus aufheben',
     'ideapool.focus.parked': 'Geparkt, während du dich konzentrierst — wartet hier auf dich.',
     'ideapool.sort.label': 'Sortieren:',
+    'ideapool.sort.custom': 'Eigene Reihenfolge',
     'ideapool.sort.created': 'Neueste',
     'ideapool.sort.spark': 'Spannendste',
     'ideapool.sort.ready': 'Startklarste',
@@ -1078,6 +1086,12 @@ const TR = {
     'ideas.done': 'Geschafft', 'ideas.done.empty': 'Noch nichts notiert — geh zurück und füll ein paar Antworten aus.',
     'ideas.to.notes': 'An Notizen schicken', 'ideas.to.character': 'Als Charaktereintrag speichern', 'ideas.restart': 'Anderer Startpunkt',
     'ideas.seed': 'Struktur ins Projekt übernehmen',
+    'gen.reroll': 'Alles neu würfeln', 'gen.reroll.one': 'Neu würfeln',
+    'gen.lock': 'Behalten', 'gen.unlock': 'Wieder freigeben',
+    'gen.save': 'In den Ideen-Pool', 'gen.saved': 'Gespeichert ✓',
+    'gen.slot.char': 'Figur', 'gen.slot.goal': 'Ziel', 'gen.slot.obstacle': 'Hindernis',
+    'gen.slot.inner': 'Innerer Konflikt', 'gen.slot.action': 'Auslöser', 'gen.slot.twist': 'Wendung',
+    'gen.slot.turn': 'Dilemma',
     'ideas.seed.title': 'Deine Prämisse wird zur Projektbeschreibung; Anfang, Mitte & Ende werden Story Beats.',
     'ideas.seed.done': 'Ins Projekt übernommen ✓',
     'ideas.seed.beginning': 'Anfang:', 'ideas.seed.middle': 'Mitte:', 'ideas.seed.end': 'Ende:',
@@ -1138,7 +1152,7 @@ function applyI18n() {
   if (exportWordBtn) exportWordBtn.title = t('writing.export.docx');
   // Split view & sidebar controls carry translated tooltips/options.
   buildSplitPicker();
-  applySplit();
+  applySplit(true); // force: the split pane's text must pick up the new language
   applySidebarCollapsed();
   applyChnavCollapsed();
   const zoomIn = document.getElementById('bs-zoom-in');
@@ -1180,12 +1194,13 @@ const IDEA_ICONS = {
   layers:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
   tree:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
   thread:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v3.5a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4V20"/><circle cx="6" cy="4" r="1.6"/><circle cx="18" cy="20" r="1.6"/></svg>',
+  dice:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="16" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>',
 };
 
 // 'ideapool' and 'brainstorming' are handled specially in ideaHome() — they
 // open inline tools instead of a guided workshop — but ride along on the same
 // starter card grid and icon/meta lookup as 'develop' and 'char'.
-const IDEA_STARTERS = ['develop', 'char', 'brainstorming', 'redthread', 'ideapool'];
+const IDEA_STARTERS = ['develop', 'char', 'generator', 'brainstorming', 'redthread', 'ideapool'];
 
 // Metadata for the starter cards on the "Find & Develop Ideas" home screen.
 // The actual field content for the two guided workshops lives in IDEA_WORKSHOP_FIELDS.
@@ -1195,6 +1210,7 @@ const IDEA_WORKSHOP_META = {
       doneClose: 'You have worked your initial idea into a premise, a moodboard-driven set of ideas, your main characters, and a structure with rising stakes.' },
     char: { icon: 'user', title: 'Who Is My Character', sub: 'What drives the character',
       doneClose: 'You have worked out what set your character\'s story in motion, what holds them in place, what they\'re already up against, and why we\'d follow them.' },
+    generator: { icon: 'dice', title: 'Idea Generator', sub: 'Roll a story premise with built-in conflict — lock what you like, reroll the rest' },
     ideapool: { icon: 'layers', title: 'Idea Pool', sub: 'Too many project ideas at once? Collect, combine, and choose what to focus on' },
     brainstorming: { icon: 'tree', title: 'Idea Tree', sub: 'Branch one idea into a tree with Why?, What if…, and But/So?' },
     redthread: { icon: 'thread', title: 'Find the Throughline', sub: 'Turn the scenes already in your head into a throughline for the plot' },
@@ -1204,6 +1220,7 @@ const IDEA_WORKSHOP_META = {
       doneClose: 'Aus deiner ersten Idee sind eine Prämisse, vom Moodboard inspirierte Ideen, deine Hauptcharaktere und eine Struktur mit steigendem Konflikt geworden.' },
     char: { icon: 'user', title: 'Wer ist mein Charakter', sub: 'Was den Charakter antreibt',
       doneClose: 'Du hast herausgearbeitet, was die Geschichte deines Charakters ins Rollen brachte, was ihn in der Patt-Situation hält, womit er bereits zu kämpfen hat und warum wir ihn begleiten wollen.' },
+    generator: { icon: 'dice', title: 'Ideengenerator', sub: 'Würfle eine Story-Prämisse mit eingebautem Konflikt — behalte, was dir gefällt, würfle den Rest neu' },
     ideapool: { icon: 'layers', title: 'Ideen-Pool', sub: 'Zu viele Projektideen im Kopf? Sammeln, kombinieren und wählen, worauf du dich konzentrierst' },
     brainstorming: { icon: 'tree', title: 'Ideen-Baum', sub: 'Eine Idee mit Warum?, Was wäre wenn… und Aber/Also? zum Baum verzweigen' },
     redthread: { icon: 'thread', title: 'Den roten Faden finden', sub: 'Aus den Szenen, die du schon im Kopf hast, einen roten Faden für den Plot entwickeln' },
@@ -1378,6 +1395,255 @@ const IDEA_WORKSHOP_FIELDS = {
   },
 };
 
+// ── Idea generator content ──
+// Templates are single strings with {slot} markers; each slot draws from the
+// pool of the same name. Only char entries are objects — they carry the
+// pronoun forms that get substituted into everything else: {pro} (sie/er),
+// {obj} (sie/ihn), {dat} (ihr/ihm), {poss} (possessive STEM ihr/sein — write
+// the German case ending as literal text right after it: "{poss}e Schwester"
+// → ihre/seine Schwester, "{poss}em Vater" → ihrem/seinem Vater).
+// Every template contains {obstacle} (external conflict) AND {inner} (internal
+// conflict); {turn} entries are always a value dilemma, so every blurb has a
+// conflict baked in. Each pool is written for ONE fixed syntactic frame (see
+// the comment above each pool) — new entries must fit that frame.
+// v1 supports only er/sie characters; a "they" character would need verb-form
+// substitution on top of pronouns. Top-level keys are generator modes, so a
+// future plot-twist or what-if generator is just another key with its own
+// templates and pools.
+const GEN_CONTENT = {
+  story: {
+    de: {
+      templates: [
+        '{char} will {goal}, aber {obstacle}. Doch insgeheim {inner}. Als {pro} {action}, {twist} — und {turn}',
+        '{char} hat nur ein Ziel: {goal}. Aber {obstacle}. Und insgeheim {inner}. Als {pro} {action}, {twist}. {turn}',
+        'Seit Jahren will {char} {goal} — aber {obstacle}. Insgeheim {inner}. Als {pro} {action}, {twist}. {turn}',
+        '{char} will endlich {goal}. Aber {obstacle} — und insgeheim {inner}. Als {pro} {action}, {twist}. {turn}',
+        '{char} will {goal}, aber {obstacle}. Doch insgeheim {inner}. Dann, als {pro} {action}, {twist} — und {turn}',
+      ],
+      pools: {
+        // Nominativ-Nominalphrase, Artikel klein (Großschreibung am Satzanfang passiert automatisch).
+        // Keine Relativsätze — die Templates setzen kein schließendes Komma.
+        char: [
+          { text: 'eine junge Kartografin', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein alternder Schmuggler', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine verwitwete Leuchtturmwärterin', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein Dorfarzt mit Heimweh nach der Ferne', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine Restauratorin alter Gemälde', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein stiller Archivar', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine Köchin ohne Geruchssinn', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein junger Priester mit Spielschulden', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine pensionierte Kommissarin', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein Uhrmacher im unfreiwilligen Ruhestand', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine Fährfrau am letzten Fluss vor der Grenze', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein Hochstapler kurz vor dem Auffliegen', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine Botanikerin auf einer letzten Expedition', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+          { text: 'ein Nachtwächter im Naturkundemuseum', pro: 'er', obj: 'ihn', dat: 'ihm', poss: 'sein' },
+          { text: 'eine Erbin wider Willen', pro: 'sie', obj: 'sie', dat: 'ihr', poss: 'ihr' },
+        ],
+        // Infinitivphrase ohne "zu" — folgt immer auf "will"
+        goal: [
+          'eine verschollene Stadt finden',
+          'die Schulden {poss}er Familie begleichen',
+          'beweisen, dass der Unfall keiner war',
+          'ein Versprechen einlösen, das {pro} vor zwanzig Jahren gegeben hat',
+          'den Hof {poss}er Kindheit zurückkaufen',
+          'ein letztes Mal mit {poss}em Bruder sprechen',
+          'herausfinden, wer die Briefe geschrieben hat',
+          'die Stadt verlassen, bevor der Winter kommt',
+          'den Namen {poss}es Vaters reinwaschen',
+          'das Haus verkaufen, in dem alles passiert ist',
+          'eine Fälschung zurücktauschen, bevor jemand sie bemerkt',
+          'noch einmal von vorn anfangen, wo {obj} niemand kennt',
+        ],
+        // Äußerer Konflikt: Hauptsatz (Verb an zweiter Stelle) — folgt immer auf "aber".
+        // Muss zu JEDEM Ziel passen (kein Bezug auf Auftraggeber, Ermittlungen o. Ä.).
+        obstacle: [
+          'dafür bleibt {dat} nur noch ein einziger Sommer',
+          'jemand hat es vor {dat} versucht und ist daran zerbrochen',
+          'dafür müsste {pro} eine alte Schuld eingestehen',
+          'der einzige Mensch, der helfen könnte, hasst {obj}',
+          'die Hälfte des Dorfes will genau das verhindern',
+          'dafür fehlt {dat} das Geld — und legal kommt {pro} nicht daran',
+          '{poss}e eigene Familie stellt sich {dat} in den Weg',
+          'niemand darf erfahren, dass {pro} es auch nur versucht',
+          '{pro} hat allen erzählt, das Kapitel sei abgeschlossen',
+          'der Einzige, der die Wahrheit kennt, liegt im Sterben',
+          'jede Spur führt zu einem Mann, der offiziell nie existiert hat',
+          'das Gesetz steht auf der anderen Seite',
+        ],
+        // Innerer Konflikt: Satz mit Verb an ERSTER Stelle — folgt immer auf "insgeheim"
+        inner: [
+          'fürchtet {pro}, dass genau das {obj} zerstören wird',
+          'weiß {pro} nicht, ob {pro} das Ziel will — oder nur die Flucht davor',
+          'glaubt {pro} selbst nicht daran, es verdient zu haben',
+          'hofft {pro}, dass es unmöglich ist — dann müsste {pro} es nie zu Ende bringen',
+          'hat {pro} nie verwunden, was damals geschah',
+          'schämt {pro} sich dafür, wie sehr {pro} es will',
+          'fragt {pro} sich, ob {pro} damit nur einen alten Fehler wiedergutmachen will',
+          'wartet {pro} nur auf einen Grund, endlich aufgeben zu dürfen',
+          'fürchtet {pro} den Tag, an dem niemand mehr da ist, dem {pro} etwas beweisen muss',
+          'ahnt {pro}, dass die Wahrheit schlimmer wäre als jede Lüge',
+        ],
+        // Nebensatz-Fragment mit Verb am ENDE — folgt immer auf "Als {pro}".
+        // Muss zu jeder Figur passen (kein Berufsbezug).
+        action: [
+          'einen Umschlag ohne Absender öffnet',
+          'ein altes Foto aus dem Rahmen löst',
+          'zum ersten Mal seit Jahren nach Hause zurückkehrt',
+          'die letzte Kiste vom Dachboden holt',
+          'einen Fremden um Hilfe bittet',
+          'mitten in der Nacht einen Anruf erhält',
+          'das Schloss zum Arbeitszimmer aufbricht',
+          'der Sache endgültig abschwören will',
+          'den ersten echten Hinweis in den Händen hält',
+          'beinahe schon am Ziel ist',
+        ],
+        // Hauptsatz mit Verb an ERSTER Stelle — folgt immer auf den vorangestellten "Als …,"-Satz
+        twist: [
+          'taucht {poss}e totgeglaubte Schwester auf',
+          'findet {pro} einen Brief, der nie abgeschickt wurde',
+          'bietet ausgerechnet {poss} ärgster Rivale {dat} Hilfe an',
+          'steht plötzlich die Person vor der Tür, die {pro} am meisten fürchtet',
+          'entdeckt {pro}, dass jemand {obj} seit Wochen beobachtet',
+          'stellt sich heraus, dass die halbe Geschichte erlogen war',
+          'verschwindet der einzige Zeuge spurlos',
+          'bekommt {pro} ein Angebot, das alles einfacher machen und {obj} alles kosten würde',
+          'erkennt {pro} die Handschrift wieder',
+          'bricht im Archiv ein Feuer aus',
+          'gesteht {dat} der Mensch, dem {pro} am meisten vertraut, eine Lüge',
+          'fällt {dat} auf, dass {pro} von Anfang an Teil der Geschichte war',
+        ],
+        // Ganzer Schlusssatz (Verb an zweiter Stelle), klein geschrieben, endet mit Punkt.
+        // Regel: immer ein Dilemma — die Figur muss zwischen zwei Dingen wählen, die ihr beide wichtig sind.
+        turn: [
+          'auf einmal muss {pro} entscheiden, wem {pro} noch trauen kann.',
+          'jetzt hängt alles davon ab, was {pro} als Nächstes verschweigt.',
+          'plötzlich steht {pro} zwischen dem, was {pro} versprochen hat, und dem, was richtig wäre.',
+          'nun muss {pro} wählen: die Wahrheit oder die Menschen, die {pro} liebt.',
+          'auf einmal ist der Preis für das Ziel jemand, den {pro} nicht opfern will.',
+          'jetzt kann {pro} nur eines retten: das alte Leben oder das neue.',
+          'plötzlich muss {pro} entscheiden, ob manche Dinge besser begraben bleiben.',
+          'nun steht {pro} vor der Frage, wie viel von sich selbst {pro} dafür aufgeben will.',
+        ],
+      },
+    },
+    en: {
+      templates: [
+        '{char} wants to {goal}, but {obstacle}. And secretly, {inner}. When {pro} {action}, {twist} — and {turn}',
+        '{char} has one goal: to {goal}. But {obstacle}. Secretly, {inner}. When {pro} {action}, {twist}. {turn}',
+        'For years, {char} has wanted to {goal} — but {obstacle}. Secretly, {inner}. When {pro} {action}, {twist}. {turn}',
+        '{char} finally wants to {goal}. But {obstacle} — and secretly, {inner}. When {pro} {action}, {twist}. {turn}',
+        '{char} wants to {goal}, but {obstacle}. And secretly, {inner}. Then, when {pro} {action}, {twist} — and {turn}',
+      ],
+      pools: {
+        // noun phrase, lowercase article (sentence starts are auto-capitalized)
+        char: [
+          { text: 'a young cartographer', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'an aging smuggler', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a widowed lighthouse keeper', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a village doctor who never left', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a restorer of old paintings', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a quiet archivist', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a chef with no sense of smell', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a young priest with gambling debts', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a retired detective', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a watchmaker who stopped taking commissions', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a ferrywoman on the last river before the border', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a con man who almost got caught', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'a botanist on one last expedition', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+          { text: 'a night guard at the natural history museum', pro: 'he', obj: 'him', dat: 'him', poss: 'his' },
+          { text: 'an heiress who never knew about the inheritance', pro: 'she', obj: 'her', dat: 'her', poss: 'her' },
+        ],
+        // bare verb phrase — always follows "wants to" / "has wanted to"
+        goal: [
+          'find a lost city',
+          'pay off {poss} family\'s debts',
+          'prove the accident was no accident',
+          'keep a promise {pro} made twenty years ago',
+          'buy back the farm {pro} grew up on',
+          'speak to {poss} brother one last time',
+          'find out who wrote the letters',
+          'leave town before winter comes',
+          'clear {poss} father\'s name',
+          'sell the house where it all happened',
+          'swap back a forgery before anyone notices',
+          'start over somewhere no one knows {obj}',
+        ],
+        // external conflict: full clause — always follows "but".
+        // Must fit ANY goal (no references to clients, investigations, etc.).
+        obstacle: [
+          'there is only one summer left to do it',
+          'the last person who tried never came back',
+          'it would mean admitting an old debt',
+          'the only person who could help hates {obj}',
+          'half the village wants to stop exactly that',
+          '{pro} can\'t afford it — and can\'t get the money legally',
+          '{poss} own family stands in the way',
+          'no one can ever know {pro} is even trying',
+          '{pro} has told everyone that chapter is closed',
+          'the only one who knows the truth is dying',
+          'every lead points to a man who officially never existed',
+          'the law is on the other side',
+        ],
+        // internal conflict: full clause starting with {pro} — always follows "secretly,"
+        inner: [
+          '{pro} fears this very search will destroy {obj}',
+          '{pro} doesn\'t know if {pro} wants the goal — or just the escape it offers',
+          '{pro} doesn\'t believe {pro} deserves it',
+          '{pro} hopes it\'s impossible — then {pro} would never have to finish it',
+          '{pro} never got over what happened back then',
+          '{pro} is ashamed of how badly {pro} wants it',
+          '{pro} wonders if {pro} is only trying to undo an old mistake',
+          '{pro} is waiting for a reason to give up',
+          '{pro} dreads the day there\'s no one left to prove anything to',
+          '{pro} suspects the truth would be worse than any lie',
+        ],
+        // verb phrase, third person singular — always follows "when {pro}".
+        // Must fit any character (no profession-specific actions).
+        action: [
+          'opens an envelope with no return address',
+          'pries an old photograph out of its frame',
+          'returns home for the first time in years',
+          'brings down the last box from the attic',
+          'asks a stranger for help',
+          'gets a phone call in the middle of the night',
+          'breaks the lock on the study',
+          'is about to walk away from it all',
+          'holds the first real clue in {poss} hands',
+          'is almost there at last',
+        ],
+        // full clause — always follows the fronted "when …," clause
+        twist: [
+          '{poss} long-dead sister turns up',
+          '{pro} finds a letter that was never sent',
+          'of all people, {poss} fiercest rival offers to help',
+          'the person {pro} fears most is standing at the door',
+          '{pro} discovers someone has been watching {obj} for weeks',
+          'it turns out half the story was a lie',
+          'the only witness vanishes without a trace',
+          '{pro} gets an offer that would make everything easier — and cost everything',
+          '{pro} recognizes the handwriting',
+          'a fire breaks out in the archive',
+          'the one person {pro} trusts most confesses to a lie',
+          '{pro} realizes {pro} was part of the story all along',
+        ],
+        // complete final sentence, lowercase, ends with a period.
+        // Rule: always a dilemma — the character must choose between two things they both care about.
+        turn: [
+          'suddenly {pro} has to decide who {pro} can still trust.',
+          'now everything depends on what {pro} hides next.',
+          'suddenly {pro} is caught between what {pro} promised and what would be right.',
+          'now {pro} must choose: the truth, or the people {pro} loves.',
+          'suddenly the price of the goal is someone {pro} refuses to sacrifice.',
+          'now {pro} can save only one thing — the old life or the new one.',
+          'suddenly {pro} has to decide whether some things are better left buried.',
+          'now {pro} has to ask how much of {obj}self {pro} is willing to give up.',
+        ],
+      },
+    },
+  },
+};
+
 const IDEA_NOTE_COLORS = ['#c8a2ff', '#ffd479', '#7ee0a0', '#7ec8ff', '#ff9eb1'];
 
 function ideaEsc(s) {
@@ -1437,6 +1703,7 @@ function ideaHome() {
       '<span class="idea-pick-s">' + m.sub + '</span></span>';
     b.addEventListener('click', () => {
       if (key === 'ideapool') ideaPoolStageRender();
+      else if (key === 'generator') ideaGeneratorStageRender();
       else if (key === 'brainstorming') ideaBrainstormingStageRender();
       else if (key === 'redthread') ideaRedThreadStageRender();
       else ideaWorkshopRender(key);
@@ -1504,6 +1771,7 @@ function ideaRedThreadStageRender() {
 
 // Rebuilds the scene cards (used on add/remove, which change the DOM structure).
 // Typing inside a card updates data + the thread panel only, so focus is kept.
+let rtDragFrom = null; // index of the scene being dragged
 function renderRedThreadScenes() {
   const wrap = document.getElementById('rt-scenes');
   if (!wrap) return;
@@ -1513,7 +1781,7 @@ function renderRedThreadScenes() {
     const card = document.createElement('div');
     card.className = 'rt-scene';
     card.innerHTML =
-      '<div class="rt-scene-num">' + (i + 1) + '</div>' +
+      '<div class="rt-scene-num" title="' + ideaEsc(t('char.section.reorder')) + '">' + (i + 1) + '</div>' +
       '<div class="rt-scene-body">' +
         '<textarea class="rt-desc" rows="1" placeholder="' + ideaEsc(t('redthread.desc')) + '">' + ideaEsc(sc.desc) + '</textarea>' +
         '<div class="rt-sentence">' +
@@ -1546,6 +1814,41 @@ function renderRedThreadScenes() {
       saveProject();
       renderRedThreadScenes();
     });
+
+    // Drag & drop reordering — the number badge is the handle, so clicks
+    // still land in the card's text fields.
+    const num = card.querySelector('.rt-scene-num');
+    card.draggable = false;
+    num.addEventListener('mousedown', () => { card.draggable = true; });
+    num.addEventListener('mouseup', () => { card.draggable = false; });
+    card.addEventListener('dragstart', e => {
+      if (!card.draggable) { e.preventDefault(); return; }
+      rtDragFrom = i;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+    card.addEventListener('dragend', () => {
+      card.draggable = false;
+      card.classList.remove('dragging');
+      wrap.querySelectorAll('.rt-scene').forEach(c => c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      if (rtDragFrom === null) return;
+      e.preventDefault();
+      if (rtDragFrom !== i) card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if (rtDragFrom === null || rtDragFrom === i) return;
+      const [moved] = redThread.scenes.splice(rtDragFrom, 1);
+      redThread.scenes.splice(i, 0, moved);
+      rtDragFrom = null;
+      saveProject();
+      renderRedThreadScenes();
+    });
+
     wrap.appendChild(card);
   });
   requestAnimationFrame(() => wrap.querySelectorAll('.rt-desc, .rt-in').forEach(autoResize));
@@ -1591,6 +1894,153 @@ function ideaPoolStageRender() {
     '</div>';
   stage.querySelector('#idea-pool-back').addEventListener('click', ideaHome);
   renderIdeaPool(stage.querySelector('#idea-pool-inline'));
+}
+
+// ── Idea generator, inline within the "Find & Develop Ideas" stage ──
+// Rolls a multi-sentence story blurb from GEN_CONTENT. Slots can be locked
+// (survive "reroll all") and rerolled individually. State is deliberately
+// RAM-only, like the flow warm-ups — only blurbs saved to the idea pool last.
+let genState = { mode: 'story', tplIdx: -1, picks: {}, locks: {} };
+// picks: slot -> index into its pool; locks: slot -> true while locked
+
+const GEN_LOCK_ICONS = {
+  locked: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  open:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/></svg>',
+};
+
+function genData() {
+  const mode = GEN_CONTENT[genState.mode];
+  return mode[currentLang] || mode.en;
+}
+
+// Pool slots used by a template, in blurb order. Grammar placeholders like
+// {pro} fall through the pools check and stay out of the list.
+function genTplSlots(tpl) {
+  const pools = genData().pools;
+  const slots = [];
+  (tpl.match(/\{\w+\}/g) || []).forEach(m => {
+    const name = m.slice(1, -1);
+    if (pools[name] && !slots.includes(name)) slots.push(name);
+  });
+  return slots;
+}
+
+function genRandIdx(len, exclude) {
+  if (len <= 1) return 0;
+  let i;
+  do { i = Math.floor(Math.random() * len); } while (i === exclude);
+  return i;
+}
+
+function genRollAll() {
+  const d = genData();
+  genState.tplIdx = genRandIdx(d.templates.length, genState.tplIdx);
+  genTplSlots(d.templates[genState.tplIdx]).forEach(slot => {
+    if (genState.locks[slot] && genState.picks[slot] != null) return;
+    genState.picks[slot] = genRandIdx(d.pools[slot].length, genState.picks[slot]);
+  });
+}
+
+function genSubst(text, ch) {
+  return text
+    .replaceAll('{pro}', ch.pro)
+    .replaceAll('{obj}', ch.obj)
+    .replaceAll('{dat}', ch.dat)
+    .replaceAll('{poss}', ch.poss);
+}
+
+// Assembles the blurb from the current template + picks. Returns { html, text }:
+// html wraps each slot in a span for highlighting; text is the plain version
+// for the idea pool. Sentence starts are auto-capitalized, so pool entries stay
+// lowercase and the same entry works after both ". " and "— ".
+function genBlurb() {
+  const d = genData();
+  const tpl = d.templates[genState.tplIdx];
+  const ch = d.pools.char[genState.picks.char] || d.pools.char[0];
+  let html = '', text = '', capNext = true;
+  tpl.split(/(\{\w+\})/).forEach(part => {
+    if (!part) return;
+    let s = part, slot = null;
+    const m = part.match(/^\{(\w+)\}$/);
+    if (m && d.pools[m[1]]) {
+      slot = m[1];
+      const entry = d.pools[slot][genState.picks[slot]];
+      s = slot === 'char' ? entry.text : entry;
+    }
+    s = genSubst(s, ch);
+    if (capNext && /\p{L}/u.test(s)) {
+      s = s.replace(/\p{L}/u, c => c.toUpperCase());
+      capNext = false;
+    }
+    if (/[.!?]["»)]?\s*$/.test(s)) capNext = true;
+    text += s;
+    html += slot
+      ? '<span class="gen-slot' + (genState.locks[slot] ? ' locked' : '') + '" data-slot="' + slot + '">' + ideaEsc(s) + '</span>'
+      : ideaEsc(s);
+  });
+  return { html, text };
+}
+
+function ideaGeneratorStageRender() {
+  const stage = ideaStage();
+  if (!stage) return;
+  const d = genData();
+  // First visit — or picks left over from another language whose pools are
+  // shorter: start from a fresh roll so the blurb is always complete.
+  const stale = genState.tplIdx < 0 || genState.tplIdx >= d.templates.length ||
+    genTplSlots(d.templates[genState.tplIdx]).some(s => genState.picks[s] == null || genState.picks[s] >= d.pools[s].length);
+  if (stale) {
+    genState = { mode: genState.mode, tplIdx: -1, picks: {}, locks: {} };
+    genRollAll();
+  }
+  const meta = (IDEA_WORKSHOP_META[currentLang] || IDEA_WORKSHOP_META.en).generator;
+  const slots = genTplSlots(d.templates[genState.tplIdx]);
+  stage.innerHTML =
+    '<div class="idea-lead">' + meta.title + '</div>' +
+    '<div class="gen-blurb">' + genBlurb().html + '</div>' +
+    '<div class="gen-chips">' +
+      slots.map(slot => {
+        const locked = !!genState.locks[slot];
+        return '<div class="gen-chip' + (locked ? ' locked' : '') + '" data-slot="' + slot + '">' +
+          '<span class="gen-chip-label">' + t('gen.slot.' + slot) + '</span>' +
+          '<button class="gen-chip-btn gen-roll" title="' + ideaEsc(t('gen.reroll.one')) + '">&#10227;</button>' +
+          '<button class="gen-chip-btn gen-lock" title="' + ideaEsc(t(locked ? 'gen.unlock' : 'gen.lock')) + '">' + GEN_LOCK_ICONS[locked ? 'locked' : 'open'] + '</button>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="idea-actions">' +
+      '<button class="idea-ghost" id="gen-back">' + t('ideas.back') + '</button>' +
+      '<div class="idea-spacer"></div>' +
+      '<button class="idea-ghost" id="gen-save">' + t('gen.save') + '</button>' +
+      '<button class="idea-next" id="gen-reroll">' + t('gen.reroll') + '</button>' +
+    '</div>';
+
+  stage.querySelector('#gen-back').addEventListener('click', ideaHome);
+  stage.querySelector('#gen-reroll').addEventListener('click', () => { genRollAll(); ideaGeneratorStageRender(); });
+  stage.querySelector('#gen-save').addEventListener('click', () => {
+    // The blurb is body text, not a headline — it goes into the note field;
+    // the title stays empty for the writer to name the idea.
+    ideaPoolAdd('', genBlurb().text);
+    const btn = stage.querySelector('#gen-save');
+    btn.disabled = true;
+    btn.textContent = t('gen.saved');
+  });
+  stage.querySelectorAll('.gen-chip').forEach(chip => {
+    const slot = chip.dataset.slot;
+    const span = () => stage.querySelector('.gen-slot[data-slot="' + slot + '"]');
+    // A manual reroll works on locked slots too — the lock only guards "reroll all".
+    chip.querySelector('.gen-roll').addEventListener('click', () => {
+      genState.picks[slot] = genRandIdx(genData().pools[slot].length, genState.picks[slot]);
+      ideaGeneratorStageRender();
+    });
+    chip.querySelector('.gen-lock').addEventListener('click', () => {
+      genState.locks[slot] = !genState.locks[slot];
+      ideaGeneratorStageRender();
+    });
+    // Hovering a chip highlights the text it controls.
+    chip.addEventListener('mouseenter', () => { const sp = span(); if (sp) sp.classList.add('hl'); });
+    chip.addEventListener('mouseleave', () => { const sp = span(); if (sp) sp.classList.remove('hl'); });
+  });
 }
 
 // ── Guided workshops ("Develop the Initial Idea", "Who Is My Character") ──
@@ -1984,27 +2434,27 @@ const WRITING_STYLE_SCENES = {
     {
       base: 'Nora duelliert sich mit ihrem Rivalen Zane, während die große Halle ringsum brennt.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Noras Großmutter hatte ihr Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und als Zanes Feuerzauber an ihr zerbrach, glitt er an dem Gewebe ab wie Regen von Öltuch. Sie spürte jeden Stich halten. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war, und da war sie ihm schon zu nah und rammte ihm die Schulter in die Rippen. Er hatte gegrinst, als wäre das Duell gewonnen. Was ihre Familie für sie gemacht hatte, tat, was Liebe tut: Es hielt sie einen Atemzug länger aufrecht." },
+        { label: 'Sinnlich & zärtlich', text: "Noras Großmutter hatte ihr Mantelfutter mit Kupferfaden durchwirkt, Nacht für Nacht eine sorgsame Reihe, genau für diesen Moment — und als Zanes Feuerzauber an ihr zerbrach, glitt er an dem Gewebe ab wie Regen von Öltuch. Sie spürte jeden Stich halten. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war, und da war sie schon unter seiner Deckung und rammte ihm die Schulter in die Rippen. Er hatte gegrinst, als wäre das Duell gewonnen. Was ihre Familie für sie gemacht hatte, tat, was Liebe tut: Es hielt sie einen Atemzug länger aufrecht." },
         { label: 'Atemlos & trotzig', text: "Zane schleuderte Feuer. Es zerbrach an meinem Mantel und glitt ab — danke, Großmutter. Er schlug zu. Ich ging runter. Der Dachbalken krachte dorthin, wo eben mein Kopf war. Er grinste, als hätte er schon gewonnen — also ließ ich ihn das glauben und rammte ihm dann die Schulter in die Rippen. Wir gehen nicht beide aus dieser Halle. Gut. Ich bin nicht die, die fällt." },
         { label: 'Trocken & theatralisch', text: "Die Halle stand in Flammen, was Nora selbst für Zane ein wenig übertrieben fand. Sein Feuerzauber glitt an ihrem kupferdurchwirkten Mantel ab und brachte nichts zustande außer ruinierten Vorhängen. „Du hast neu dekoriert“, bemerkte sie und duckte sich unter einem Hieb, während ein Dachbalken gefällig dorthin fiel, wo eben ihr Kopf gewesen war. Zane knurrte etwas von Bestimmung. Sie rammte ihm die Schulter in die Rippen, vor allem, um ihn zum Schweigen zu bringen." },
         { label: 'Bissig & ungeschönt', text: "Alle romantisieren ein Duell auf Leben und Tod, und alle sind Idioten, denn keiner erwähnt den Rauch. Zane schleuderte einen verbotenen Feuerritus, der ihn in einem Jahrzehnt die Seele kostet — nicht, dass der Angeber so weit dächte —, und der glitt einfach an dem Mantel ab, den meine Großmutter mit Kupfer durchwirkt hatte. Ein Dachbalken hätte die Sache fast für uns beide entschieden. Also hörte ich auf, wie eine Dame zu fechten, und rammte ihm stattdessen die Schulter in die Rippen." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Das Feuer blühte an den hohen Fenstern auf wie ein zweiter, hungrigerer Sonnenuntergang, und einen Herzschlag lang war die brennende Halle beinahe schön. Zane' Zauber schoss auf Nora zu — und glitt von dem Kupfer ab, das ihre Großmutter Winterabend für Winterabend in ihren Mantel gefädelt hatte, als hielten die Hände der alten Frau sie noch immer warm. Ein Dachbalken fiel dorthin, wo eben ihr Kopf gewesen war, und zog Funken hinter sich her wie aufgeschreckte Glühwürmchen. Zane lächelte, seiner Sache sicher. Nora trat in diese Sicherheit hinein und rammte ihm die Schulter in die Rippen." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Das Feuer blühte an den hohen Fenstern auf wie ein zweiter, hungrigerer Sonnenuntergang, und einen Herzschlag lang war die brennende Halle beinahe schön. Zanes Zauber schoss auf Nora zu — und glitt von dem Kupfer ab, das ihre Großmutter Winterabend für Winterabend in ihren Mantel gefädelt hatte, als hielten die Hände der alten Frau sie noch immer warm. Ein Dachbalken fiel dorthin, wo eben ihr Kopf gewesen war, und zog Funken hinter sich her wie aufgeschreckte Glühwürmchen. Zane lächelte, seiner Sache sicher. Nora trat in diese Sicherheit hinein und rammte ihm die Schulter in die Rippen." },
         { label: 'Frech & herzlich', text: "Die große Halle stand also in Flammen — sehr dramatisch, Zane, wirklich. Er schleuderte mir mit einer unerträglich selbstgefälligen kleinen Geste einen Feuerzauber entgegen, und der... glitt einfach an meinem Mantel ab. Danke, Oma, und danke für deine neunhundert Stunden Kupferfaden. Ein Dachbalken krachte genau dorthin, wo eben mein Kopf gewesen war, worüber ich beschloss, nicht nachzudenken. Er grinste, als hätte er schon gewonnen. Süß. Ich rammte ihm die Schulter in die Rippen und wischte ihm das Grinsen aus dem Gesicht." },
         { label: 'Spöttisch & skrupellos', text: "Nora hatte den Kampf in dem Moment durchgerechnet, in dem Zane die Hand hob: ein Mantel, von einer Großmutter mit Kupfer durchwirkt, die nie eine Schuld einging, ohne sich abzusichern, gegen einen Feuerzauber, geworfen von einem Jungen, der nie eine Rechnung zu zahlen gedachte. Die Flammen zerbrachen am Gewebe und suchten sich jemand anderen zum Ruinieren. Ein Dachbalken krachte dorthin, wo eben ihr Kopf gewesen war — schlampig, fand sie, von der Architektur. Zane grinste, als gehörte ihm die Halle schon. Nora ließ ihm das Grinsen und nahm sich seine Rippen. Nach ihrer Erfahrung fielen die, die zuerst lächelten, am härtesten." },
-        { label: 'Kinetisch & präzise', text: "Zanes Zauber traf das Kupfergewebe und glitt ab, seine Hitze verlief sich in den Fäden, genau wie das Metall es erzwingen sollte. Nora spürte den Zug und drehte sich mit dem Abgleiten, nicht dagegen. Über ihr gab ein Balken nach — sie war schon zur Seite getreten, also fiel er durch die leere Luft, wo sie eben gewesen war. Zwei Schritte schlossen den Abstand. Sie ließ ihr Gewicht sinken, stieß sich vom hinteren Fuß ab und rammte ihm die Schulter mitten in die Rippen. Knochen verschob sich. Sein Grinsen zerbrach einen halben Herzschlag vor seiner Deckung." },
+        { label: 'Kinetisch & präzise', text: "Zanes Zauber traf das Kupfergewebe und glitt ab, seine Hitze verlief sich entlang der Fäden — genau dafür war das Kupfer eingewebt. Nora spürte den Zug und drehte sich mit dem Abgleiten, nicht dagegen. Über ihr gab ein Balken nach — sie war schon zur Seite getreten, also fiel er durch die leere Luft, wo sie eben gewesen war. Zwei Schritte schlossen den Abstand. Sie ließ ihr Gewicht sinken, stieß sich vom hinteren Fuß ab und rammte ihm die Schulter mitten in die Rippen. Knochen gaben nach. Sein Grinsen zerbrach einen halben Herzschlag vor seiner Deckung." },
       ],
     },
     {
       base: 'Die Seilbrücke reißt über der Schlucht — Nora fängt die letzte Planke.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, glatt geschliffen von hundert Jahren kreuzender Hände, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn Nora kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden; jetzt fanden ihre Finger den Knoten ihres Vaters, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält. Das Holz riss ihr die Handflächen auf. Sie brachte ein Knie hoch, dann das andere, und kletterte zurück auf den Sims." },
-        { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich packte die letzte Planke, und das Holz riss mir die Handflächen auf, und es war mir egal. Mein Vater hatte diese Seile neu gebunden; ich kannte seinen Knoten am Griff. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ein Knie hoch. Dann das andere. Ich kletterte meinen eigenen Schrei zurück auf den Sims." },
+        { label: 'Sinnlich & zärtlich', text: "Die Planke war altes Zedernholz, von den Händen eines Jahrhunderts glatt geschliffen, und beinahe hätte sie genau diese Glätte umgebracht — dann rettete sie sie, denn Nora kannte diese Maserung. Als Kind hatte sie geholfen, diese Seile neu zu binden; jetzt fanden ihre Finger den Knoten ihres Vaters, den ungeschickten, festen, und hielten ihn, wie man eine Hand hält. Das Holz riss ihr die Handflächen auf. Sie brachte ein Knie hoch, dann das andere, und kletterte zurück auf den Felsvorsprung." },
+        { label: 'Atemlos & trotzig', text: "Die Brücke gab nach. Einfach — weg, unter mir. Ich packte die letzte Planke, und das Holz riss mir die Handflächen auf, und es war mir egal. Mein Vater hatte diese Seile neu gebunden; ich kannte seinen Knoten am Griff. Unter mir wollte die Schlucht mich haben, und der Wind gab ihr recht. Nein. Nicht heute. Ein Knie hoch. Dann das andere. Ich kletterte, den Schrei noch im Hals, zurück auf den Vorsprung." },
         { label: 'Trocken & theatralisch', text: "Die Brücke stürzte mit der Begeisterung von etwas ein, das die ganze Woche darauf gewartet hatte. Nora fand sich an einer einzigen Planke baumelnd wieder, über einem Abgrund, den man großzügig als tödlich bezeichnen durfte, die Handflächen aufgerissen — und erkannte ausgerechnet das Knotenwerk ihres Vaters. „Na schön“, sagte sie zur Schlucht, die nicht antwortete, weil sie eine Schlucht war. Sie brachte ein Knie hoch, dann das andere, und machte sich an das mühsame Geschäft, nicht zu sterben." },
         { label: 'Bissig & ungeschönt', text: "Was dir niemand über uralte Seilbrücken sagt: Sie werden von exakt niemandem gewartet und nur von Tradition und Optimismus zusammengehalten. Als sie mich also fallen ließ, war ich nicht überrascht — wütend, baumelnd, mit blutenden Handflächen, aber nicht überrascht. Die einzige Gnade war das Seil: Mein Vater hatte diese Knoten neu gebunden, und seiner hielt. Ich brachte ein Knie hoch, dann das andere, aus reinem Trotz. Trotz, wie sich herausstellt, hat einen ausgezeichneten Griff." },
         { label: 'Märchenhaft & atmosphärisch', text: "Die Brücke gab unter Nora nach wie ein zu lange angehaltener Atem, der endlich entweicht, und unter ihr öffnete die Schlucht ihren langen blauen Schlund. Ihre Hände fanden die letzte Planke — altes Zedernholz, glatt wie eine zu oft erzählte Geschichte —, und das Holz biss ihr in die Handflächen, noch während es sie rettete. Ihr Vater hatte diese Seile neu gebunden; sie kannte seinen ungeschickten, treuen Knoten, wie man eine Stimme im Dunkeln kennt. Ein Knie, dann das andere, und sie kletterte zurück in die Welt der Lebenden." },
-        { label: 'Frech & herzlich', text: "Die Brücke war einfach... weg. Eben noch eine Brücke, im nächsten Moment ein nachdrücklicher Vorschlag, doch bitte fliegen zu lernen. Ich packte die letzte Planke — Holz, Splitter, Blut, das ganze Programm — und ehrlich? Unverschämt. Aber mein Vater hatte diese Seile neu gebunden, als ich klein war, und seinen knubbeligen Knoten würde ich überall erkennen. Unter mir hielt die Schlucht ihr Plädoyer. Ich lehnte ab. Ein Knie hoch, dann das andere, und ich zog mich zurück auf den Sims, fluchend den ganzen Weg." },
-        { label: 'Spöttisch & skrupellos', text: "Die Brücke versagte, wie schlechte Pläne es tun — alles auf einmal und jemanden mit sich reißend. Nora fing die letzte Planke und überließ die Rechnung dem Später: zwei Handflächen, eine Brücke, kein bequemer Weg zurück. Altes Zedernholz, glatt geschliffen von hundert Leuten, die ihm mehr vertraut hatten als sie. Sie fand den Knoten ihres Vaters am Griff — ungeschickt, ehrlich, das einzig Ehrliche auf hundert Meilen — und ließ ihn sie tragen. Ein Knie. Das andere. Sie kletterte aus der Schlucht, wie sie alles tat: unbezahlt und wütend darüber." },
-        { label: 'Kinetisch & präzise', text: "Die Planken fielen der Reihe nach, und Noras Hand schloss sich um die letzte, bevor ihr Verstand den Sturz zu Ende gedacht hatte. Das Zedernholz nahm ihr Haut von den Handflächen — Reibung, der Preis des Anhaltens —, aber es hielt. Sie schwang einmal aus, um den Schwung zu töten, wartete den Bogen ab und griff dann mit der freien Hand nach dem Seil. Der Knoten ihres Vaters saß, wo er immer gesessen hatte. Sie belastete ihn, prüfte ihn, vertraute ihm. Knie auf die Planke. Gewicht hoch. Zweites Knie. Jede Bewegung klein, jede Bewegung sicher, bis der Sims unter ihr war und die Schlucht nur noch ein Abgrund." },
+        { label: 'Frech & herzlich', text: "Die Brücke war einfach... weg. Eben noch eine Brücke, im nächsten Moment ein nachdrücklicher Vorschlag, doch bitte fliegen zu lernen. Ich packte die letzte Planke — Holz, Splitter, Blut, das ganze Programm — und ehrlich? Unverschämt. Aber mein Vater hatte diese Seile neu gebunden, als ich klein war, und seinen knubbeligen Knoten würde ich überall erkennen. Unter mir hielt die Schlucht ihr Plädoyer. Ich lehnte ab. Ein Knie hoch, dann das andere, und ich zog mich zurück auf den Vorsprung, fluchend auf dem ganzen Weg." },
+        { label: 'Spöttisch & skrupellos', text: "Die Brücke versagte, wie schlechte Pläne es tun — alles auf einmal und jemanden mit sich reißend. Nora fing die letzte Planke und verschob die Rechnung auf später: zwei Handflächen, eine Brücke, kein bequemer Weg zurück. Altes Zedernholz, glatt geschliffen von hundert Leuten, die ihm mehr vertraut hatten als sie. Sie fand den Knoten ihres Vaters am Griff — ungeschickt, ehrlich, das einzig Ehrliche auf hundert Meilen — und ließ ihn sie tragen. Ein Knie. Das andere. Sie kletterte aus der Schlucht, wie sie alles tat: unbezahlt und wütend darüber." },
+        { label: 'Kinetisch & präzise', text: "Die Planken fielen der Reihe nach, und Noras Hand schloss sich um die letzte, bevor ihr Verstand den Sturz zu Ende gedacht hatte. Das Zedernholz nahm ihr Haut von den Handflächen — Reibung, der Preis des Anhaltens —, aber es hielt. Sie schwang einmal aus, um den Schwung abzufangen, wartete den Bogen ab und griff dann mit der freien Hand nach dem Seil. Der Knoten ihres Vaters saß, wo er immer gesessen hatte. Sie belastete ihn, prüfte ihn, vertraute ihm. Knie auf die Planke. Gewicht hoch. Zweites Knie. Jede Bewegung klein, jede Bewegung sicher, bis der Vorsprung unter ihr war und die Schlucht nur noch ein Abgrund." },
       ],
     },
     {
@@ -2014,16 +2464,16 @@ const WRITING_STYLE_SCENES = {
         { label: 'Atemlos & trotzig', text: "„Rück rüber.“ „Ich hatt's.“ „Du hattest es nicht.“ Zanes Schulter lag an meiner, warm, ablenkend, zutiefst unfair. Unsere Hände stießen ständig am Dietrich zusammen. Das Schloss klickte. Wir erstarrten beide — zu nah, beide grinsend, keiner gab's zu. „Siehst du“, hauchte er. „Teamwork.“ Ich sagte ihm, er solle den Mund halten. Ich rückte nicht weg." },
         { label: 'Trocken & theatralisch', text: "„Du atmest mir in den Nacken“, stellte Nora fest. „Ich konzentriere mich“, sagte Zane, der sich ganz offensichtlich nicht konzentrierte. Sie steckten zusammengequetscht in einem Türrahmen, gebaut für einen einzigen reuigen Mönch, die Hände aneinanderstoßend an einem einzigen Dietrich, und arbeiteten an einem Schloss, das deutlich weniger Spannung zwischen den beiden verlangte, die daran hingen. Das Schloss kapitulierte zuerst. „Teamwork“, sagte Zane. Nora verbuchte es als taktische Niederlage und rückte nicht weg." },
         { label: 'Bissig & ungeschönt', text: "Ein Schloss zu zweit zu knacken gilt als großartige Vertrauensübung. Was es tatsächlich ist: zwei Leute, die so tun, als wäre der einzige Grund, warum ihre Hände sich ständig berühren, das Schloss. Ich kannte diesen Mechanismus — links, links, hart rechts — und hätte es allein in drei Sekunden geschafft. Mit Zanes Schulter an meiner brauchte ich dreißig. Das Ding klickte; er grinste und sagte „Teamwork“. Ich sagte ihm, er solle den Mund halten. Er riecht nach Regen und schlechten Entscheidungen, und für beides war ich schon immer schwach — also nein, ich rückte nicht weg." },
-        { label: 'Märchenhaft & atmosphärisch', text: "Der Türrahmen war für einen einzigen reuigen Mönch gebaut und beherbergte stattdessen zwei Diebe, Schulter warm an Schulter im Dunkeln. Ihre Hände trafen sich am Dietrich immer wieder wie Motten an derselben kleinen Flamme; die messingnen Zuhaltungen waren unter ihren Fingern warm geworden. „Du machst es falsch“, hauchte Nora und drehte Zanes Hand eine halbe Umdrehung, und das Schloss seufzte sich auf — genau in dem Moment, in dem sie vergaß zu atmen. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
-        { label: 'Frech & herzlich', text: "Stell dir das vor: ein Türrahmen, gebaut für einen einzigen, sehr kleinen Mönch, und trotzdem irgendwie wir beide darin, Schulter an Schulter, viel zu nah. Unsere Hände stießen ständig am Dietrich zusammen, und ich Würde Da Jetzt Nicht Drüber Nachdenken. „Du machst es falsch.“ „Ich hatt's.“ „Du hattest es ganz sicher nicht.“ Das Schloss klickte. Wir erstarrten — grinsend wie zwei Idioten, keiner gab irgendwas zu. „Teamwork“, hauchte Zane. Ich sagte ihm, er solle den Mund halten. Und nein, ich rückte nicht weg." },
-        { label: 'Spöttisch & skrupellos', text: "Zwei Diebe, ein Türrahmen, gebaut für einen einzigen reuigen Mönch, ein Schloss, bei dem keiner von beiden wirklich Hilfe brauchte. Nora hatte diesen Mechanismus ein Dutzend Mal blind geknackt; sie hätte ihn offen gehabt, bevor Zane sie überhaupt fertig eingeengt hätte. Tat sie nicht. Ihre Hände trafen sich immer wieder am Dietrich, und sie ließ es immer wieder zu — ein Geständnis für sich, das zu unterschreiben sie nicht gedachte. Die Zuhaltungen wurden warm. Das Schloss gab nach. „Teamwork“, murmelte Zane — unerträglich, und nah. Sie sagte ihm, er solle den Mund halten. Sie hatte längst beschlossen, dass der Fluchtweg warten konnte, und sie rückte nicht weg." },
+        { label: 'Märchenhaft & atmosphärisch', text: "Der Türrahmen war für einen einzigen reuigen Mönch gebaut und beherbergte stattdessen zwei Diebe, Schulter warm an Schulter im Dunkeln. Ihre Hände trafen sich am Dietrich immer wieder wie Motten an derselben kleinen Flamme; die messingnen Zuhaltungen waren unter ihren Fingern warm geworden. „Du machst es falsch“, hauchte Nora und drehte Zanes Hand eine halbe Umdrehung, und das Schloss ging mit einem Seufzen auf — genau in dem Moment, in dem sie vergaß zu atmen. „Teamwork“, flüsterte er, und sie rückte nicht weg." },
+        { label: 'Frech & herzlich', text: "Stell dir das vor: ein Türrahmen, gebaut für einen einzigen, sehr kleinen Mönch, und trotzdem irgendwie wir beide darin, Schulter an Schulter, viel zu nah. Unsere Hände stießen ständig am Dietrich zusammen, und darüber dachte ich jetzt einfach nicht nach. Gar nicht. „Du machst es falsch.“ „Ich hatt's.“ „Du hattest es ganz sicher nicht.“ Das Schloss klickte. Wir erstarrten — grinsend wie zwei Idioten, keiner gab irgendwas zu. „Teamwork“, hauchte Zane. Ich sagte ihm, er solle den Mund halten. Und nein, ich rückte nicht weg." },
+        { label: 'Spöttisch & skrupellos', text: "Zwei Diebe, ein Türrahmen, gebaut für einen einzigen reuigen Mönch, ein Schloss, bei dem keiner von beiden wirklich Hilfe brauchte. Nora hatte diesen Mechanismus ein Dutzend Mal blind geknackt; sie hätte ihn offen gehabt, bevor Zane überhaupt richtig neben ihr stand. Tat sie nicht. Ihre Hände trafen sich immer wieder am Dietrich, und sie ließ es immer wieder zu — ein Geständnis für sich, das zu unterschreiben sie nicht gedachte. Die Zuhaltungen wurden warm. Das Schloss gab nach. „Teamwork“, murmelte Zane — unerträglich, und nah. Sie sagte ihm, er solle den Mund halten. Sie hatte längst beschlossen, dass der Fluchtweg warten konnte, und sie rückte nicht weg." },
         { label: 'Kinetisch & präzise', text: "Nora setzte den Dietrich an, spürte den ersten Stift einrasten und hielt die Spannung mit dem Daumen ruhig. Zanes Schulter drückte gegen ihre — eine Variable, die sie zu ignorieren wählte. Zweiter Stift. Dritter. Das Messing wurde warm unter der wiederholten Berührung, die Passung enger, während das Metall arbeitete. Ihre Hände stießen zusammen; sie korrigierte ihren Griff um eine halbe Drehung, und der letzte Stift fiel in die Reihe. Der Riegel glitt. Sie verbuchte den Mechanismus als gelöst und den Türrahmen, bei dieser Breite, als unlösbar. „Teamwork“, sagte Zane. Sie antwortete nicht, und sie rückte nicht weg." },
       ],
     },
     {
       base: 'Nach der Schlacht setzt sich Zane neben Nora und teilt die letzte Ration.',
       voices: [
-        { label: 'Sinnlich & zärtlich', text: "Zane brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Vergebungen. Er drückte Nora die größere Hälfte in die Hand — „die sind gleich groß“, log er — und schloss ihre Finger darum. Er sagte nichts über die Schlacht oder über die, die nicht mit ihnen saßen. Er ließ nur die Wärme seiner Handfläche den Rest sagen, und sie atmeten beide, was mehr war, als manche konnten." },
+        { label: 'Sinnlich & zärtlich', text: "Zane brach das letzte Wegbrot entlang der Naht, die sie beide von derselben toten Köchin gelernt hatten, und die Krümel fielen zwischen sie wie kleine Friedensangebote. Er drückte Nora die größere Hälfte in die Hand — „die sind gleich groß“, log er — und schloss ihre Finger darum. Er sagte nichts über die Schlacht oder über die, die nicht mit ihnen saßen. Er ließ nur die Wärme seiner Handfläche den Rest sagen, und sie atmeten beide, was mehr war, als manche konnten." },
         { label: 'Atemlos & trotzig', text: "Wir zitterten beide noch. Egal. Zane ließ sich neben mir fallen, riss das letzte Wegbrot entzwei, drückte mir die größere Hälfte gegen die Brust. „Die sind gleich groß“, log er. „Iss.“ „Iss du.“ „Iss, oder ich setz mich auf dich.“ Ich aß. Er sah mir dabei zu, als wäre es der einzige Befehl, der den ganzen Tag richtig gelaufen war. Wir atmeten beide noch. Vielleicht war das genug." },
         { label: 'Trocken & theatralisch', text: "„Ich hab dir das größere Stück aufgehoben“, sagte Zane, was eine Lüge war; die Hälften waren identisch, und er hatte sie mit der grimmigen Präzision eines Mannes abgemessen, der beinahe gestorben war und nun gedachte, bei kleineren Dingen kleinlich zu sein. Er drängte es Nora auf, bis sie aß. Sie saßen im Trümmerfeld und teilten altes Wegbrot, als wäre es ein Festmahl. Ein bisschen war es das. Sie atmeten beide noch, was die Architektur nicht von sich behaupten konnte." },
         { label: 'Bissig & ungeschönt', text: "Die Leute denken, Freundschaft im Krieg bestehe aus edlen Reden. Tut sie nicht. Sie besteht aus Zane, deinem trotteligen besten Freund, der einen traurigen Wegbrotkanten teilt und darauf beharrt, seine Hälfte sei kleiner, obwohl sie das offensichtlich nicht ist. Ich ließ ihm diese Lüge. Man lernt, welche Kämpfe zählen. Diesen hier — das Brot, das Sich-neben-mich-Setzen, das Wir-beide-atmen-noch — den verliere ich mit Absicht, jedes Mal." },
@@ -2037,12 +2487,12 @@ const WRITING_STYLE_SCENES = {
       base: 'Zane steht allein die Nachtwache, hoch oben auf dem Turm.',
       voices: [
         { label: 'Sinnlich & zärtlich', text: "Zane hatte den Wollschal seiner Mutter zweimal um den Hals geschlungen und fand immer wieder die Stelle, an der die Farbe verlaufen war, eine kleine Landkarte eines alten Regensturms. Der Turm war kalt, die Sterne fern, die Wache ganz allein seine. Er lehnte den Rücken an den Stein und sah hinauf. Eine Weile erinnerte sich die Wolle an Wärme, selbst dort, wo seine Hände nicht mehr daran glaubten, und die fernen Sterne schienen gar nicht mehr so fern." },
-        { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er muss reichen. Ich lehne den Rücken an den kalten Stein und sehe hinauf. Gut. Allein kann ich — allein hab ich schon hinter mir. Ich starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
+        { label: 'Atemlos & trotzig', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht verbirgt. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er muss reichen. Ich lehne den Rücken an den kalten Stein und sehe hinauf. Gut. Allein kann ich. Allein kenn ich. Ich starre die Nacht nieder, als schulde sie mir Geld. Sie blinzelt nicht. Ich auch nicht." },
         { label: 'Trocken & theatralisch', text: "Die Nachtwache, hatte Zane beschlossen, war eine großartige Art, daran erinnert zu werden, wie zutiefst unwichtig man dem Universum war. Die Sterne ignorierten ihn. Der Wind ignorierte ihn mit echter Hingabe. Er zog den Schal seiner Mutter höher, lehnte den Rücken an den kalten Stein und sah trotzdem zu ihnen hinauf. Er salutierte der Dunkelheit. Prinzipien waren schließlich Prinzipien." },
-        { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da — den Schal meiner Mutter doppelt um den Hals, den Rücken am kalten Stein, herrlich entbehrlich — und, ja, gut, sah hinauf, weil dir niemand sagt, wie ungerecht die Sterne von hier oben sind." },
+        { label: 'Bissig & ungeschönt', text: "Nachtwache ist Strafdienst, der sich als Ehre verkleidet, und alle über mir wissen das. Du stehst sechs Stunden auf einem eiskalten Turm, damit du, falls etwas Schreckliches kommt, ein kleines bisschen früher darüber schreien kannst, bevor es alle umbringt. Das ist der ganze Job. Also stand ich da — den Schal meiner Mutter doppelt um den Hals, den Rücken am kalten Stein, herrlich entbehrlich — und, ja, gut, sah hinauf, weil dir niemand sagt, wie unverschämt schön die Sterne von hier oben sind." },
         { label: 'Märchenhaft & atmosphärisch', text: "Hoch oben auf dem Turm war die Nacht weit und alt, und Zane stand ganz allein in ihr, den Wollschal seiner Mutter zweimal um den Hals geschlungen. Immer wieder fand er die Stelle, an der die Farbe verlaufen war, eine kleine verblasste Landkarte irgendeines längst vergangenen Regensturms. Der Wind zog vorüber wie etwas, das anderswo erwartet wurde; die Sterne hingen fern und geduldig. Er lehnte den Rücken an den kalten Stein und sah hinauf, und eine Weile erinnerte sich die Wolle an eine Wärme, die seine Hände vergessen hatten." },
         { label: 'Frech & herzlich', text: "Nur ich hier oben. Ich, der Wind, die Dunkelheit und was auch immer die Dunkelheit heute Nacht versteckt — wunderbar. Der Schal meiner Mutter ist zweimal um meinen Hals geschlungen, und er wird reichen müssen, denn die Gastfreundschaft dieses Turms heißt „eiskalt“. Ich lehnte den Rücken an den kalten Stein und sah hinauf. Und, na gut, ja — die Sterne waren lächerlich schön. Vor dem Teil warnt einen keiner. Der Nacht würde ich nie die Genugtuung geben, das laut zuzugeben." },
-        { label: 'Spöttisch & skrupellos', text: "Nachtwache: der Posten, den man den Entbehrlichen gibt, damit, wenn das Schlimmste kommt, jemand schon in Position ist, um zuerst darüber zu schreien. Zane kannte seinen Marktwert auf die Münze genau. Er schlang den Schal seiner Mutter zweimal um den Hals — die Farbe an einem Ende verlaufen wie die Karte eines Sturms, den keiner überlebt hatte, um sich zu erinnern — und lehnte den Rücken an den Stein. Die Sterne vollführten ihren üblichen Trick, prächtig und zu nichts zu gebrauchen zu sein. Er sah trotzdem hinauf. Ein Mann konnte billig zu haben sein und sich den einen Luxus bewahren, den niemand ihm in Rechnung zu stellen gedacht hatte." },
+        { label: 'Spöttisch & skrupellos', text: "Nachtwache: der Posten, den man den Entbehrlichen gibt, damit, wenn das Schlimmste kommt, jemand schon in Position ist, um zuerst darüber zu schreien. Zane kannte seinen Marktwert auf den Heller genau. Er schlang den Schal seiner Mutter zweimal um den Hals — die Farbe an einem Ende verlaufen wie die Karte eines Sturms, an den sich niemand mehr erinnerte — und lehnte den Rücken an den Stein. Die Sterne vollführten ihren üblichen Trick, prächtig und zu nichts zu gebrauchen zu sein. Er sah trotzdem hinauf. Ein Mann konnte billig zu haben sein und sich den einen Luxus bewahren, den niemand ihm in Rechnung zu stellen gedacht hatte." },
         { label: 'Kinetisch & präzise', text: "Zane ging zuerst die Turmspitze ab — Ecken, Treppe, die lange Sichtlinie nach Norden —, so wie er jeden Posten sicherte: bekannte Größen vor unbekannten. Die Kälte drang durch die Nähte seines Mantels, also zog er den Schal seiner Mutter höher und legte ihn doppelt, um den Wärmeverlust am Hals zu senken. Dann lehnte er den Rücken an den Stein, der auf einer Seite den Wind brach und das Problem halbierte. Wache war meist Warten, und Warten war meist, warm genug zu bleiben, um noch handeln zu können. Er sah hinauf. Die Sterne gaben ihm nichts zu tun, was hieß, dass noch nichts schiefgegangen war." },
       ],
     },
@@ -2052,9 +2502,9 @@ const WRITING_STYLE_SCENES = {
         { label: 'Sinnlich & zärtlich', text: "Nora hatte den kleinen Holzvogel an hundert leichteren Abenden geschnitzt, und nun drückte sie ihn in Zanes versagende Hand, weil sie ihm nichts anderes zu geben hatte, das ihre eigenen Finger gemacht hatten. Ihre andere Hand blieb auf der Wunde. Der Schnee legte sich auf sein Haar und schmolz nicht. Er entschuldigte sich — für das Blut auf ihrem Ärmel, der Narr — und lächelte, als wäre alles in Ordnung. Sie hielt den Daumen an seinem Knöchel in Bewegung, die alte Schnitzbewegung, als könnte sie aus dem Nichts noch einen Morgen schnitzen." },
         { label: 'Atemlos & trotzig', text: "Bleib. Bleib bei mir, Zane. Ich befehle es dir. Der Schnee fiel und sein Blut war so warm dagegen, und ich presste beide Hände auf die Wunde, als könnte ich ihn mit Gewalt zusammenhalten. Der kleine Vogel, den ich geschnitzt hatte, lag noch in seiner Hand. „Wag es nicht“, sagte ich. „Wag es ja nicht.“ Er lächelte — das war das Schlimmste — und entschuldigte sich für meinen Ärmel. Er lächelte, als wäre alles in Ordnung. Es war nicht in Ordnung." },
         { label: 'Trocken & theatralisch', text: "„Das ist peinlich“, brachte Zane hervor, Blut auf den Zähnen, Schnee in den Wimpern, der kleine geschnitzte Vogel lose in seiner Hand. „Sterben. Im Winter. So dramatisch.“ Nora sagte ihm, er solle seinen Atem sparen, und drückte fester auf die Wunde; er sagte, der Atem sei ja genau das Problem, nicht wahr, und entschuldigte sich für ihren Ärmel. Der Schnee fiel weiter, gleichgültig und rein. Er machte noch einen Witz. Einen zweiten machte er nicht." },
-        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Zane im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Über welches bin ich immer noch wütend." },
-        { label: 'Spöttisch & skrupellos', text: "Nora hatte die Ausgänge jedes Raumes gelernt, den sie je betreten hatte, und aus diesem gab es keinen. Also hörte sie auf, nach dem Winkel zu suchen, und presste stattdessen beide Hände auf die Wunde — der einzige Handel, der noch auf dem Tisch lag. Der kleine geschnitzte Vogel lag in Zanes Faust — ihre Arbeit, das eine Weiche, das gemacht zu haben sie je zugegeben hatte. Er verbrachte einen sterbenden Atemzug damit, sich für das Blut auf ihrem Ärmel zu entschuldigen. Natürlich tat er das. „Bleib“, sagte sie, als wäre es ein Auftrag, für den sie ihn anheuern könnte. Er brachte einen letzten Witz heraus. Einen zweiten brachte er nicht mehr heraus, und danach gab es nichts mehr, worüber man klug hätte sein können." },
-        { label: 'Kinetisch & präzise', text: "Nora hielt Druck auf die Wunde — Handballen, volles Gewicht, so wie man eine Blutung verlangsamt, die man nicht stoppen kann — und wusste, an der Geschwindigkeit, mit der die Wärme ihn verließ, dass Druck nicht reichen würde. Schnee legte sich in Zanes Haar und blieb; seine Haut hatte die Wärme, die ihn geschmolzen hätte, schon aufgegeben. Sie faltete den geschnitzten Vogel in seine Finger, weil ihre Hände eine Aufgabe brauchten und keine andere übrig war. Er entschuldigte sich für ihren Ärmel. Sie sagte ihm, er solle bleiben. Er machte noch einen Witz, verbrauchte den Atem, den er kostete, und holte keinen weiteren." },
+        { label: 'Bissig & ungeschönt', text: "Niemand warnt dich, dass die Sterbenden weiterreden. In den Liedern bekommen sie eine saubere Zeile und ein geschmackvolles Verklingen. Im echten Leben verblutete Zane im Schnee und entschuldigte sich — entschuldigte sich, der wahnsinnige Narr — für das Blut auf meinem Ärmel, den geschnitzten Vogel, den ich ihm gegeben hatte, noch in seiner Faust. Ich sagte ihm, der Ärmel sei ohnehin ruiniert. Ich sagte ihm, er solle den Mund halten und bleiben. Eines von beidem tat er. Welches, darüber bin ich bis heute wütend." },
+        { label: 'Spöttisch & skrupellos', text: "Nora hatte die Ausgänge jedes Raumes gelernt, den sie je betreten hatte, und aus diesem gab es keinen. Also hörte sie auf, nach dem Winkel zu suchen, und presste stattdessen beide Hände auf die Wunde — der einzige Handel, der noch auf dem Tisch lag. Der kleine geschnitzte Vogel lag in Zanes Faust — ihre Arbeit, das einzig Weiche, das sie je gemacht zu haben zugab. Er verbrachte einen sterbenden Atemzug damit, sich für das Blut auf ihrem Ärmel zu entschuldigen. Natürlich tat er das. „Bleib“, sagte sie, als wäre es ein Auftrag, für den sie ihn anheuern könnte. Er brachte einen letzten Witz heraus. Ein zweiter kam nicht mehr, und danach gab es nichts mehr, worüber man hätte klug sein können." },
+        { label: 'Kinetisch & präzise', text: "Nora hielt Druck auf die Wunde — Handballen, volles Gewicht, so wie man eine Blutung verlangsamt, die man nicht stoppen kann — und wusste, an der Geschwindigkeit, mit der die Wärme ihn verließ, dass Druck nicht reichen würde. Schnee legte sich in Zanes Haar und blieb liegen; die Wärme, die ihn hätte schmelzen lassen, gab seine Haut schon nicht mehr her. Sie faltete den geschnitzten Vogel in seine Finger, weil ihre Hände eine Aufgabe brauchten und keine andere übrig war. Er entschuldigte sich für ihren Ärmel. Sie sagte ihm, er solle bleiben. Er machte noch einen Witz, verbrauchte den Atem, den er kostete, und holte keinen weiteren." },
       ],
     },
   ],
@@ -2789,14 +3239,25 @@ function renderPageHooks(page) {
   if (page === 'characters') requestAnimationFrame(() => charsGrid.querySelectorAll('textarea').forEach(autoResize));
 }
 
+// Which page the split pane currently has rendered (null while hidden). The
+// render hooks rebuild a page's DOM, wiping any open sub-view (e.g. an Impulse
+// workshop), so they must only run when a pane's page actually changes — not
+// every time the other pane navigates.
+let splitPaneRendered = null;
+
 function switchPage(page) {
   if (typeof flushEditor === 'function') { flushEditor(); saveProject(); }
   if (page !== 'ideas' && typeof flowClearTimer === 'function') flowClearTimer();
+  const prev = activePageName();
+  // Coming over from the split pane, the page's DOM is already live — skip the
+  // render hooks so its sub-view survives the move.
+  const wasSplitPane = uiPrefs.split && prev !== 'home' && page === splitPaneRendered;
   // Navigating to the page already shown on the right swaps the panes instead
   // of showing the same page twice (one DOM node can't live in two places).
   if (uiPrefs.split && page === uiPrefs.splitPage) {
-    const prev = activePageName();
-    uiPrefs.splitPage = (prev !== 'home' && prev !== page) ? prev : (page === 'brainstorm' ? 'moodboard' : 'brainstorm');
+    const swap = prev !== 'home' && prev !== page;
+    uiPrefs.splitPage = swap ? prev : (page === 'brainstorm' ? 'moodboard' : 'brainstorm');
+    if (swap) splitPaneRendered = prev; // was just visible on the left
     saveUiPrefs();
   }
   document.querySelectorAll('.icon-nav-btn').forEach(b => b.classList.remove('active'));
@@ -2805,7 +3266,7 @@ function switchPage(page) {
   if (btn) btn.classList.add('active');
   const pageEl = document.getElementById('page-' + page);
   if (pageEl) pageEl.classList.add('active');
-  renderPageHooks(page);
+  if (!wasSplitPane) renderPageHooks(page);
   applySplit();
 }
 
@@ -2850,7 +3311,7 @@ function buildSplitPicker() {
   }));
 }
 
-function applySplit() {
+function applySplit(forceRender = false) {
   const content = document.querySelector('.content');
   const divider = document.getElementById('split-divider');
   const picker = document.getElementById('split-picker');
@@ -2870,7 +3331,10 @@ function applySplit() {
     const sec = document.getElementById('page-' + uiPrefs.splitPage);
     if (sec) sec.classList.add('split-pane');
     buildSplitPicker(); // keeps the button icon in sync after pane swaps
-    renderPageHooks(uiPrefs.splitPage);
+    if (forceRender || splitPaneRendered !== uiPrefs.splitPage) renderPageHooks(uiPrefs.splitPage);
+    splitPaneRendered = uiPrefs.splitPage;
+  } else {
+    splitPaneRendered = null;
   }
 }
 
@@ -3045,6 +3509,7 @@ let ideaPool = { focusId: null, sort: 'created', ideas: [] };
 let ideaPoolCombine = false;       // combine-mode toggle
 let ideaPoolSelected = new Set();  // ids selected while combining
 let ideaPoolSuggestId = null;      // transient "decide for me" highlight
+let ideaPoolDragId = null;         // id of the card being dragged
 
 function loadIdeaPool() {
   try {
@@ -3054,7 +3519,13 @@ function loadIdeaPool() {
       ideaPool = {
         focusId: d.focusId || null,
         sort: d.sort || 'created',
-        ideas: Array.isArray(d.ideas) ? d.ideas : [],
+        // Older pools stored a single `link` string per idea; ideas now carry
+        // a list of {label, url} links like the link boxes elsewhere.
+        ideas: (Array.isArray(d.ideas) ? d.ideas : []).map(i => {
+          if (!Array.isArray(i.links)) i.links = i.link ? [{ label: '', url: i.link }] : [];
+          delete i.link;
+          return i;
+        }),
       };
     }
   } catch {}
@@ -3072,6 +3543,7 @@ function ideaPoolSorted() {
   const list = ideaPool.ideas.slice();
   const sweet = i => (i.spark || 0) + (i.ready || 0);
   switch (ideaPool.sort) {
+    case 'custom': break; // drag & drop order — the array order itself
     case 'spark': list.sort((a, b) => (b.spark || 0) - (a.spark || 0)); break;
     case 'ready': list.sort((a, b) => (b.ready || 0) - (a.ready || 0)); break;
     case 'sweet': list.sort((a, b) => sweet(b) - sweet(a)); break;
@@ -3084,11 +3556,12 @@ function ideaPoolSorted() {
   return list;
 }
 
-function ideaPoolAdd(title) {
+function ideaPoolAdd(title, note) {
   const text = (title || '').trim();
-  if (!text) return;
+  const body = (note || '').trim();
+  if (!text && !body) return;
   ideaPool.ideas.push({
-    id: ideaPoolId(), title: text, note: '', link: '', image: '',
+    id: ideaPoolId(), title: text, note: body, links: [], image: '',
     spark: 0, ready: 0, combinedFrom: [], created: Date.now(),
   });
   saveIdeaPool();
@@ -3118,6 +3591,7 @@ function ideaPoolCombineSelected() {
     id: ideaPoolId(),
     title: sources.join(' + '),
     note,
+    links: picked.flatMap(i => i.links || []),
     spark: Math.max(...picked.map(i => i.spark || 0)),
     ready: 0,
     combinedFrom: sources,
@@ -3153,8 +3627,8 @@ function ideaPoolToProject(idea, keepInPool) {
     moodboard: idea.image ? [{ id: Date.now(), src: idea.image, comment: idea.title || '' }] : [],
     blurb: idea.note || '',
     writing: { chapters: [] },
-    brainstorm: idea.link
-      ? { notes: [{ id: Date.now(), x: 40, y: 40, text: idea.title || '', color: IDEA_NOTE_COLORS[0], hyperlinks: [{ url: idea.link, label: '' }] }], links: [] }
+    brainstorm: (idea.links && idea.links.length)
+      ? { notes: [{ id: Date.now(), x: 40, y: 40, text: idea.title || '', color: IDEA_NOTE_COLORS[0], hyperlinks: idea.links.map(lk => ({ url: lk.url, label: lk.label || '' })) }], links: [] }
       : { notes: [], links: [] },
     timeline: { columns: [], rows: [] }, inspiration: [], todos: [],
     writingGoal: 0, wordHistory: [], selectedStructure: null,
@@ -3410,8 +3884,9 @@ function renderIdeaPool(container) {
   sortWrap.className = 'ip-sort';
   sortWrap.innerHTML = '<span>' + t('ideapool.sort.label') + '</span>';
   const sortSel = document.createElement('select');
-  [['created', 'ideapool.sort.created'], ['sweet', 'ideapool.sort.sweet'],
-   ['spark', 'ideapool.sort.spark'], ['ready', 'ideapool.sort.ready']].forEach(([v, k]) => {
+  [['custom', 'ideapool.sort.custom'], ['created', 'ideapool.sort.created'],
+   ['sweet', 'ideapool.sort.sweet'], ['spark', 'ideapool.sort.spark'],
+   ['ready', 'ideapool.sort.ready']].forEach(([v, k]) => {
     const o = document.createElement('option');
     o.value = v; o.textContent = t(k);
     if (ideaPool.sort === v) o.selected = true;
@@ -3474,6 +3949,7 @@ function renderIdeaPool(container) {
     const isFocus = idea.id === ideaPool.focusId;
     const parked = ideaPool.focusId && !isFocus;
     const card = document.createElement('div');
+    card.dataset.id = idea.id;
     card.className = 'ip-card'
       + (isFocus ? ' is-focus' : '')
       + (parked ? ' is-parked' : '')
@@ -3489,6 +3965,51 @@ function renderIdeaPool(container) {
         renderIdeaPool();
       });
     }
+
+    // Drag & drop reordering — like world/character cards: draggable only
+    // while the handle is grabbed, so clicks land in the card's text fields.
+    // Dropping adopts the currently displayed order and switches to "my order".
+    const handle = document.createElement('div');
+    handle.className = 'ip-drag-handle';
+    handle.title = t('char.section.reorder');
+    handle.innerHTML = '&#8942;&#8942;&#8942;';
+    card.appendChild(handle);
+    card.draggable = false;
+    handle.addEventListener('mousedown', () => { card.draggable = true; });
+    handle.addEventListener('mouseup', () => { card.draggable = false; });
+    card.addEventListener('dragstart', e => {
+      if (!card.draggable) { e.preventDefault(); return; }
+      ideaPoolDragId = idea.id;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+    card.addEventListener('dragend', () => {
+      card.draggable = false;
+      card.classList.remove('dragging');
+      grid.querySelectorAll('.ip-card').forEach(c => c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      if (!ideaPoolDragId) return;
+      e.preventDefault();
+      if (ideaPoolDragId !== idea.id) card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if (!ideaPoolDragId || ideaPoolDragId === idea.id) return;
+      const order = ideaPoolSorted();
+      const from = order.findIndex(i => i.id === ideaPoolDragId);
+      const to = order.findIndex(i => i.id === idea.id);
+      ideaPoolDragId = null;
+      if (from < 0 || to < 0) return;
+      const [moved] = order.splice(from, 1);
+      order.splice(to, 0, moved);
+      ideaPool.ideas = order;
+      ideaPool.sort = 'custom';
+      saveIdeaPool();
+      renderIdeaPool();
+    });
 
     // Title
     const title = document.createElement('input');
@@ -3568,23 +4089,94 @@ function renderIdeaPool(container) {
       card.appendChild(imgBtn);
     }
 
-    // Link
-    const link = document.createElement('input');
-    link.className = 'ip-card-link';
-    link.type = 'url';
-    link.value = idea.link || '';
-    link.placeholder = t('ideapool.link.placeholder');
-    link.addEventListener('input', () => { idea.link = link.value; saveIdeaPool(); });
-    card.appendChild(link);
-    if (idea.link) {
-      const linkOpen = document.createElement('a');
-      linkOpen.className = 'ip-card-link-open';
-      linkOpen.href = idea.link;
-      linkOpen.target = '_blank';
-      linkOpen.rel = 'noopener noreferrer';
-      linkOpen.textContent = t('ideapool.link.open');
-      card.appendChild(linkOpen);
-    }
+    // Links — same clickable link rows as the link boxes on characters/world
+    if (!Array.isArray(idea.links)) idea.links = [];
+    const linksWrap = document.createElement('div');
+    linksWrap.className = 'char-links ip-card-links';
+    idea.links.forEach(lk => {
+      const row = document.createElement('div');
+      row.className = 'char-link';
+      if (charLinkEditing.has(lk)) {
+        const label = document.createElement('input');
+        label.type = 'text';
+        label.className = 'char-link-input';
+        label.placeholder = t('notes.hyperlink.label');
+        label.value = lk.label || '';
+        const url = document.createElement('input');
+        url.type = 'url';
+        url.className = 'char-link-input';
+        url.placeholder = t('notes.hyperlink.url');
+        url.value = lk.url || '';
+        const done = document.createElement('button');
+        done.className = 'char-link-btn';
+        done.textContent = '✓';
+        done.title = t('notes.hyperlink.done');
+        const commit = () => {
+          lk.url = normalizeUrl(url.value.trim());
+          lk.label = label.value.trim();
+          if (!lk.url) idea.links = idea.links.filter(x => x !== lk);
+          charLinkEditing.delete(lk);
+          saveIdeaPool();
+          renderIdeaPool();
+        };
+        const cancel = () => {
+          if (!lk.url) idea.links = idea.links.filter(x => x !== lk);
+          charLinkEditing.delete(lk);
+          renderIdeaPool();
+        };
+        [label, url].forEach(inp => inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+          else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+        }));
+        done.addEventListener('click', commit);
+        row.appendChild(label);
+        row.appendChild(url);
+        row.appendChild(done);
+      } else {
+        const a = document.createElement('a');
+        a.className = 'char-link-a';
+        a.href = lk.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = lk.label || lk.url;
+        a.title = lk.url;
+        const edit = document.createElement('button');
+        edit.className = 'char-link-btn';
+        edit.textContent = '✎';
+        edit.title = t('notes.hyperlink.edit');
+        edit.addEventListener('click', () => {
+          charLinkEditing.add(lk);
+          renderIdeaPool();
+        });
+        const rm = document.createElement('button');
+        rm.className = 'char-link-btn rm';
+        rm.textContent = '×';
+        rm.title = t('notes.hyperlink.remove');
+        rm.addEventListener('click', () => {
+          idea.links = idea.links.filter(x => x !== lk);
+          saveIdeaPool();
+          renderIdeaPool();
+        });
+        row.appendChild(a);
+        row.appendChild(edit);
+        row.appendChild(rm);
+      }
+      linksWrap.appendChild(row);
+    });
+    card.appendChild(linksWrap);
+    const addLk = document.createElement('button');
+    addLk.className = 'char-list-add ip-card-link-add';
+    addLk.textContent = t('char.links.add.item');
+    addLk.addEventListener('click', () => {
+      const lk = { label: '', url: '' };
+      idea.links.push(lk);
+      charLinkEditing.add(lk);
+      renderIdeaPool();
+      const rows = ideaPoolContainer.querySelectorAll(`.ip-card[data-id="${idea.id}"] .char-link`);
+      const input = rows.length && rows[rows.length - 1].querySelector('input');
+      if (input) input.focus();
+    });
+    card.appendChild(addLk);
 
     // Ratings
     const ratings = document.createElement('div');
