@@ -843,6 +843,23 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 }
 
 /* ── Internal link pickers (scenes / characters / world entries) ── */
+.picker-search {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.picker-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .picker-list {
   max-height: 55vh;
   overflow-y: auto;

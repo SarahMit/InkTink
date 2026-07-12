@@ -748,6 +748,7 @@ const TR = {
     'picker.scene.title': 'Link a scene', 'picker.scene.empty': 'No scenes yet — create one on the Writing page first.',
     'picker.ref.title': 'Link to…', 'picker.none': 'Nothing here yet.',
     'picker.group.scenes': 'Scenes', 'picker.group.characters': 'Characters', 'picker.group.world': 'Worldbuilding',
+    'picker.search': 'Search…', 'picker.noresults': 'No matches.',
     'timeline.add.col': '+ Column', 'timeline.add.row': '+ Thread',
     'timeline.col.placeholder': 'Chapter', 'timeline.row.placeholder': 'Thread',
     'timeline.card.placeholder': 'What happens here?',
@@ -1040,6 +1041,7 @@ const TR = {
     'picker.scene.title': 'Szene verknüpfen', 'picker.scene.empty': 'Noch keine Szenen — lege zuerst eine auf der Schreiben-Seite an.',
     'picker.ref.title': 'Verknüpfen mit…', 'picker.none': 'Noch nichts vorhanden.',
     'picker.group.scenes': 'Szenen', 'picker.group.characters': 'Charaktere', 'picker.group.world': 'Weltenbau',
+    'picker.search': 'Suchen…', 'picker.noresults': 'Keine Treffer.',
     'timeline.add.col': '+ Spalte', 'timeline.add.row': '+ Strang',
     'timeline.col.placeholder': 'Kapitel', 'timeline.row.placeholder': 'Strang',
     'timeline.card.placeholder': 'Was passiert hier?',
@@ -4594,32 +4596,71 @@ function openScenePicker(onPick) {
 }
 
 // Modal listing scenes, characters, and worldbuilding entries;
-// calls onPick({ type: 'scene' | 'char' | 'world', id }).
+// calls onPick({ type: 'scene' | 'char' | 'world', id }). A search box filters
+// all three groups live so large projects stay navigable.
 function openRefPicker(onPick) {
   const container = document.createElement('div');
-  const scenesHtml = (writing.chapters || []).map(ch => {
-    const scenes = ch.scenes || [];
+  const none = `<div class="picker-none">${t('picker.none')}</div>`;
+
+  // Scenes keep their chapter subheadings; a scene matches on its own title or
+  // its chapter's title so searching a chapter name surfaces its scenes.
+  const scenesHtml = q => (writing.chapters || []).map(ch => {
+    let scenes = ch.scenes || [];
+    if (q) scenes = scenes.filter(sc =>
+      ((sc.title || '') + ' ' + (ch.title || '')).toLowerCase().includes(q));
     if (!scenes.length) return '';
     return `<div class="picker-ch">${ideaEsc(ch.title) || t('writing.untitled.chapter')}</div>` +
       scenes.map(sc => `<button class="picker-item" data-type="scene" data-id="${sc.id}">${ideaEsc(sc.title) || t('writing.untitled.scene')}</button>`).join('');
   }).join('');
-  const charsHtml = characters.map(c =>
-    `<button class="picker-item" data-type="char" data-id="${c.id}">${ideaEsc(c.name) || t('writing.untitled')}</button>`).join('');
-  const worldHtml = worldbuilding.entries.map(w =>
-    `<button class="picker-item" data-type="world" data-id="${w.id}">${ideaEsc(w.title) || t('writing.untitled')}</button>`).join('');
-  const none = `<div class="picker-none">${t('picker.none')}</div>`;
+  const charsHtml = q => characters
+    .filter(c => !q || (c.name || '').toLowerCase().includes(q))
+    .map(c => `<button class="picker-item" data-type="char" data-id="${c.id}">${ideaEsc(c.name) || t('writing.untitled')}</button>`).join('');
+  const worldHtml = q => worldbuilding.entries
+    .filter(w => !q || (w.title || '').toLowerCase().includes(q))
+    .map(w => `<button class="picker-item" data-type="world" data-id="${w.id}">${ideaEsc(w.title) || t('writing.untitled')}</button>`).join('');
+
   container.innerHTML = `
     <div class="modal-title">${t('picker.ref.title')}</div>
-    <div class="picker-list">
-      <div class="picker-group">${t('picker.group.scenes')}</div>${scenesHtml || none}
-      <div class="picker-group">${t('picker.group.characters')}</div>${charsHtml || none}
-      <div class="picker-group">${t('picker.group.world')}</div>${worldHtml || none}
-    </div>`;
-  container.querySelectorAll('.picker-item').forEach(btn => btn.addEventListener('click', () => {
+    <input type="text" class="picker-search" placeholder="${t('picker.search')}">
+    <div class="picker-list"></div>`;
+  const searchEl = container.querySelector('.picker-search');
+  const listEl = container.querySelector('.picker-list');
+
+  function render() {
+    const q = searchEl.value.trim().toLowerCase();
+    const sc = scenesHtml(q), ch = charsHtml(q), wo = worldHtml(q);
+    // While searching, drop empty groups entirely; when idle, show each group
+    // with a placeholder so the user sees what kinds of links exist.
+    const group = (labelKey, html) =>
+      html ? `<div class="picker-group">${t(labelKey)}</div>${html}`
+           : (q ? '' : `<div class="picker-group">${t(labelKey)}</div>${none}`);
+    if (q && !sc && !ch && !wo) {
+      listEl.innerHTML = `<div class="picker-none">${t('picker.noresults')}</div>`;
+    } else {
+      listEl.innerHTML = group('picker.group.scenes', sc)
+        + group('picker.group.characters', ch)
+        + group('picker.group.world', wo);
+    }
+    listEl.querySelectorAll('.picker-item').forEach(btn => btn.addEventListener('click', () => {
+      closeModal();
+      onPick({ type: btn.dataset.type, id: Number(btn.dataset.id) });
+    }));
+  }
+
+  // Enter picks the first match, so typing then hitting return is enough.
+  searchEl.addEventListener('input', render);
+  searchEl.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const first = listEl.querySelector('.picker-item');
+    if (!first) return;
+    e.preventDefault();
     closeModal();
-    onPick({ type: btn.dataset.type, id: Number(btn.dataset.id) });
-  }));
+    onPick({ type: first.dataset.type, id: Number(first.dataset.id) });
+  });
+
+  render();
   openModal(container);
+  requestAnimationFrame(() => searchEl.focus());
 }
 
 // Resolve a ref to a display label, or null if its target was deleted.
