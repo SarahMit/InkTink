@@ -7,6 +7,7 @@ const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const DiskStore = require('./storage');
+const SnapshotStore = require('./snapshots');
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -110,6 +111,22 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.on('storage:set', (e, key, value) => { store.set(key, value); });
     ipcMain.on('storage:flush', (e) => { store.flush(); e.returnValue = true; });
     ipcMain.on('app:version', (e) => { e.returnValue = app.getVersion(); });
+
+    // Snapshot history files (see desktop/snapshots.js). Write is fire-and-
+    // forget like storage:set; list/read are sync (small index / one file).
+    const snaps = new SnapshotStore(store.dataDir);
+    ipcMain.on('snapshots:write', (e, project, ts, words, json) => {
+      try { snaps.write(String(project), Number(ts), words, String(json)); }
+      catch (err) { console.warn('InkTink: snapshot write failed', err); }
+    });
+    ipcMain.on('snapshots:list', (e, project) => {
+      try { e.returnValue = snaps.list(String(project)); }
+      catch { e.returnValue = []; }
+    });
+    ipcMain.on('snapshots:read', (e, project, ts) => {
+      try { e.returnValue = snaps.read(String(project), Number(ts)); }
+      catch { e.returnValue = null; }
+    });
 
     buildMenu();
     createWindow();

@@ -28,6 +28,9 @@
         <div class="split-menu" id="split-menu" hidden></div>
       </div>
       <button class="tb-util" id="theme-switch" title="Toggle light/dark" aria-label="Toggle light/dark">☾</button>
+      <button class="sprint-chip" id="sprint-chip" hidden></button>
+      <button class="tb-util" id="gsearch-btn" title="Search (Ctrl+K)" aria-label="Search">&#128269;</button>
+      <button class="tb-util" id="history-btn" title="Version history" aria-label="Version history">⟲</button>
       <button class="tb-util" id="lang-toggle">EN</button>
       <a class="tb-util" id="github-link" href="https://github.com/SarahMit/InkTink" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View on GitHub">
         <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
@@ -153,7 +156,7 @@
             <span data-i18n="writing.sections">Chapters &amp; Scenes</span>
             <div class="chapter-nav-actions">
               <button class="btn-mini" id="chnav-collapse" aria-label="Hide chapter list">&#171;</button>
-              <button class="btn-mini" id="btn-export-word" title="Export as Word document (.docx)">&#8595; .docx</button>
+              <button class="btn-mini" id="btn-export-manuscript" title="Export manuscript (.docx / .md / .txt)">&#8595; Export</button>
               <button class="btn-mini" id="add-chapter" data-i18n="writing.add.chapter">+ Chapter</button>
             </div>
           </div>
@@ -241,9 +244,29 @@
     </div>
   </div>
 
+  <!-- Global search overlay (Ctrl+K) -->
+  <div class="gsearch-overlay" id="global-search" hidden>
+    <div class="gsearch-panel" role="dialog" aria-modal="true" aria-label="Search">
+      <input class="gsearch-input" id="gsearch-input" placeholder="Search everything...">
+      <div class="gsearch-results" id="gsearch-results"></div>
+    </div>
+  </div>
+
+  <!-- Multi-tab guard: shown in tabs that are not allowed to write -->
+  <div class="tab-guard" id="tab-guard" hidden role="alertdialog" aria-modal="true" aria-labelledby="tab-guard-title">
+    <div class="tab-guard-panel">
+      <h2 id="tab-guard-title" data-i18n="tabs.guard.title">Already open</h2>
+      <p id="tab-guard-msg" data-i18n="tabs.guard.msg">InkTink is already open in another tab. To avoid losing changes, only one tab can edit at a time.</p>
+      <button class="tb-cta" id="tab-guard-takeover" data-i18n="tabs.guard.takeover">Use this tab instead</button>
+    </div>
+  </div>
+
+  <!-- Toast notifications (transient errors/successes; quota uses #save-warning) -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
   <!-- Modal for character editing -->
   <div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal">
+    <div class="modal" id="modal" role="dialog" aria-modal="true">
       <button class="modal-close" id="modal-close">&times;</button>
       <div class="modal-body" id="modal-body"></div>
     </div>

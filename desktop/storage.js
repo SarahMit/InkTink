@@ -184,3 +184,5 @@ class DiskStore {
 }
 
 module.exports = DiskStore;
+module.exports.sanitizeFilename = sanitizeFilename;
+module.exports.atomicWrite = atomicWrite;

@@ -22,4 +22,9 @@ contextBridge.exposeInMainWorld('inktinkDesktop', {
     key: (i) => [...cache.keys()][i] ?? null,
   },
   flushSync: () => ipcRenderer.sendSync('storage:flush'),
+  snapshots: {
+    write: (project, ts, words, json) => ipcRenderer.send('snapshots:write', project, ts, words, json),
+    list: (project) => ipcRenderer.sendSync('snapshots:list', project),
+    read: (project, ts) => ipcRenderer.sendSync('snapshots:read', project, ts),
+  },
 });

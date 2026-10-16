@@ -24,7 +24,7 @@ function setCurrentProjectName(name) {
 }
 
 function collectProjectData() {
-  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
+  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, sprints, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
 }
 
 function readProjectsStore() {
@@ -87,6 +87,7 @@ function snapshotWordHistory() {
 // many/large images) shows a persistent warning banner with a backup button.
 function saveProject() {
   if (!projectReady) return false; // boot-time call: nothing loaded yet
+  if (tabReadOnly) return false;   // another tab is the writer (multi-tab guard)
   snapshotWordHistory();
   try {
     const json = JSON.stringify(collectProjectData());
@@ -121,6 +122,358 @@ function hideSaveWarning() {
   const el = document.getElementById('save-warning');
   if (el) el.hidden = true;
 }
+
+// ── Toasts ──
+// Transient notifications for one-off failures/successes (imports, exports,
+// image ops). Not used for the localStorage quota — that condition repeats on
+// every keystroke and is covered by the persistent #save-warning banner.
+function showToast(msgKey, { kind = 'error', duration = 5000, vars = null } = {}) {
+  const stack = document.getElementById('toast-stack');
+  if (!stack) return;
+  let msg = t(msgKey) || msgKey;
+  if (vars) for (const [k, v] of Object.entries(vars)) msg = msg.replace('{' + k + '}', v);
+
+  // Same message already visible: reset its timer instead of stacking dupes.
+  const existing = [...stack.children].find(el => el.dataset.msg === msg);
+  if (existing) {
+    clearTimeout(existing._timer);
+    existing._timer = setTimeout(() => dismissToast(existing), duration);
+    return;
+  }
+
+  while (stack.children.length >= 3) stack.removeChild(stack.firstChild);
+
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + kind;
+  el.dataset.msg = msg;
+  const text = document.createElement('span');
+  text.className = 'toast-msg';
+  text.textContent = msg;
+  const close = document.createElement('button');
+  close.className = 'toast-close';
+  close.innerHTML = '&times;';
+  close.setAttribute('aria-label', t('toast.dismiss') || 'Dismiss');
+  close.addEventListener('click', () => dismissToast(el));
+  el.append(text, close);
+  stack.appendChild(el);
+  el._timer = setTimeout(() => dismissToast(el), duration);
+}
+
+function dismissToast(el) {
+  clearTimeout(el._timer);
+  el.classList.add('toast-out');
+  // Remove after the fade; fallback timeout in case animations are disabled.
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+  setTimeout(() => el.remove(), 400);
+}
+
+// ── Multi-tab guard (browser only) ──
+// Two tabs writing localStorage would silently clobber each other (last write
+// wins), so a BroadcastChannel leader protocol lets exactly one tab (the
+// "writer") save. Other tabs get a blocking overlay and can take over
+// explicitly. The desktop app has a single-instance lock instead; browsers
+// without BroadcastChannel skip the guard (no worse than before).
+let tabReadOnly = false;
+const tabGuard = (!IS_DESKTOP && typeof BroadcastChannel !== 'undefined') && (() => {
+  const chan = new BroadcastChannel('inktink-tabs');
+  const tabId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+  let role = 'boot'; // 'boot' | 'writer' | 'readonly'
+  let claimSeen = false;
+  let beatTimer = null;  // writer: heartbeat sender
+  let watchTimer = null; // readonly: heartbeat watchdog
+  let lastBeat = 0;
+
+  function post(type) { try { chan.postMessage({ type, tabId }); } catch {} }
+
+  function setGuardVisible(visible, gone) {
+    const overlay = document.getElementById('tab-guard');
+    if (!overlay) return;
+    overlay.hidden = !visible;
+    const msg = document.getElementById('tab-guard-msg');
+    if (msg) {
+      const key = gone ? 'tabs.guard.gone' : 'tabs.guard.msg';
+      msg.dataset.i18n = key; // keeps language switching working
+      msg.textContent = t(key);
+    }
+    // `inert` blocks pointer AND keyboard interaction with the app behind
+    // the overlay — airtight, unlike disabling individual controls.
+    for (const sel of ['.topbar', '.icon-nav', '.sidebar', '.sb-expand', '.content']) {
+      const el = document.querySelector(sel);
+      if (el) el.inert = visible;
+    }
+  }
+
+  function becomeWriter() {
+    role = 'writer';
+    tabReadOnly = false;
+    clearInterval(watchTimer); watchTimer = null;
+    setGuardVisible(false);
+    if (!beatTimer) beatTimer = setInterval(() => post('beat'), 2000);
+    post('claim'); // pushes any other candidate tabs into read-only
+  }
+
+  function becomeReadOnly() {
+    role = 'readonly';
+    tabReadOnly = true;
+    clearInterval(beatTimer); beatTimer = null;
+    lastBeat = Date.now();
+    setGuardVisible(true, false);
+    if (!watchTimer) watchTimer = setInterval(() => {
+      // Writer closed/crashed without a takeover: offer to continue here.
+      if (Date.now() - lastBeat > 5000) setGuardVisible(true, true);
+    }, 1000);
+  }
+
+  async function takeover() {
+    post('takeover');
+    // Give the old writer a moment to flush its pending save (writes are sync).
+    await new Promise(r => setTimeout(r, 150));
+    const data = await loadInitialProject();
+    applyProjectData(data);
+    updateProjectLabel();
+    becomeWriter();
+  }
+
+  chan.addEventListener('message', ev => {
+    const m = ev.data || {};
+    if (!m.type || m.tabId === tabId) return;
+    if (m.type === 'hello') {
+      if (role === 'writer') post('claim');
+    } else if (m.type === 'claim') {
+      claimSeen = true;
+      if (role === 'writer') {
+        // Two writers (opened simultaneously): the lowest tabId keeps the pen.
+        if (m.tabId < tabId) { flushPendingSave(); becomeReadOnly(); }
+        else post('claim');
+      } else if (role === 'readonly') {
+        lastBeat = Date.now();
+      }
+    } else if (m.type === 'beat') {
+      lastBeat = Date.now();
+      if (role === 'writer' && m.tabId < tabId) { flushPendingSave(); becomeReadOnly(); }
+    } else if (m.type === 'takeover') {
+      if (role === 'writer') { flushPendingSave(); becomeReadOnly(); }
+    }
+  });
+
+  async function negotiate() {
+    post('hello');
+    await new Promise(r => setTimeout(r, 250));
+    if (claimSeen) becomeReadOnly(); else becomeWriter();
+  }
+
+  const btn = document.getElementById('tab-guard-takeover');
+  if (btn) btn.addEventListener('click', takeover);
+
+  return { negotiate };
+})();
+
+// ── Snapshot history ──
+// Rolling safety copies of the whole project: every 10 minutes while working,
+// plus right before destructive operations (import over existing work, New
+// Project, restoring a snapshot). Snapshots live OUTSIDE the project data —
+// they never appear in exports.
+//
+// Browser: a small ring in localStorage. Embedded images are stripped (they
+// are what blows the quota) and re-attached from the live project on restore,
+// matched by the id of the object carrying the image.
+// Desktop: full-fidelity files (images included) under
+// Documents/InkTink/snapshots/, via the IPC in desktop/snapshots.js.
+const LS_SNAPSHOTS = 'inktink.snapshots';
+const SNAP_INTERVAL_MS = 10 * 60 * 1000;
+const SNAP_CAP_BROWSER = 10;
+const SNAP_IMG_SENTINEL = '\u0000img'; // NUL prefix: cannot occur in real text
+const snapDisk = (IS_DESKTOP && window.inktinkDesktop.snapshots) ? window.inktinkDesktop.snapshots : null;
+let snapLastHash = null;
+let snapSkipToastShown = false;
+
+function snapProjectKey() { return currentProjectName || '__current__'; }
+
+function snapHash(str) { // djb2 — cheap change detection, not cryptographic
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return h + ':' + str.length;
+}
+
+function snapStripImages(value) {
+  if (typeof value === 'string') return value.startsWith('data:') ? SNAP_IMG_SENTINEL : value;
+  if (Array.isArray(value)) return value.map(snapStripImages);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) out[k] = snapStripImages(v);
+    return out;
+  }
+  return value;
+}
+
+// Walks the live project and maps "<carrier id>:<field>" → image, so restore
+// can put current images back where the snapshot has sentinels.
+function snapCollectImages(value, map) {
+  if (Array.isArray(value)) { value.forEach(v => snapCollectImages(v, map)); return map; }
+  if (value && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) {
+      if (value.id != null && typeof v === 'string' && v.startsWith('data:')) map.set(value.id + ':' + k, v);
+      else snapCollectImages(v, map);
+    }
+  }
+  return map;
+}
+
+function snapRehydrate(value, map) {
+  if (Array.isArray(value)) return value.map(v => snapRehydrate(v, map));
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (v === SNAP_IMG_SENTINEL) out[k] = (value.id != null && map.get(value.id + ':' + k)) || null;
+      else out[k] = snapRehydrate(v, map);
+    }
+    return out;
+  }
+  return value === SNAP_IMG_SENTINEL ? null : value;
+}
+
+function snapTotalWords() {
+  let total = 0;
+  for (const ch of writing.chapters)
+    for (const sc of (ch.scenes || [])) total += countWords(sc.content || '');
+  return total;
+}
+
+function readSnapStore() {
+  try { return JSON.parse(appStorage.getItem(LS_SNAPSHOTS) || '{}') || {}; }
+  catch { return {}; }
+}
+
+// Same retention as desktop/snapshots.js, smaller cap: everything from the
+// last hour, then one per day.
+function snapPrune(list, cap) {
+  const sorted = [...list].sort((a, b) => b.ts - a.ts);
+  const hourAgo = Date.now() - 3600 * 1000;
+  const days = new Set();
+  const kept = [];
+  for (const s of sorted) {
+    if (s.ts >= hourAgo) { kept.push(s); continue; }
+    const day = new Date(s.ts).toISOString().slice(0, 10);
+    if (!days.has(day)) { days.add(day); kept.push(s); }
+  }
+  return kept.slice(0, cap);
+}
+
+// Never lets snapshotting interfere with real saving: everything is wrapped,
+// and on quota pressure the oldest snapshot is dropped before giving up.
+function takeSnapshot() {
+  if (!projectReady || tabReadOnly) return;
+  try {
+    const ts = Date.now();
+    const words = snapTotalWords();
+    if (snapDisk) {
+      const json = JSON.stringify({ version: 2, ...collectProjectData() });
+      const hash = snapProjectKey() + '|' + snapHash(json);
+      if (hash === snapLastHash) return;
+      snapLastHash = hash;
+      snapDisk.write(snapProjectKey(), ts, words, json);
+      return;
+    }
+    const json = JSON.stringify({ version: 2, ...snapStripImages(collectProjectData()) });
+    const hash = snapProjectKey() + '|' + snapHash(json);
+    if (hash === snapLastHash) return;
+    const store = readSnapStore();
+    const list = store[snapProjectKey()] || [];
+    list.push({ ts, words, json });
+    store[snapProjectKey()] = snapPrune(list, SNAP_CAP_BROWSER);
+    try {
+      appStorage.setItem(LS_SNAPSHOTS, JSON.stringify(store));
+    } catch (e) {
+      // Quota: drop the oldest snapshot and retry once, then skip this cycle.
+      store[snapProjectKey()] = store[snapProjectKey()].slice(0, -1); // newest-first: last = oldest
+      try {
+        appStorage.setItem(LS_SNAPSHOTS, JSON.stringify(store));
+      } catch (e2) {
+        if (!snapSkipToastShown) { snapSkipToastShown = true; showToast('toast.snapshot.skipped', { kind: 'info' }); }
+        return;
+      }
+    }
+    snapLastHash = hash;
+  } catch (e) {
+    console.warn('Snapshot failed:', e);
+  }
+}
+
+function listSnapshots() {
+  if (snapDisk) {
+    try { return snapDisk.list(snapProjectKey()) || []; } catch { return []; }
+  }
+  return (readSnapStore()[snapProjectKey()] || []).map(({ ts, words }) => ({ ts, words }));
+}
+
+function readSnapshotJson(ts) {
+  if (snapDisk) {
+    try { return snapDisk.read(snapProjectKey(), ts); } catch { return null; }
+  }
+  const hit = (readSnapStore()[snapProjectKey()] || []).find(s => s.ts === ts);
+  return hit ? hit.json : null;
+}
+
+function restoreSnapshot(ts) {
+  const json = readSnapshotJson(ts);
+  if (!json) { showToast('import.error'); return; }
+  let data;
+  try { data = JSON.parse(json); } catch { showToast('import.error'); return; }
+  if (typeof flushEditor === 'function') flushEditor();
+  takeSnapshot(); // the current state becomes restorable too
+  if (!snapDisk) data = snapRehydrate(data, snapCollectImages(collectProjectData(), new Map()));
+  applyProjectData(data);
+  updateProjectLabel();
+  saveProject();
+  closeModal();
+  showToast('toast.snapshot.restored', { kind: 'success' });
+}
+
+function openHistoryModal() {
+  const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
+  const snaps = listSnapshots().sort((a, b) => b.ts - a.ts);
+  const c = document.createElement('div');
+  const rows = snaps.map(s => {
+    const when = new Date(s.ts).toLocaleString(locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const words = (s.words != null) ? t('history.words').replace('{n}', s.words.toLocaleString(locale)) : '';
+    return `
+      <div class="history-row" data-ts="${s.ts}">
+        <div class="history-row-info">
+          <span class="history-row-when">${ideaEsc(when)}</span>
+          <span class="history-row-words">${ideaEsc(words)}</span>
+        </div>
+        <button class="btn-secondary history-restore">${t('history.restore')}</button>
+      </div>`;
+  }).join('');
+  c.innerHTML = `
+    <div class="modal-title">${t('history.title')}</div>
+    ${snapDisk ? '' : `<div class="history-note">${t('history.images.note')}</div>`}
+    <div class="history-actions">
+      <button class="btn-primary" id="history-snap-now">${t('history.now')}</button>
+    </div>
+    <div class="history-list">${rows || `<div class="modal-empty">${t('history.empty')}</div>`}</div>
+  `;
+  openModal(c);
+
+  c.querySelector('#history-snap-now').addEventListener('click', () => {
+    if (typeof flushEditor === 'function') flushEditor();
+    snapLastHash = null; // manual snapshot: always take one, even if unchanged
+    takeSnapshot();
+    openHistoryModal(); // re-render the list
+  });
+  c.querySelectorAll('.history-restore').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ts = Number(btn.closest('.history-row').dataset.ts);
+      if (btn.dataset.armed) { restoreSnapshot(ts); return; }
+      btn.dataset.armed = '1';
+      btn.textContent = t('history.restore.confirm');
+      btn.classList.add('history-restore-armed');
+    });
+  });
+}
+
+setInterval(takeSnapshot, SNAP_INTERVAL_MS);
+document.getElementById('history-btn').addEventListener('click', openHistoryModal);
 
 // Images are embedded directly in the project as base64 data URLs, so a
 // single exported .json file is fully self-contained.
@@ -176,6 +529,7 @@ async function compressImage(file) {
     return compressed.length < original.length ? compressed : original;
   } catch (e) {
     console.warn('Image compression failed, keeping original:', e);
+    showToast('toast.image.fallback', { kind: 'info' });
     return original;
   }
 }
@@ -200,6 +554,7 @@ async function listProjects() {
 }
 
 function saveProjectAs(name) {
+  if (tabReadOnly) return { ok: false, name }; // multi-tab guard
   snapshotWordHistory();
   try {
     const store = readProjectsStore();
@@ -280,7 +635,7 @@ function deleteAllLocalData() {
   projectReady = false; // block the unload flush from re-saving anything
   isDirty = false;
   ['inktink.current', 'inktink.currentName', 'inktink.projects', 'inktink.ideapool',
-   'inktink-ui', 'inktink-theme', 'inktink-lang'].forEach(k => {
+   'inktink.snapshots', 'inktink-ui', 'inktink-theme', 'inktink-lang'].forEach(k => {
     try { appStorage.removeItem(k); } catch {}
   });
   location.reload();
@@ -332,7 +687,7 @@ function restoreFullBackup(data) {
   updateProjectLabel();
   saveProject();
   if (typeof switchPage === 'function') switchPage('writing');
-  alert(t('backup.imported').replace('{n}', names.length));
+  showToast('backup.imported', { kind: 'success', vars: { n: names.length } });
 }
 
 function importProjectFromFile() {
@@ -348,6 +703,7 @@ function importProjectFromFile() {
         const data = JSON.parse(reader.result);
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('not a project file');
         if (typeof flushEditor === 'function') flushEditor();
+        takeSnapshot(); // the state being imported over stays restorable
 
         if (data.backup && data.projects && typeof data.projects === 'object') {
           restoreFullBackup(data);
@@ -360,7 +716,7 @@ function importProjectFromFile() {
         saveProject();
         if (typeof switchPage === 'function') switchPage('writing');
       } catch (e) {
-        alert(t('import.error') || 'Could not read that file.');
+        showToast('import.error');
       }
     };
     reader.readAsText(file);
@@ -390,6 +746,7 @@ let inspiration = [];
 let todos = [];
 let writingGoal = 0;
 let wordHistory = []; // [{ date: "YYYY-MM-DD", words: number }]
+let sprints = []; // [{ date: ISO, minutes, words, target }] — last 50 writing sprints
 let selectedStructure = null;
 let worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
 let ideaMap = { nodes: [] };
@@ -552,6 +909,63 @@ const TR = {
     'btn.export.title': 'Download this project as a .json file',
     'btn.import.title': 'Open a project from a .json file',
     'import.error': 'Could not read that file.',
+    'toast.export.error': 'Export failed — please try again.',
+    'toast.image.fallback': 'Image could not be compressed — the original was kept.',
+    'toast.dismiss': 'Dismiss',
+    'tabs.guard.title': 'Already open',
+    'tabs.guard.msg': 'InkTink is already open in another tab. To avoid losing changes, only one tab can edit at a time.',
+    'tabs.guard.gone': 'The other tab seems to be gone. You can continue writing here.',
+    'tabs.guard.takeover': 'Use this tab instead',
+    'history.btn.title': 'Version history',
+    'history.title': 'Version history',
+    'history.empty': 'No snapshots yet. One is taken automatically every 10 minutes while you work.',
+    'history.now': 'Snapshot now',
+    'history.restore': 'Restore',
+    'history.restore.confirm': 'Restore this version?',
+    'history.words': '{n} words',
+    'history.images.note': 'Browser snapshots don\'t include images — your current images are kept on restore.',
+    'toast.snapshot.skipped': 'Snapshot skipped — browser storage is almost full.',
+    'toast.snapshot.restored': 'Earlier version restored.',
+    'export.manuscript.title': 'Export manuscript',
+    'export.scope.all': 'Whole manuscript',
+    'export.scope.chapter': 'One chapter:',
+    'export.btn.title': 'Export manuscript (.docx / .md / .txt)',
+    'scene.meta.pov': 'POV',
+    'scene.meta.pov.pick': 'Who tells this scene?',
+    'scene.meta.place.pick': 'Where does this scene take place?',
+    'scene.meta.when.placeholder': 'Story date, e.g. "Day 3" or "Winter 1042"',
+    'scene.meta.clear': 'Remove',
+    'picker.usetext': 'Use "{q}" as text',
+    'char.pov.count': 'POV in {n} scene(s)',
+    'gsearch.btn.title': 'Search (Ctrl+K)',
+    'gsearch.placeholder': 'Search scenes, characters, notes…',
+    'gsearch.hint': 'Type to search your whole project. ↑↓ to move, Enter to open, Esc to close.',
+    'gsearch.noresults': 'No results.',
+    'gsearch.more': '+{n} more',
+    'gsearch.group.scenes': 'Scenes', 'gsearch.group.chapters': 'Chapters',
+    'gsearch.group.characters': 'Characters', 'gsearch.group.world': 'Worldbuilding',
+    'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Timeline',
+    'gsearch.group.notes': 'Notes',
+    'sprint.btn': 'Sprint',
+    'sprint.btn.title': 'Writing sprint: a countdown with an optional word target',
+    'sprint.start.title': 'Start a writing sprint',
+    'sprint.start': 'Start',
+    'sprint.custom': 'Custom min',
+    'sprint.target': 'Word target:',
+    'sprint.target.optional': 'optional',
+    'sprint.target.short': 'target {n}',
+    'sprint.chip.title': 'Sprint running — click to end it',
+    'sprint.done.title': 'Sprint finished!',
+    'sprint.done.words': '{n} words in {m} minutes.',
+    'sprint.done.target.hit': 'Target of {n} words reached!',
+    'sprint.done.target.miss': 'Target was {n} words — every word still counts.',
+    'stats.streak.current': 'Day streak',
+    'stats.streak.best': 'Best streak',
+    'stats.streak.today': 'Words today',
+    'stats.streak.hint': 'Consecutive days with new words. Deleting more than you add breaks the streak.',
+    'stats.sprints.recent': 'Recent sprints',
+    'a11y.projtitle': 'Project title — also used as the export filename',
+    'notes.confirm.delete': 'Delete this note?',
     'nav.writing': 'Manuscript', 'nav.notes': 'Notes', 'nav.moodboard': 'Moodboard',
     'nav.theme': 'Theme', 'nav.brainstorming': 'Idea Tree', 'nav.ideas': 'Spark', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Timeline', 'nav.characters': 'Characters', 'nav.worldbuilding': 'Worldbuilding', 'nav.stats': 'Stats',
@@ -600,7 +1014,6 @@ const TR = {
     'project.untitled': 'Untitled Project', 'project.blurb.placeholder': "What's it about? A short description of your project...",
     'save.warning': '⚠️ Saving failed — your browser storage is full. Your latest changes are NOT saved. Remove some images, or download a backup now.',
     'save.warning.backup': 'Download backup',
-    'writing.export.docx': 'Export as Word document (.docx)',
     'writing.untitled.chapter': 'Untitled Chapter',
     'writing.untitled.scene': 'Untitled Scene',
     'export.docx.unavailable': 'The Word export module has not loaded yet. Go online once and reload the page, then try again.',
@@ -848,6 +1261,63 @@ const TR = {
     'btn.export.title': 'Dieses Projekt als .json-Datei herunterladen',
     'btn.import.title': 'Ein Projekt aus einer .json-Datei öffnen',
     'import.error': 'Diese Datei konnte nicht gelesen werden.',
+    'toast.export.error': 'Export fehlgeschlagen — bitte noch einmal versuchen.',
+    'toast.image.fallback': 'Bild konnte nicht komprimiert werden — Original wurde behalten.',
+    'toast.dismiss': 'Schließen',
+    'tabs.guard.title': 'Bereits geöffnet',
+    'tabs.guard.msg': 'InkTink ist bereits in einem anderen Tab geöffnet. Damit nichts verloren geht, kann nur ein Tab gleichzeitig schreiben.',
+    'tabs.guard.gone': 'Der andere Tab scheint geschlossen zu sein. Du kannst hier weiterschreiben.',
+    'tabs.guard.takeover': 'Diesen Tab verwenden',
+    'history.btn.title': 'Versionsverlauf',
+    'history.title': 'Versionsverlauf',
+    'history.empty': 'Noch keine Snapshots. Beim Arbeiten wird automatisch alle 10 Minuten einer angelegt.',
+    'history.now': 'Jetzt sichern',
+    'history.restore': 'Wiederherstellen',
+    'history.restore.confirm': 'Diese Version wiederherstellen?',
+    'history.words': '{n} Wörter',
+    'history.images.note': 'Browser-Snapshots enthalten keine Bilder — beim Wiederherstellen bleiben deine aktuellen Bilder erhalten.',
+    'toast.snapshot.skipped': 'Snapshot übersprungen — der Browser-Speicher ist fast voll.',
+    'toast.snapshot.restored': 'Frühere Version wiederhergestellt.',
+    'export.manuscript.title': 'Manuskript exportieren',
+    'export.scope.all': 'Ganzes Manuskript',
+    'export.scope.chapter': 'Ein Kapitel:',
+    'export.btn.title': 'Manuskript exportieren (.docx / .md / .txt)',
+    'scene.meta.pov': 'POV',
+    'scene.meta.pov.pick': 'Wer erzählt diese Szene?',
+    'scene.meta.place.pick': 'Wo spielt diese Szene?',
+    'scene.meta.when.placeholder': 'Story-Datum, z. B. "Tag 3" oder "Winter 1042"',
+    'scene.meta.clear': 'Entfernen',
+    'picker.usetext': '"{q}" als Text verwenden',
+    'char.pov.count': 'POV in {n} Szene(n)',
+    'gsearch.btn.title': 'Suchen (Strg+K)',
+    'gsearch.placeholder': 'Szenen, Charaktere, Notizen durchsuchen…',
+    'gsearch.hint': 'Tippe, um dein ganzes Projekt zu durchsuchen. ↑↓ zum Bewegen, Enter zum Öffnen, Esc zum Schließen.',
+    'gsearch.noresults': 'Keine Treffer.',
+    'gsearch.more': '+{n} weitere',
+    'gsearch.group.scenes': 'Szenen', 'gsearch.group.chapters': 'Kapitel',
+    'gsearch.group.characters': 'Charaktere', 'gsearch.group.world': 'Weltenbau',
+    'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Zeitstrahl',
+    'gsearch.group.notes': 'Notizen',
+    'sprint.btn': 'Sprint',
+    'sprint.btn.title': 'Schreib-Sprint: ein Countdown mit optionalem Wortziel',
+    'sprint.start.title': 'Schreib-Sprint starten',
+    'sprint.start': 'Start',
+    'sprint.custom': 'Eigene Min',
+    'sprint.target': 'Wortziel:',
+    'sprint.target.optional': 'optional',
+    'sprint.target.short': 'Ziel {n}',
+    'sprint.chip.title': 'Sprint läuft — zum Beenden klicken',
+    'sprint.done.title': 'Sprint geschafft!',
+    'sprint.done.words': '{n} Wörter in {m} Minuten.',
+    'sprint.done.target.hit': 'Ziel von {n} Wörtern erreicht!',
+    'sprint.done.target.miss': 'Das Ziel waren {n} Wörter — jedes Wort zählt trotzdem.',
+    'stats.streak.current': 'Tage-Serie',
+    'stats.streak.best': 'Beste Serie',
+    'stats.streak.today': 'Wörter heute',
+    'stats.streak.hint': 'Aufeinanderfolgende Tage mit neuen Wörtern. Wer mehr löscht als schreibt, unterbricht die Serie.',
+    'stats.sprints.recent': 'Letzte Sprints',
+    'a11y.projtitle': 'Projekttitel — wird auch als Export-Dateiname verwendet',
+    'notes.confirm.delete': 'Diese Notiz löschen?',
     'nav.writing': 'Manuskript', 'nav.notes': 'Notizen', 'nav.moodboard': 'Moodboard',
     'nav.theme': 'Thema', 'nav.brainstorming': 'Ideen-Baum', 'nav.ideas': 'Impulse', 'nav.beats': 'Story Beats',
     'nav.timeline': 'Zeitstrahl', 'nav.characters': 'Charaktere', 'nav.worldbuilding': 'Weltenbau', 'nav.stats': 'Statistiken',
@@ -896,7 +1366,6 @@ const TR = {
     'project.untitled': 'Unbenanntes Projekt', 'project.blurb.placeholder': "Worum geht's? Kurze Beschreibung deines Projekts...",
     'save.warning': '⚠️ Speichern fehlgeschlagen — der Browser-Speicher ist voll. Deine letzten Änderungen sind NICHT gespeichert. Entferne einige Bilder oder lade jetzt ein Backup herunter.',
     'save.warning.backup': 'Backup herunterladen',
-    'writing.export.docx': 'Als Word-Dokument exportieren (.docx)',
     'writing.untitled.chapter': 'Unbenanntes Kapitel',
     'writing.untitled.scene': 'Unbenannte Szene',
     'export.docx.unavailable': 'Das Word-Export-Modul ist noch nicht geladen. Einmal online gehen und die Seite neu laden, dann erneut versuchen.',
@@ -1147,11 +1616,32 @@ function ts(structKey, subKey, fallback) {
 
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-tooltip]').forEach(el => { el.dataset.tooltip = t(el.dataset.i18nTooltip); });
+  document.querySelectorAll('[data-i18n-tooltip]').forEach(el => {
+    el.dataset.tooltip = t(el.dataset.i18nTooltip);
+    // Icon-only controls: the translated tooltip doubles as the accessible name.
+    if (!el.textContent.trim()) el.setAttribute('aria-label', t(el.dataset.i18nTooltip));
+  });
+  const projTitleA11y = document.getElementById('proj-title');
+  if (projTitleA11y) {
+    projTitleA11y.setAttribute('role', 'textbox');
+    projTitleA11y.setAttribute('aria-label', t('a11y.projtitle'));
+  }
   const blurb = document.getElementById('project-blurb');
   if (blurb) blurb.placeholder = t('project.blurb.placeholder');
-  const exportWordBtn = document.getElementById('btn-export-word');
-  if (exportWordBtn) exportWordBtn.title = t('writing.export.docx');
+  const exportManuscriptBtn = document.getElementById('btn-export-manuscript');
+  if (exportManuscriptBtn) exportManuscriptBtn.title = t('export.btn.title');
+  const historyBtn = document.getElementById('history-btn');
+  if (historyBtn) {
+    historyBtn.title = t('history.btn.title');
+    historyBtn.setAttribute('aria-label', t('history.btn.title'));
+  }
+  const gsearchBtn = document.getElementById('gsearch-btn');
+  if (gsearchBtn) {
+    gsearchBtn.title = t('gsearch.btn.title');
+    gsearchBtn.setAttribute('aria-label', t('gsearch.btn.title'));
+  }
+  const gsearchInput = document.getElementById('gsearch-input');
+  if (gsearchInput) gsearchInput.placeholder = t('gsearch.placeholder');
   // Split view & sidebar controls carry translated tooltips/options.
   buildSplitPicker();
   applySplit(true); // force: the split pane's text must pick up the new language
@@ -3230,6 +3720,12 @@ function activePageName() {
 // main pane and the split pane.
 function renderPageHooks(page) {
   if (page === 'home') renderHome();
+  // Refresh scene-meta chips (cheap, focus-safe) so a character or world entry
+  // deleted on another page can't leave a stale POV/place chip behind.
+  if (page === 'writing' && activeChapterId && activeSceneId) {
+    const { scene } = findScene(activeChapterId, activeSceneId);
+    if (scene) { renderSceneMetaRow(scene); patchTreeSceneMeta(scene); }
+  }
   if (page === 'stats') renderStats();
   if (page === 'beats') renderBeats(); // keeps drafted chips & coverage current
   if (page === 'worldbuilding') renderWorldbuilding();
@@ -3379,6 +3875,24 @@ document.getElementById('split-divider').addEventListener('pointerdown', e => {
   divider.addEventListener('pointermove', move);
   divider.addEventListener('pointerup', up);
 });
+
+// Keyboard access to the split divider: focus it, resize with arrow keys.
+{
+  const divider = document.getElementById('split-divider');
+  divider.setAttribute('role', 'separator');
+  divider.setAttribute('aria-orientation', 'vertical');
+  divider.setAttribute('aria-valuemin', '25');
+  divider.setAttribute('aria-valuemax', '75');
+  divider.tabIndex = 0;
+  divider.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    uiPrefs.splitLeft = Math.min(75, Math.max(25, uiPrefs.splitLeft + (e.key === 'ArrowLeft' ? -2 : 2)));
+    document.querySelector('.content').style.setProperty('--split-left', uiPrefs.splitLeft + '%');
+    divider.setAttribute('aria-valuenow', String(Math.round(uiPrefs.splitLeft)));
+    saveUiPrefs();
+  });
+}
 
 // ── Collapsible sidebars (project sidebar + chapter tree) ──
 function applySidebarCollapsed() {
@@ -4414,12 +4928,14 @@ function renderStats() {
   for (const ch of writing.chapters) {
     const scenes = (ch.scenes || []).map((sc, i) => ({
       title: sc.title || `Szene ${i + 1}`,
-      words: countWords(sc.content || '')
+      words: countWords(sc.content || ''),
+      status: sceneStatus(sc)
     }));
     const chWords = scenes.reduce((s, sc) => s + sc.words, 0);
     totalWords += chWords;
     chapterData.push({ title: ch.title || 'Unbenannt', scenes, words: chWords });
   }
+  const streaks = computeStreaks();
   const totalScenes = chapterData.reduce((s, ch) => s + ch.scenes.length, 0);
   const progress = writingGoal > 0 ? Math.min(100, Math.round((totalWords / writingGoal) * 100)) : 0;
   const maxChWords = Math.max(1, ...chapterData.map(c => c.words));
@@ -4459,6 +4975,9 @@ function renderStats() {
           <div class="stats-card"><div class="stats-number">${beats.length}</div><div class="stats-label">Story Beats</div></div>
           <div class="stats-card"><div class="stats-number">${characters.length}</div><div class="stats-label">${t('stats.characters')}</div></div>
           <div class="stats-card"><div class="stats-number">${brainstorm.notes.length}</div><div class="stats-label">${t('nav.notes')}</div></div>
+          <div class="stats-card" title="${t('stats.streak.hint')}"><div class="stats-number">&#128293; ${streaks.current}</div><div class="stats-label">${t('stats.streak.current')}</div></div>
+          <div class="stats-card"><div class="stats-number">${streaks.best}</div><div class="stats-label">${t('stats.streak.best')}</div></div>
+          <div class="stats-card"><div class="stats-number">${streaks.wordsToday.toLocaleString('de-DE')}</div><div class="stats-label">${t('stats.streak.today')}</div></div>
         </div>
       </div>
 
@@ -4473,11 +4992,18 @@ function renderStats() {
                 const shade = 100 - (i % 5) * 15; // shades of the theme accent: 100,85,70,55,40
                 return `<div class="stats-stack-seg" style="flex:${sc.words || 0.01};background:color-mix(in srgb, var(--accent) ${shade}%, var(--bg-card))" title="${ideaEsc(sc.title)}: ${sc.words.toLocaleString('de-DE')} ${t('stats.words')}"></div>`;
               }).join('');
+              const statusCounts = { done: 0, revised: 0, draft: 0 };
+              ch.scenes.forEach(sc => statusCounts[sc.status]++);
+              const statusSegs = ['done', 'revised', 'draft']
+                .filter(s => statusCounts[s])
+                .map(s => `<div class="stats-status-seg status-${s}" style="flex:${statusCounts[s]}" title="${t('writing.status.' + s)}: ${statusCounts[s]}"></div>`)
+                .join('');
               return `
                 <div class="stats-bar-row">
                   <div class="stats-bar-label">${ideaEsc(ch.title)}</div>
                   <div class="stats-bar-track">
                     <div class="stats-stacked-bar" style="width:${barPct}%">${segments}</div>
+                    ${statusSegs ? `<div class="stats-status-bar" style="width:${barPct}%">${statusSegs}</div>` : ''}
                   </div>
                   <div class="stats-bar-count">${ch.words.toLocaleString('de-DE')}</div>
                 </div>`;
@@ -4489,6 +5015,22 @@ function renderStats() {
         <div class="stats-section-label" style="margin-bottom:20px">${t('stats.history.title')}</div>
         ${renderWordHistoryChart()}
       </div>
+
+      ${sprints.length ? `
+      <div class="stats-chart-card">
+        <div class="stats-section-label" style="margin-bottom:14px">${t('stats.sprints.recent')}</div>
+        <div class="stats-sprints">
+          ${[...sprints].slice(-5).reverse().map(s => {
+            const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
+            const when = new Date(s.date).toLocaleString(locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const hit = s.target > 0 && s.words >= s.target;
+            return `<div class="stats-sprint-row">
+              <span class="stats-sprint-when">${ideaEsc(when)}</span>
+              <span class="stats-sprint-detail">${s.minutes} min · ${s.words} ${t('stats.words')}${s.target ? ` · ${hit ? '\u{1F389}' : ''} ${t('sprint.target.short').replace('{n}', s.target)}` : ''}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
 
     </div>
   `;
@@ -4551,19 +5093,36 @@ document.getElementById('theme-switch').addEventListener('click', () => {
 const modalOverlay = document.getElementById('modal-overlay');
 const modalBody = document.getElementById('modal-body');
 
+let modalPrevFocus = null;
+
 function openModal(content) {
   modalBody.innerHTML = '';
   if (typeof content === 'string') modalBody.innerHTML = content;
   else modalBody.appendChild(content);
+  if (!modalOverlay.classList.contains('open')) modalPrevFocus = document.activeElement;
   modalOverlay.classList.add('open');
+  // Focus the first control; callers that focus something specific (rAF) win.
+  const first = modalBody.querySelector('input, textarea, select, button');
+  if (first) requestAnimationFrame(() => {
+    if (modalOverlay.classList.contains('open') && !modalBody.contains(document.activeElement)) first.focus();
+  });
 }
 
 function closeModal() {
   modalOverlay.classList.remove('open');
+  if (modalPrevFocus && typeof modalPrevFocus.focus === 'function') {
+    try { modalPrevFocus.focus(); } catch {}
+  }
+  modalPrevFocus = null;
 }
 
 document.getElementById('modal-close').addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => {
+  // Esc closes the modal — unless the global search overlay is on top of it.
+  const gs = document.getElementById('global-search');
+  if (e.key === 'Escape' && modalOverlay.classList.contains('open') && (!gs || gs.hidden)) closeModal();
+});
 
 // ══════════════════════════════════
 // ── STORY BEATS ──
@@ -4598,7 +5157,11 @@ function openScenePicker(onPick) {
 // Modal listing scenes, characters, and worldbuilding entries;
 // calls onPick({ type: 'scene' | 'char' | 'world', id }). A search box filters
 // all three groups live so large projects stay navigable.
-function openRefPicker(onPick) {
+// opts.types limits the groups (e.g. ['char']); opts.allowFreeText adds a
+// "use what I typed" row that yields { type: 'text', value }; opts.titleKey
+// overrides the modal title.
+function openRefPicker(onPick, opts = {}) {
+  const types = opts.types || ['scene', 'char', 'world'];
   const container = document.createElement('div');
   const none = `<div class="picker-none">${t('picker.none')}</div>`;
 
@@ -4620,30 +5183,41 @@ function openRefPicker(onPick) {
     .map(w => `<button class="picker-item" data-type="world" data-id="${w.id}">${ideaEsc(w.title) || t('writing.untitled')}</button>`).join('');
 
   container.innerHTML = `
-    <div class="modal-title">${t('picker.ref.title')}</div>
+    <div class="modal-title">${t(opts.titleKey || 'picker.ref.title')}</div>
     <input type="text" class="picker-search" placeholder="${t('picker.search')}">
     <div class="picker-list"></div>`;
   const searchEl = container.querySelector('.picker-search');
   const listEl = container.querySelector('.picker-list');
 
+  const pickFrom = btn => btn.dataset.type === 'text'
+    ? { type: 'text', value: searchEl.value.trim() }
+    : { type: btn.dataset.type, id: Number(btn.dataset.id) };
+
   function render() {
     const q = searchEl.value.trim().toLowerCase();
-    const sc = scenesHtml(q), ch = charsHtml(q), wo = worldHtml(q);
+    const sc = types.includes('scene') ? scenesHtml(q) : null;
+    const ch = types.includes('char') ? charsHtml(q) : null;
+    const wo = types.includes('world') ? worldHtml(q) : null;
+    const free = (opts.allowFreeText && searchEl.value.trim())
+      ? `<button class="picker-item picker-free" data-type="text">${t('picker.usetext').replace('{q}', ideaEsc(searchEl.value.trim()))}</button>`
+      : '';
     // While searching, drop empty groups entirely; when idle, show each group
     // with a placeholder so the user sees what kinds of links exist.
     const group = (labelKey, html) =>
-      html ? `<div class="picker-group">${t(labelKey)}</div>${html}`
-           : (q ? '' : `<div class="picker-group">${t(labelKey)}</div>${none}`);
-    if (q && !sc && !ch && !wo) {
+      html == null ? ''
+        : html ? `<div class="picker-group">${t(labelKey)}</div>${html}`
+        : (q ? '' : `<div class="picker-group">${t(labelKey)}</div>${none}`);
+    if (q && !sc && !ch && !wo && !free) {
       listEl.innerHTML = `<div class="picker-none">${t('picker.noresults')}</div>`;
     } else {
       listEl.innerHTML = group('picker.group.scenes', sc)
         + group('picker.group.characters', ch)
-        + group('picker.group.world', wo);
+        + group('picker.group.world', wo)
+        + free;
     }
     listEl.querySelectorAll('.picker-item').forEach(btn => btn.addEventListener('click', () => {
       closeModal();
-      onPick({ type: btn.dataset.type, id: Number(btn.dataset.id) });
+      onPick(pickFrom(btn));
     }));
   }
 
@@ -4655,7 +5229,7 @@ function openRefPicker(onPick) {
     if (!first) return;
     e.preventDefault();
     closeModal();
-    onPick({ type: first.dataset.type, id: Number(first.dataset.id) });
+    onPick(pickFrom(first));
   });
 
   render();
@@ -5415,6 +5989,9 @@ function renderCharacters() {
   characters.forEach((char, i) => {
     normalizeCharSections(char);
     if (char.id == null) char.id = Date.now() + i; // pre-id characters need one for internal links
+    const povScenes = [];
+    for (const ch of writing.chapters)
+      for (const sc of (ch.scenes || [])) if (sc.pov === char.id) povScenes.push(sc.id);
     const card = document.createElement('div');
     card.className = 'char-card';
     card.dataset.id = char.id;
@@ -5439,6 +6016,7 @@ function renderCharacters() {
           <span class="char-quote-mark">&#8220;</span>
           <textarea class="char-quote-text" rows="1" placeholder="${t('char.quote.placeholder')}">${ideaEsc(char.quote || '')}</textarea>
         </div>
+        ${povScenes.length ? `<button class="char-pov-line">${t('char.pov.count').replace('{n}', povScenes.length)}</button>` : ''}
         <div class="char-sections"></div>
         <div class="char-section-add">
           <button class="char-add-section">${t('char.add.section')}</button>
@@ -5449,6 +6027,9 @@ function renderCharacters() {
         <button class="char-delete">${t('char.delete')}</button>
       </div>
     `;
+
+    const povLine = card.querySelector('.char-pov-line');
+    if (povLine) povLine.addEventListener('click', () => goToRef({ type: 'scene', id: povScenes[0] }));
 
     const cardHandle = card.querySelector('.char-drag-handle');
     cardHandle.addEventListener('mousedown', () => { card.draggable = true; });
@@ -5782,8 +6363,8 @@ function renderChapterTree() {
     const collapsed = !!ch.collapsed;
     block.innerHTML = `
       <div class="chapter-row">
-        <span class="chapter-drag" draggable="true" title="${t('writing.drag.chapter')}" style="cursor:grab;color:var(--text-muted);font-size:13px">&#8942;&#8942;</span>
-        <button class="chapter-toggle" title="${t('writing.collapse')}">${collapsed ? '&#9656;' : '&#9662;'}</button>
+        <span class="chapter-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.chapter')}" style="cursor:grab;color:var(--text-muted);font-size:13px">&#8942;&#8942;</span>
+        <button class="chapter-toggle" title="${t('writing.collapse')}" aria-expanded="${!collapsed}" aria-label="${t('writing.collapse')}">${collapsed ? '&#9656;' : '&#9662;'}</button>
         <input class="chapter-title" value="${ideaEsc(ch.title)}" placeholder="${t('writing.chapter.placeholder')}">
         <div class="chapter-actions">
           <button class="tree-icon-btn del" title="${t('writing.delete.chapter')}">&times;</button>
@@ -5851,13 +6432,51 @@ function renderChapterTree() {
         const li = document.createElement('li');
         li.className = 'scene-item' + (sc.id === activeSceneId ? ' active' : '');
         li.dataset.scene = sc.id;
+        const povChar = characters.find(c => c.id === sc.pov);
         li.innerHTML = `
-          <span class="scene-drag" draggable="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
+          <span class="scene-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
           <span class="scene-status-dot status-${sceneStatus(sc)}"></span>
+          ${povChar ? `<span class="scene-pov-badge">${ideaEsc(povInitials(povChar.name))}</span>` : ''}
           <input class="scene-name-input" value="${ideaEsc(sc.title)}" placeholder="${t('writing.scene.placeholder')}">
-          <button class="scene-del" title="${t('writing.delete.scene')}">&times;</button>
+          <button class="scene-del" title="${t('writing.delete.scene')}" aria-label="${t('writing.delete.scene')}">&times;</button>
         `;
-        if (sc.summary) li.title = sc.summary;
+        const metaTip = [sc.summary, scenePlaceLabel(sc), sc.when].filter(Boolean).join(' · ');
+        if (metaTip) li.title = metaTip;
+
+        // Keyboard: Enter/Space opens, ↑↓ moves focus, Alt+↑↓ reorders within
+        // the chapter (same splice as drag & drop), ←/→ collapses/expands.
+        li.tabIndex = 0;
+        li.setAttribute('aria-label', (sc.title || t('writing.untitled.scene')) + (metaTip ? ' — ' + metaTip : ''));
+        li.addEventListener('keydown', e => {
+          if (e.target !== li) return; // keys inside the name input stay there
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectScene(ch.id, sc.id);
+          } else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+            e.preventDefault();
+            const from = ch.scenes.findIndex(s => s.id === sc.id);
+            const to = e.key === 'ArrowUp' ? from - 1 : from + 1;
+            if (to < 0 || to >= ch.scenes.length) return;
+            const [moved] = ch.scenes.splice(from, 1);
+            ch.scenes.splice(to, 0, moved);
+            saveProject();
+            renderChapterTree();
+            const nli = chapterTree.querySelector(`.scene-item[data-scene="${sc.id}"]`);
+            if (nli) nli.focus();
+          } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const items = [...chapterTree.querySelectorAll('.scene-item')];
+            const next = items[items.indexOf(li) + (e.key === 'ArrowDown' ? 1 : -1)];
+            if (next) next.focus();
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            ch.collapsed = true;
+            saveProject();
+            renderChapterTree();
+            const toggle = chapterTree.querySelector(`.chapter-block[data-chapter="${ch.id}"] .chapter-toggle`);
+            if (toggle) toggle.focus();
+          }
+        });
 
         // Select scene (and focus the manuscript) when clicking empty row area
         li.addEventListener('click', e => {
@@ -5996,6 +6615,7 @@ function renderEditor() {
     <div class="editor-summary-row">
       <input class="scene-summary-input" id="scene-summary-input" placeholder="${t('writing.summary.placeholder')}" value="${ideaEsc(scene.summary)}">
     </div>
+    <div class="editor-meta-row" id="scene-meta-row"></div>
     <div class="format-toolbar">
       <button class="fmt-btn" data-cmd="bold" title="${t('editor.fmt.bold')}"><b>B</b></button>
       <button class="fmt-btn" data-cmd="italic" title="${t('editor.fmt.italic')}"><i>I</i></button>
@@ -6009,6 +6629,7 @@ function renderEditor() {
       </select>
       <span class="fmt-divider"></span>
       <button class="btn-mini" id="insert-note">&#128221; ${t('editor.insert.note')}</button>
+      <button class="btn-mini" id="sprint-btn" title="${t('sprint.btn.title')}">&#9201; ${t('sprint.btn')}</button>
       <span class="editor-spacer"></span>
       <span class="word-count" id="word-count"></span>
     </div>
@@ -6027,6 +6648,7 @@ function renderEditor() {
 
   manuscript.innerHTML = scene.content || '';
   wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
+  renderSceneMetaRow(scene);
 
   function persist() {
     scene.content = manuscript.innerHTML;
@@ -6102,6 +6724,9 @@ function renderEditor() {
   });
 
   editorPane.querySelector('#insert-note').addEventListener('click', () => insertNoteAtCursor(manuscript));
+  editorPane.querySelector('#sprint-btn').addEventListener('click', () => {
+    if (sprintState) endSprint(); else openSprintModal();
+  });
 
   // ── Light / Dark editor toggle ──
   const themeToggleBtn = editorPane.querySelector('#theme-toggle');
@@ -6136,18 +6761,123 @@ function plainTextOf(html) {
   return tmp.textContent || '';
 }
 
+// ── Scene metadata (POV / location / story date) ──
+// Optional flat fields on the scene: pov (character id), place ({type:'world',
+// id} or a free-text string), when (free text — fictional calendars welcome).
+// Chips update in place; a full renderEditor would steal typing focus.
+function scenePlaceLabel(scene) {
+  if (typeof scene.place === 'string') return scene.place;
+  if (scene.place && scene.place.id != null) {
+    const w = worldbuilding.entries.find(e => e.id === scene.place.id);
+    return w ? (w.title || t('writing.untitled')) : '';
+  }
+  return '';
+}
+
+function povInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)).toUpperCase();
+}
+
+function renderSceneMetaRow(scene) {
+  const row = document.getElementById('scene-meta-row');
+  if (!row) return;
+
+  // Dangling refs (deleted character / world entry) are cleared lazily here.
+  if (scene.pov != null && !characters.find(c => c.id === scene.pov)) delete scene.pov;
+  if (scene.place && typeof scene.place === 'object' && !worldbuilding.entries.find(w => w.id === scene.place.id)) delete scene.place;
+
+  const povChar = characters.find(c => c.id === scene.pov);
+  const placeLabel = scenePlaceLabel(scene);
+  const chip = (id, set, label, clearKey) => `
+    <button class="meta-chip${set ? ' set' : ''}" id="${id}">${label}${set ? `<span class="meta-clear" data-clear="${clearKey}" title="${t('scene.meta.clear')}">&times;</span>` : ''}</button>`;
+
+  row.innerHTML =
+    chip('meta-pov', !!povChar, `${t('scene.meta.pov')}: ${povChar ? ideaEsc(povChar.name || t('writing.untitled')) : '+'}`, 'pov') +
+    chip('meta-place', !!placeLabel, `&#128205; ${placeLabel ? ideaEsc(placeLabel) : '+'}`, 'place') +
+    chip('meta-when', !!scene.when, `&#128197; ${scene.when ? ideaEsc(scene.when) : '+'}`, 'when');
+
+  const changed = () => {
+    saveProjectDebounced();
+    renderSceneMetaRow(scene);
+    patchTreeSceneMeta(scene);
+  };
+
+  row.querySelectorAll('.meta-clear').forEach(x => x.addEventListener('click', e => {
+    e.stopPropagation();
+    delete scene[x.dataset.clear];
+    changed();
+  }));
+
+  row.querySelector('#meta-pov').addEventListener('click', () => {
+    openRefPicker(ref => { scene.pov = ref.id; changed(); },
+      { types: ['char'], titleKey: 'scene.meta.pov.pick' });
+  });
+
+  row.querySelector('#meta-place').addEventListener('click', () => {
+    openRefPicker(ref => {
+      scene.place = ref.type === 'text' ? ref.value : { type: 'world', id: ref.id };
+      changed();
+    }, { types: ['world'], allowFreeText: true, titleKey: 'scene.meta.place.pick' });
+  });
+
+  row.querySelector('#meta-when').addEventListener('click', () => {
+    const chipEl = row.querySelector('#meta-when');
+    const input = document.createElement('input');
+    input.className = 'meta-when-input';
+    input.value = scene.when || '';
+    input.placeholder = t('scene.meta.when.placeholder');
+    chipEl.replaceWith(input);
+    input.focus();
+    let cancelled = false;
+    input.addEventListener('blur', () => {
+      if (!cancelled) {
+        const v = input.value.trim();
+        if (v) scene.when = v; else delete scene.when;
+      }
+      changed();
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelled = true; input.blur(); }
+    });
+  });
+}
+
+// Patch the tree row's POV badge and tooltip without a full rebuild.
+function patchTreeSceneMeta(scene) {
+  const li = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"]`);
+  if (!li) return;
+  const povChar = characters.find(c => c.id === scene.pov);
+  let badge = li.querySelector('.scene-pov-badge');
+  if (!povChar) {
+    if (badge) badge.remove();
+  } else {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'scene-pov-badge';
+      li.querySelector('.scene-status-dot').after(badge);
+    }
+    badge.textContent = povInitials(povChar.name);
+  }
+  const tip = [scene.summary, scenePlaceLabel(scene), scene.when].filter(Boolean).join(' · ');
+  if (tip) li.title = tip; else li.removeAttribute('title');
+}
+
 function runSceneSearch(term, container) {
-  const t = term.trim().toLowerCase();
+  // NB: not `t` — that would shadow the i18n t() used in the no-results branch
+  const q = term.trim().toLowerCase();
   container.innerHTML = '';
-  if (!t) return;
+  if (!q) return;
 
   const hits = [];
   writing.chapters.forEach(ch => {
     (ch.scenes || []).forEach(sc => {
       const text = plainTextOf(sc.content);
       const lowText = text.toLowerCase();
-      const inTitle = (sc.title || '').toLowerCase().includes(t);
-      const idx = lowText.indexOf(t);
+      const inTitle = (sc.title || '').toLowerCase().includes(q);
+      const idx = lowText.indexOf(q);
       if (inTitle || idx >= 0) {
         let snippet = '';
         if (idx >= 0) {
@@ -6181,6 +6911,332 @@ function runSceneSearch(term, container) {
     });
     container.appendChild(item);
   });
+}
+
+// ── Global search (Ctrl+K) ──
+// One overlay that searches everything: scenes (title/summary/prose),
+// chapters, characters, worldbuilding, beats, timeline cells, and sticky
+// notes. Each hit navigates to its page and flashes the target card.
+// The index is rebuilt on every open — cheap (plain string concat per item)
+// and always current; nothing can change while the overlay has focus.
+const GSEARCH_GROUPS = ['scenes', 'chapters', 'characters', 'world', 'beats', 'timeline', 'notes'];
+const GSEARCH_PER_GROUP = 8;
+let gsearchIndex = [];
+let gsearchMatches = [];
+let gsearchActive = 0;
+let gsearchExpanded = new Set();
+let gsearchPrevFocus = null;
+let gsearchDebounce = null;
+
+// Pulls the searchable strings out of a char/world sections array.
+function gsearchSectionText(sections) {
+  return (sections || []).map(s => [
+    s.title, s.content,
+    ...(Array.isArray(s.items) ? s.items.map(it => typeof it === 'string' ? it : (it && (it.label || it.text) || '')) : []),
+  ].filter(x => typeof x === 'string' && x).join('\n')).join('\n');
+}
+
+function buildSearchIndex() {
+  const idx = [];
+  const add = (group, label, context, text, go) =>
+    idx.push({ group, label, context, low: (text || '').toLowerCase(), raw: text || '', go });
+
+  writing.chapters.forEach(ch => {
+    add('chapters', ch.title || t('writing.untitled.chapter'), '', ch.title || '', () => {
+      switchPage('writing');
+      const first = (ch.scenes || [])[0];
+      if (first) selectScene(ch.id, first.id);
+    });
+    (ch.scenes || []).forEach(sc => {
+      add('scenes', sc.title || t('writing.untitled.scene'), ch.title || '',
+        [sc.title, sc.summary, plainTextOf(sc.content)].filter(Boolean).join('\n'),
+        () => goToRef({ type: 'scene', id: sc.id }));
+    });
+  });
+  characters.forEach(c => {
+    add('characters', c.name || t('writing.untitled'), '',
+      [c.name, c.quote, gsearchSectionText(c.sections)].filter(Boolean).join('\n'),
+      () => goToRef({ type: 'char', id: c.id }));
+  });
+  worldbuilding.entries.forEach(w => {
+    add('world', w.title || t('writing.untitled'), w.category || '',
+      [w.title, gsearchSectionText(w.sections)].filter(Boolean).join('\n'),
+      () => goToRef({ type: 'world', id: w.id }));
+  });
+  beats.forEach((b, i) => {
+    const text = [b.text, b.theme].filter(Boolean).join('\n');
+    if (!text) return;
+    add('beats', beatSceneTitle(b), '', text,
+      () => { switchPage('beats'); flashCard(`.beat-card[data-index="${i}"]`); });
+  });
+  timeline.rows.forEach(row => {
+    Object.entries(row.cells || {}).forEach(([colId, text]) => {
+      if (!text || typeof text !== 'string') return;
+      const col = timeline.columns.find(c => String(c.id) === String(colId));
+      add('timeline', [row.title, col && col.title].filter(Boolean).join(' · '), '', text,
+        () => { switchPage('timeline'); flashCard(`.tl-cell[data-row="${row.id}"][data-col="${colId}"]`); });
+    });
+  });
+  brainstorm.notes.forEach(n => {
+    if (!n.text) return;
+    add('notes', n.text.slice(0, 48), '', n.text,
+      () => { switchPage('brainstorm'); flashCard(`.bs-note[data-id="${n.id}"]`); });
+  });
+  gsearchIndex = idx;
+}
+
+function gsearchSnippet(raw, pos, len) {
+  const start = Math.max(0, pos - 30);
+  const marked = (start > 0 ? '…' : '') +
+    raw.substring(start, pos) + '【' + raw.substr(pos, len) + '】' +
+    raw.substring(pos + len, pos + len + 40) + (pos + len + 40 < raw.length ? '…' : '');
+  return ideaEsc(marked.replace(/\s+/g, ' ')).replace('【', '<mark>').replace('】', '</mark>');
+}
+
+function gsearchRender() {
+  const resultsEl = document.getElementById('gsearch-results');
+  const q = document.getElementById('gsearch-input').value.trim().toLowerCase();
+  gsearchMatches = [];
+  gsearchActive = 0;
+  if (!q) {
+    resultsEl.innerHTML = `<div class="gsearch-hint">${t('gsearch.hint')}</div>`;
+    return;
+  }
+
+  const byGroup = new Map();
+  for (const e of gsearchIndex) {
+    const pos = e.low.indexOf(q);
+    if (pos < 0) continue;
+    if (!byGroup.has(e.group)) byGroup.set(e.group, []);
+    byGroup.get(e.group).push({ e, pos });
+  }
+
+  let html = '';
+  for (const group of GSEARCH_GROUPS) {
+    const hits = byGroup.get(group);
+    if (!hits || !hits.length) continue;
+    const shown = gsearchExpanded.has(group) ? hits : hits.slice(0, GSEARCH_PER_GROUP);
+    html += `<div class="gsearch-group">${t('gsearch.group.' + group)}</div>`;
+    for (const { e, pos } of shown) {
+      const i = gsearchMatches.length;
+      gsearchMatches.push(e);
+      html += `
+        <div class="gsearch-row${i === 0 ? ' active' : ''}" data-i="${i}">
+          <div class="gsearch-row-label">${ideaEsc(e.label)}${e.context ? `<span class="gsearch-row-ctx">${ideaEsc(e.context)}</span>` : ''}</div>
+          <div class="gsearch-row-snippet">${gsearchSnippet(e.raw, pos, q.length)}</div>
+        </div>`;
+    }
+    if (hits.length > shown.length) {
+      html += `<button class="gsearch-more" data-group="${group}">${t('gsearch.more').replace('{n}', hits.length - shown.length)}</button>`;
+    }
+  }
+  resultsEl.innerHTML = html || `<div class="gsearch-hint">${t('gsearch.noresults')}</div>`;
+
+  resultsEl.querySelectorAll('.gsearch-row').forEach(row => {
+    row.addEventListener('click', () => gsearchGo(Number(row.dataset.i)));
+    row.addEventListener('mousemove', () => gsearchSetActive(Number(row.dataset.i)));
+  });
+  resultsEl.querySelectorAll('.gsearch-more').forEach(btn => {
+    btn.addEventListener('click', () => { gsearchExpanded.add(btn.dataset.group); gsearchRender(); });
+  });
+}
+
+function gsearchSetActive(i) {
+  if (i < 0 || i >= gsearchMatches.length) return;
+  gsearchActive = i;
+  document.querySelectorAll('.gsearch-row').forEach(r =>
+    r.classList.toggle('active', Number(r.dataset.i) === i));
+}
+
+function gsearchGo(i) {
+  const e = gsearchMatches[i];
+  if (!e) return;
+  closeGlobalSearch(true); // navigating: the target gets the focus
+  e.go();
+}
+
+function openGlobalSearch() {
+  if (tabReadOnly) return;
+  buildSearchIndex();
+  gsearchExpanded = new Set();
+  gsearchPrevFocus = document.activeElement;
+  const input = document.getElementById('gsearch-input');
+  input.value = '';
+  document.getElementById('global-search').hidden = false;
+  gsearchRender();
+  input.focus();
+}
+
+function closeGlobalSearch(skipFocusRestore) {
+  document.getElementById('global-search').hidden = true;
+  if (!skipFocusRestore && gsearchPrevFocus && typeof gsearchPrevFocus.focus === 'function') {
+    try { gsearchPrevFocus.focus(); } catch {}
+  }
+  gsearchPrevFocus = null;
+}
+
+document.getElementById('gsearch-btn').addEventListener('click', openGlobalSearch);
+document.getElementById('global-search').addEventListener('mousedown', e => {
+  if (e.target === e.currentTarget) closeGlobalSearch();
+});
+document.getElementById('gsearch-input').addEventListener('input', () => {
+  clearTimeout(gsearchDebounce);
+  gsearchExpanded = new Set();
+  gsearchDebounce = setTimeout(gsearchRender, 150);
+});
+document.getElementById('gsearch-input').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); gsearchSetActive(gsearchActive + 1); gsearchScrollActive(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); gsearchSetActive(gsearchActive - 1); gsearchScrollActive(); }
+  else if (e.key === 'Enter') { e.preventDefault(); gsearchGo(gsearchActive); }
+});
+function gsearchScrollActive() {
+  const el = document.querySelector('.gsearch-row.active');
+  if (el) el.scrollIntoView({ block: 'nearest' });
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
+    e.preventDefault();
+    if (document.getElementById('global-search').hidden) openGlobalSearch();
+    else closeGlobalSearch();
+  } else if (e.key === 'Escape' && !document.getElementById('global-search').hidden) {
+    closeGlobalSearch();
+  }
+});
+
+// ── Writing sprints & streaks ──
+// A sprint is a countdown with an optional word target. State is in-memory
+// only (a reload simply ends the sprint unrecorded); finished sprints are
+// stored on the project (capped at 50). The topbar chip lives in index.html
+// so editor re-renders can't kill it.
+let sprintState = null;
+
+function startSprint(minutes, target) {
+  if (sprintState) return;
+  if (typeof flushEditor === 'function') flushEditor();
+  sprintState = {
+    minutes,
+    target: target || 0,
+    startWords: snapTotalWords(),
+    startedAt: Date.now(),
+    endsAt: Date.now() + minutes * 60000,
+    lastDelta: 0,
+    lastCountAt: Date.now(),
+    timer: setInterval(sprintTick, 1000),
+  };
+  closeModal();
+  sprintTick();
+}
+
+function sprintTick() {
+  if (!sprintState) return;
+  const chipEl = document.getElementById('sprint-chip');
+  const remaining = Math.max(0, sprintState.endsAt - Date.now());
+  // Recount all words at most every 5 s — cheap enough, and typing stays smooth.
+  if (Date.now() - sprintState.lastCountAt >= 5000) {
+    sprintState.lastCountAt = Date.now();
+    if (typeof flushEditor === 'function') flushEditor();
+    sprintState.lastDelta = Math.max(0, snapTotalWords() - sprintState.startWords);
+  }
+  const mm = Math.floor(remaining / 60000);
+  const ss = Math.floor((remaining % 60000) / 1000);
+  chipEl.hidden = false;
+  chipEl.textContent = `⏱ ${mm}:${String(ss).padStart(2, '0')} · +${sprintState.lastDelta}`;
+  chipEl.title = t('sprint.chip.title');
+  if (remaining <= 0) endSprint();
+}
+
+function endSprint() {
+  if (!sprintState) return;
+  clearInterval(sprintState.timer);
+  const s = sprintState;
+  sprintState = null;
+  document.getElementById('sprint-chip').hidden = true;
+  if (typeof flushEditor === 'function') flushEditor();
+  const words = Math.max(0, snapTotalWords() - s.startWords);
+  const minutesRun = Math.max(1, Math.round((Date.now() - s.startedAt) / 60000));
+  sprints.push({ date: new Date().toISOString(), minutes: minutesRun, words, target: s.target });
+  if (sprints.length > 50) sprints = sprints.slice(-50);
+  saveProject();
+
+  const hit = s.target > 0 && words >= s.target;
+  const c = document.createElement('div');
+  c.innerHTML = `
+    <div class="modal-title">${t('sprint.done.title')}</div>
+    <div class="sprint-result">
+      <div class="sprint-result-words">${hit ? '\u{1F389} ' : ''}${t('sprint.done.words').replace('{n}', words).replace('{m}', minutesRun)}</div>
+      ${s.target ? `<div class="sprint-result-target">${t(hit ? 'sprint.done.target.hit' : 'sprint.done.target.miss').replace('{n}', s.target)}</div>` : ''}
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn-primary" id="sprint-ok">OK</button></div>`;
+  openModal(c);
+  c.querySelector('#sprint-ok').addEventListener('click', closeModal);
+}
+
+function openSprintModal() {
+  const c = document.createElement('div');
+  c.innerHTML = `
+    <div class="modal-title">${t('sprint.start.title')}</div>
+    <div class="sprint-presets">
+      ${[15, 25, 45].map(m => `<button class="btn-secondary sprint-preset" data-min="${m}">${m} min</button>`).join('')}
+      <input type="number" id="sprint-custom" class="sprint-custom" min="1" max="180" placeholder="${t('sprint.custom')}">
+    </div>
+    <label class="sprint-target-row">${t('sprint.target')}
+      <input type="number" id="sprint-target" min="0" step="50" placeholder="${t('sprint.target.optional')}">
+    </label>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+      <button class="btn-secondary" id="sprint-cancel">${t('btn.cancel')}</button>
+      <button class="btn-primary" id="sprint-go">${t('sprint.start')}</button>
+    </div>`;
+  openModal(c);
+  let chosen = 25;
+  const presets = c.querySelectorAll('.sprint-preset');
+  const mark = () => presets.forEach(b => b.classList.toggle('active', Number(b.dataset.min) === chosen));
+  mark();
+  presets.forEach(b => b.addEventListener('click', () => {
+    chosen = Number(b.dataset.min);
+    c.querySelector('#sprint-custom').value = '';
+    mark();
+  }));
+  c.querySelector('#sprint-custom').addEventListener('input', e => {
+    const v = Number(e.target.value);
+    if (v > 0) { chosen = v; mark(); }
+  });
+  c.querySelector('#sprint-cancel').addEventListener('click', closeModal);
+  c.querySelector('#sprint-go').addEventListener('click', () =>
+    startSprint(Math.min(180, Math.max(1, chosen)), Number(c.querySelector('#sprint-target').value) || 0));
+}
+
+document.getElementById('sprint-chip').addEventListener('click', endSprint);
+
+// Streaks are computed from wordHistory (cumulative daily totals, UTC dates —
+// same convention as snapshotWordHistory). A "writing day" is a day whose
+// total rose vs. the previous recorded day; deletions break the streak.
+function computeStreaks() {
+  const sorted = [...wordHistory].sort((a, b) => a.date.localeCompare(b.date));
+  const writingDays = new Set();
+  let prev = null;
+  for (const e of sorted) {
+    if ((prev === null && e.words > 0) || (prev !== null && e.words > prev)) writingDays.add(e.date);
+    prev = e.words;
+  }
+  const dayStr = d => d.toISOString().slice(0, 10);
+  let current = 0;
+  const cursor = new Date();
+  if (!writingDays.has(dayStr(cursor))) cursor.setUTCDate(cursor.getUTCDate() - 1); // today not counted (yet)
+  while (writingDays.has(dayStr(cursor))) { current++; cursor.setUTCDate(cursor.getUTCDate() - 1); }
+  let best = current;
+  for (const d of writingDays) {
+    const before = new Date(d + 'T00:00:00Z');
+    before.setUTCDate(before.getUTCDate() - 1);
+    if (writingDays.has(dayStr(before))) continue; // not a streak start
+    let len = 0;
+    const c = new Date(d + 'T00:00:00Z');
+    while (writingDays.has(dayStr(c))) { len++; c.setUTCDate(c.getUTCDate() + 1); }
+    best = Math.max(best, len);
+  }
+  const today = dayStr(new Date());
+  const ti = sorted.findIndex(e => e.date === today);
+  const wordsToday = ti >= 0 ? Math.max(0, sorted[ti].words - (ti > 0 ? sorted[ti - 1].words : 0)) : 0;
+  return { current, best, wordsToday };
 }
 
 // ── Inline notes ──
@@ -6685,6 +7741,30 @@ function createNoteEl(note) {
     if (linkingFrom === note.id) cancelLinking();
     saveProject();
     renderBrainstorm();
+  });
+
+  // Keyboard: tab to a note, arrows move it (Shift = fine steps), Delete
+  // removes it (confirmed — no drag-out-of-trouble on the keyboard), Esc blurs.
+  el.tabIndex = 0;
+  el.addEventListener('keydown', e => {
+    if (e.target !== el) return; // typing in the textarea keeps its keys
+    if (e.key === 'Escape') { el.blur(); return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      if (confirm(t('notes.confirm.delete'))) el.querySelector('.bs-note-btn.del').click();
+      return;
+    }
+    const step = e.shiftKey ? 1 : 10;
+    const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+    const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+    if (!dx && !dy) return;
+    e.preventDefault();
+    note.x = Math.max(0, (note.x || 0) + dx);
+    note.y = Math.max(0, (note.y || 0) + dy);
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+    drawLinks();
+    saveProjectDebounced();
   });
 
   // Start linking
@@ -7239,7 +8319,15 @@ function applyProjectData(data) {
       ...ch,
       scenes: (Array.isArray(ch.scenes) ? ch.scenes : [])
         .filter(sc => sc && typeof sc === 'object')
-        .map(sc => ({ ...sc, content: sanitizeHtml(sc.content) })),
+        .map(sc => {
+          const out = { ...sc, content: sanitizeHtml(sc.content) };
+          // Scene metadata is optional; drop malformed values from imports.
+          if (typeof out.pov !== 'number') delete out.pov;
+          if (out.place != null && typeof out.place !== 'string' &&
+              !(typeof out.place === 'object' && typeof out.place.id === 'number')) delete out.place;
+          if (out.when != null && typeof out.when !== 'string') out.when = String(out.when);
+          return out;
+        }),
     }));
   // Select first available scene, if any
   activeChapterId = null;
@@ -7261,6 +8349,7 @@ function applyProjectData(data) {
   todos = Array.isArray(data.todos) ? data.todos : [];
   writingGoal = data.writingGoal || 0;
   wordHistory = Array.isArray(data.wordHistory) ? data.wordHistory : [];
+  sprints = Array.isArray(data.sprints) ? data.sprints.slice(-50) : [];
   selectedStructure = data.selectedStructure || null;
   if (selectedStructure && STRUCTURES[selectedStructure]) syncBeatsToStructure(selectedStructure);
   worldbuilding = data.worldbuilding && Array.isArray(data.worldbuilding.entries)
@@ -7403,6 +8492,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
   container.querySelector('#new-cancel').addEventListener('click', closeModal);
   container.querySelector('#new-confirm').addEventListener('click', () => {
     if (typeof flushEditor === 'function') flushEditor();
+    takeSnapshot(); // the project being replaced stays restorable
 
     beats = [];
     characters = [];
@@ -7415,6 +8505,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
     todos = [];
     writingGoal = 0;
     wordHistory = [];
+    sprints = [];
     selectedStructure = null;
     worldbuilding = { entries: [], customCategories: [], hiddenBuiltins: [] };
     ideaMap = { nodes: [] };
@@ -7494,9 +8585,10 @@ function sceneHtmlToParagraphs(html) {
   return paragraphs;
 }
 
-async function exportToDocx() {
-  if (typeof docx === 'undefined') { alert(t('export.docx.unavailable')); return; }
+async function exportToDocx(chapters = null, filenameBase = null) {
+  if (typeof docx === 'undefined') { showToast('export.docx.unavailable'); return; }
   if (typeof flushEditor === 'function') flushEditor();
+  chapters = chapters || writing.chapters;
 
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
   const projectTitle = document.getElementById('proj-title').textContent || t('project.untitled');
@@ -7508,7 +8600,7 @@ async function exportToDocx() {
       children: [new TextRun(projectTitle)],
     }),
   ];
-  for (const chapter of writing.chapters) {
+  for (const chapter of chapters) {
     children.push(new Paragraph({
       heading: HeadingLevel.HEADING_1,
       children: [new TextRun(chapter.title || t('writing.untitled.chapter'))],
@@ -7524,17 +8616,175 @@ async function exportToDocx() {
     }
   }
 
-  const doc = new Document({ sections: [{ children }] });
-  const blob = await Packer.toBlob(doc);
+  try {
+    const doc = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (filenameBase || (currentProjectName || projectTitle || 'export').replace(/[<>:"/\\|?*]/g, '_')) + '.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.warn('docx export failed:', e);
+    showToast('toast.export.error');
+  }
+}
+
+// ── Manuscript exports (.md / .txt / single chapter) ──
+// Library-independent sibling of sceneHtmlToParagraphs: converts a scene's
+// editor HTML into plain blocks the text exporters can walk. Same rules:
+// p/div/h1-h3 blocks, b/i/u inline, inline notes dropped, "<div><br></div>"
+// is one empty line.
+function sceneHtmlToBlocks(html) {
+  const BLOCKS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'UL', 'OL', 'LI']);
+  const HEADINGS = { H1: 'h1', H2: 'h2', H3: 'h3' };
+
+  function runsForNode(node, fmt) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ? [{ text: node.textContent, ...fmt }] : [];
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE || node.classList.contains('inline-note')) return [];
+    const tag = node.tagName;
+    if (tag === 'BR') return [{ text: '\n' }];
+    const next = { ...fmt };
+    if (tag === 'B' || tag === 'STRONG') next.bold = true;
+    if (tag === 'I' || tag === 'EM') next.italics = true;
+    if (tag === 'U') next.underline = true;
+    const runs = [];
+    for (const child of node.childNodes) runs.push(...runsForNode(child, next));
+    return runs;
+  }
+
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html || '';
+  const blocks = [];
+  let loose = [];
+  const flushLoose = () => {
+    if (loose.length) { blocks.push({ type: 'p', runs: loose }); loose = []; }
+  };
+  for (const node of tpl.content.childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE && BLOCKS.has(node.tagName)) {
+      flushLoose();
+      let runs = runsForNode(node, {});
+      if (runs.length === 1 && node.children.length === 1 && node.children[0].tagName === 'BR') runs = [];
+      blocks.push({ type: HEADINGS[node.tagName] || 'p', runs });
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+      flushLoose();
+    } else {
+      loose.push(...runsForNode(node, {}));
+    }
+  }
+  flushLoose();
+  return blocks;
+}
+
+// Minimal escaping: defuse markers that would change Markdown structure.
+// Prose almost never needs more; over-escaping makes the file ugly.
+function mdEscape(text) {
+  return text.replace(/([*_`\\])/g, '\\$1').replace(/^(\s*)([#>+-])/, '$1\\$2');
+}
+
+function runsToMarkdown(runs) {
+  return runs.map(r => {
+    let text = mdEscape(r.text);
+    if (!text.trim()) return text; // whitespace-only: markers would break emphasis
+    if (r.underline) text = '<u>' + text + '</u>';
+    if (r.italics) text = '*' + text + '*';
+    if (r.bold) text = '**' + text + '**';
+    return text;
+  }).join('');
+}
+
+// Hierarchy: # project / ## chapter / ### scene; headings typed inside a
+// scene are demoted below the scene level so the outline stays a tree.
+const MD_INNER_HEADINGS = { h1: '#### ', h2: '##### ', h3: '###### ' };
+
+function manuscriptToMarkdown(chapters, projectTitle) {
+  const lines = ['# ' + mdEscape(projectTitle)];
+  for (const chapter of chapters) {
+    lines.push('', '## ' + mdEscape(chapter.title || t('writing.untitled.chapter')));
+    for (const scene of (chapter.scenes || [])) {
+      if (chapter.scenes.length > 1 || scene.title) {
+        lines.push('', '### ' + mdEscape(scene.title || t('writing.untitled.scene')));
+      }
+      lines.push('');
+      for (const b of sceneHtmlToBlocks(scene.content || '')) {
+        lines.push((MD_INNER_HEADINGS[b.type] || '') + runsToMarkdown(b.runs), '');
+      }
+    }
+  }
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function manuscriptToText(chapters, projectTitle) {
+  const out = [projectTitle];
+  for (const chapter of chapters) {
+    out.push('', '———', '', chapter.title || t('writing.untitled.chapter'), '');
+    for (const scene of (chapter.scenes || [])) {
+      if (chapter.scenes.length > 1 || scene.title) {
+        out.push('', '· ' + (scene.title || t('writing.untitled.scene')), '');
+      }
+      for (const b of sceneHtmlToBlocks(scene.content || '')) {
+        out.push(b.runs.map(r => r.text).join(''));
+      }
+    }
+  }
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function downloadTextFile(filename, mime, text) {
+  const blob = new Blob([text], { type: mime + ';charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = (currentProjectName || projectTitle || 'export').replace(/[<>:"/\\|?*]/g, '_') + '.docx';
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 }
 
-document.getElementById('btn-export-word').addEventListener('click', exportToDocx);
+function openExportModal() {
+  if (typeof flushEditor === 'function') flushEditor();
+  const activeIdx = Math.max(0, writing.chapters.findIndex(ch => ch.id === activeChapterId));
+  const chapterOpts = writing.chapters.map((ch, i) =>
+    `<option value="${i}" ${i === activeIdx ? 'selected' : ''}>${ideaEsc(ch.title) || t('writing.untitled.chapter')}</option>`).join('');
+
+  const c = document.createElement('div');
+  c.innerHTML = `
+    <div class="modal-title">${t('export.manuscript.title')}</div>
+    <div class="export-scope">
+      <label><input type="radio" name="exp-scope" value="all" checked> ${t('export.scope.all')}</label>
+      <label><input type="radio" name="exp-scope" value="chapter" ${writing.chapters.length ? '' : 'disabled'}> ${t('export.scope.chapter')}</label>
+      <select id="exp-chapter" class="fmt-select" disabled>${chapterOpts}</select>
+    </div>
+    <div class="export-formats">
+      <button class="btn-primary" data-fmt="docx">.docx</button>
+      <button class="btn-secondary" data-fmt="md">.md</button>
+      <button class="btn-secondary" data-fmt="txt">.txt</button>
+    </div>`;
+  openModal(c);
+
+  const chapterSel = c.querySelector('#exp-chapter');
+  c.querySelectorAll('input[name="exp-scope"]').forEach(r =>
+    r.addEventListener('change', () => { chapterSel.disabled = r.value !== 'chapter' || !r.checked; }));
+
+  c.querySelectorAll('[data-fmt]').forEach(btn => btn.addEventListener('click', () => {
+    const scope = c.querySelector('input[name="exp-scope"]:checked').value;
+    const chapters = scope === 'chapter'
+      ? [writing.chapters[Number(chapterSel.value)]].filter(Boolean)
+      : writing.chapters;
+    if (!chapters.length) { closeModal(); return; }
+    const projectTitle = document.getElementById('proj-title').textContent || t('project.untitled');
+    const suffix = scope === 'chapter' ? ' — ' + (chapters[0].title || t('writing.untitled.chapter')) : '';
+    const base = ((currentProjectName || projectTitle || 'export') + suffix).replace(/[<>:"/\\|?*]/g, '_');
+    closeModal();
+    if (btn.dataset.fmt === 'docx') exportToDocx(chapters, base);
+    else if (btn.dataset.fmt === 'md') downloadTextFile(base + '.md', 'text/markdown', manuscriptToMarkdown(chapters, projectTitle));
+    else downloadTextFile(base + '.txt', 'text/plain', manuscriptToText(chapters, projectTitle));
+  }));
+}
+
+document.getElementById('btn-export-manuscript').addEventListener('click', openExportModal);
 document.getElementById('btn-export-project').addEventListener('click', exportProjectToFile);
 document.getElementById('btn-import-project').addEventListener('click', importProjectFromFile);
 document.getElementById('save-warning-backup').addEventListener('click', exportProjectToFile);
@@ -7552,6 +8802,7 @@ projTitleEl.addEventListener('blur', () => commitProjectTitle(projTitleEl.textCo
 // ── Init: load from server ──
 (async function init() {
   loadIdeaPool();
+  if (tabGuard) await tabGuard.negotiate(); // multi-tab guard: decide writer/read-only first
   const data = await loadInitialProject();
   projectReady = true; // loaded — saving is safe from here on
   applyProjectData(data);
