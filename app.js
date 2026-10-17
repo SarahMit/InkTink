@@ -24,7 +24,7 @@ function setCurrentProjectName(name) {
 }
 
 function collectProjectData() {
-  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, writing, brainstorm, timeline, inspiration, todos, writingGoal, wordHistory, sprints, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
+  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, cover: bookCover, writing, brainstorm, plotNotes, timeline, inspiration, todos, writingGoal, wordHistory, sprints, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
 }
 
 function readProjectsStore() {
@@ -741,6 +741,19 @@ let writing = { chapters: [] };
 let activeChapterId = null;
 let activeSceneId = null;
 let brainstorm = { notes: [], links: [] };
+// Categorised plotting notes (ideas, open questions, research, sources, …).
+// Built-in categories carry a `key` (name comes from i18n unless renamed);
+// custom ones only a `name`.
+let plotNotes = plotNotesDefault();
+function plotNotesDefault() {
+  return {
+    categories: ['ideas', 'questions', 'research', 'sources'].map(key => ({ id: 'pc-' + key, key, name: '' })),
+    notes: [],
+  };
+}
+// Book cover: { id, image } — the id lets browser snapshots re-attach the
+// image on restore (see snapCollectImages), like every other embedded image.
+let bookCover = null;
 let timeline = { columns: [], rows: [] };
 let inspiration = [];
 let todos = [];
@@ -946,6 +959,61 @@ const TR = {
     'gsearch.group.characters': 'Characters', 'gsearch.group.world': 'Worldbuilding',
     'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Timeline',
     'gsearch.group.notes': 'Notes',
+    'gsearch.group.plot': 'Plot Notes',
+    'lang.original': 'Original', 'lang.version': 'Version',
+    'lang.add': 'Add a language',
+    'lang.add.title': 'Write this story in another language too',
+    'lang.manage': 'Manage story languages',
+    'lang.original.title': 'The original version',
+    'lang.version.title': 'A language version of this story',
+    'lang.modal.title': 'Story languages',
+    'lang.modal.intro': 'Write the same story in several languages. Chapters, scenes, notes and metadata are shared; every language has its own titles and text. The first language is the original — while you write another version, the original can be shown alongside.',
+    'lang.name.main.placeholder': 'Language of the original, e.g. German',
+    'lang.name.placeholder': 'Language name',
+    'lang.new.placeholder': 'New language, e.g. English',
+    'lang.add.btn': '+ Add',
+    'lang.remove': 'Remove this language',
+    'lang.remove.confirm': 'Remove "{name}"? Everything written in this language will be deleted.',
+    'lang.original.toggle': 'Original',
+    'lang.original.toggle.title': 'Show the original text alongside',
+    'lang.original.ref': 'Original',
+    'lang.original.empty': 'This scene has no text in the original yet.',
+    'lang.manuscript.placeholder': 'Write the {lang} version…',
+    'export.lang': 'Language:',
+    'export.cover': 'Include the book cover (.docx)',
+    'plan.toggle': 'Chapter & scene notes',
+    'plan.chapter': 'Chapter notes',
+    'plan.chapter.placeholder': 'What should this chapter show? Arcs, themes, things to set up or pay off…',
+    'plan.scene': 'Scene notes',
+    'plan.scene.placeholder': 'Goal of this scene: what changes? What should the reader learn or feel?',
+    'cover.add': '+ Book cover',
+    'cover.add.title': 'Add a cover image for this book',
+    'cover.replace': 'Replace', 'cover.remove': 'Remove', 'cover.alt': 'Book cover',
+    'cover.remove.confirm': 'Remove the book cover?',
+    'plot.note.delete.confirm': 'Delete this note?',
+    'nav.plot': 'Plot Notes',
+    'plot.intro': 'Everything around the story, sorted by kind. Drag notes between categories with ⋮⋮.',
+    'plot.cat.ideas': 'Ideas for the story',
+    'plot.cat.ideas.hint': 'Scenes, twists, images, lines of dialogue that should end up in the story.',
+    'plot.cat.questions': 'Open questions & decisions',
+    'plot.cat.questions.hint': 'Things you still need to decide. Tick them off once settled.',
+    'plot.cat.research': 'Research notes',
+    'plot.cat.research.hint': 'Facts, details and findings you looked up.',
+    'plot.cat.sources': 'References & sources',
+    'plot.cat.sources.hint': 'Books, articles, links — where you found things.',
+    'plot.cat.new': 'New category',
+    'plot.cat.add': '+ Category',
+    'plot.cat.name': 'Category name',
+    'plot.cat.delete': 'Delete category',
+    'plot.cat.delete.confirm': 'Delete "{name}" and its {n} note(s)?',
+    'plot.note.add': '+ Note',
+    'plot.note.placeholder': 'Write a note…',
+    'plot.note.done': 'Done / settled',
+    'plot.note.delete': 'Delete note',
+    'plot.note.link': 'Link a scene, character or place',
+    'plot.note.drag': 'Drag to move',
+    'plot.hide.done': 'Hide settled',
+    'plot.empty': 'No categories yet — add one to start collecting.',
     'sprint.btn': 'Sprint',
     'sprint.btn.title': 'Writing sprint: a countdown with an optional word target',
     'sprint.start.title': 'Start a writing sprint',
@@ -1298,6 +1366,61 @@ const TR = {
     'gsearch.group.characters': 'Charaktere', 'gsearch.group.world': 'Weltenbau',
     'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Zeitstrahl',
     'gsearch.group.notes': 'Notizen',
+    'gsearch.group.plot': 'Plot-Notizen',
+    'lang.original': 'Original', 'lang.version': 'Fassung',
+    'lang.add': 'Sprache hinzufügen',
+    'lang.add.title': 'Diese Geschichte zusätzlich in einer anderen Sprache schreiben',
+    'lang.manage': 'Sprachfassungen verwalten',
+    'lang.original.title': 'Die Originalfassung',
+    'lang.version.title': 'Eine Sprachfassung dieser Geschichte',
+    'lang.modal.title': 'Sprachfassungen',
+    'lang.modal.intro': 'Schreib dieselbe Geschichte in mehreren Sprachen. Kapitel, Szenen, Notizen und Metadaten sind gemeinsam; jede Sprache hat eigene Titel und eigenen Text. Die erste Sprache ist das Original — während du an einer anderen Fassung schreibst, kann das Original daneben angezeigt werden.',
+    'lang.name.main.placeholder': 'Sprache des Originals, z. B. Deutsch',
+    'lang.name.placeholder': 'Name der Sprache',
+    'lang.new.placeholder': 'Neue Sprache, z. B. Englisch',
+    'lang.add.btn': '+ Hinzufügen',
+    'lang.remove': 'Diese Sprache entfernen',
+    'lang.remove.confirm': '„{name}" entfernen? Alles, was in dieser Sprache geschrieben wurde, wird gelöscht.',
+    'lang.original.toggle': 'Original',
+    'lang.original.toggle.title': 'Originaltext daneben anzeigen',
+    'lang.original.ref': 'Original',
+    'lang.original.empty': 'Diese Szene hat im Original noch keinen Text.',
+    'lang.manuscript.placeholder': 'Schreib die Fassung auf {lang}…',
+    'export.lang': 'Sprache:',
+    'export.cover': 'Buchcover einfügen (.docx)',
+    'plan.toggle': 'Kapitel- & Szenennotizen',
+    'plan.chapter': 'Kapitelnotizen',
+    'plan.chapter.placeholder': 'Was soll dieses Kapitel zeigen? Bögen, Themen, was vorbereitet oder aufgelöst wird…',
+    'plan.scene': 'Szenennotizen',
+    'plan.scene.placeholder': 'Ziel dieser Szene: Was verändert sich? Was sollen Lesende erfahren oder fühlen?',
+    'cover.add': '+ Buchcover',
+    'cover.add.title': 'Ein Coverbild für dieses Buch hinzufügen',
+    'cover.replace': 'Ersetzen', 'cover.remove': 'Entfernen', 'cover.alt': 'Buchcover',
+    'cover.remove.confirm': 'Das Buchcover entfernen?',
+    'plot.note.delete.confirm': 'Diese Notiz löschen?',
+    'nav.plot': 'Plot-Notizen',
+    'plot.intro': 'Alles rund um die Geschichte, nach Art sortiert. Notizen mit ⋮⋮ zwischen Kategorien ziehen.',
+    'plot.cat.ideas': 'Ideen für die Geschichte',
+    'plot.cat.ideas.hint': 'Szenen, Wendungen, Bilder, Dialogzeilen, die in die Geschichte sollen.',
+    'plot.cat.questions': 'Offene Fragen & Entscheidungen',
+    'plot.cat.questions.hint': 'Was noch entschieden werden muss. Abhaken, sobald es feststeht.',
+    'plot.cat.research': 'Recherche-Notizen',
+    'plot.cat.research.hint': 'Fakten, Details und Erkenntnisse aus der Recherche.',
+    'plot.cat.sources': 'Quellen & Referenzen',
+    'plot.cat.sources.hint': 'Bücher, Artikel, Links — woher etwas stammt.',
+    'plot.cat.new': 'Neue Kategorie',
+    'plot.cat.add': '+ Kategorie',
+    'plot.cat.name': 'Name der Kategorie',
+    'plot.cat.delete': 'Kategorie löschen',
+    'plot.cat.delete.confirm': '„{name}" und {n} Notiz(en) löschen?',
+    'plot.note.add': '+ Notiz',
+    'plot.note.placeholder': 'Notiz schreiben…',
+    'plot.note.done': 'Erledigt / entschieden',
+    'plot.note.delete': 'Notiz löschen',
+    'plot.note.link': 'Mit Szene, Figur oder Ort verknüpfen',
+    'plot.note.drag': 'Ziehen zum Verschieben',
+    'plot.hide.done': 'Erledigte ausblenden',
+    'plot.empty': 'Noch keine Kategorien — leg eine an, um zu sammeln.',
     'sprint.btn': 'Sprint',
     'sprint.btn.title': 'Schreib-Sprint: ein Countdown mit optionalem Wortziel',
     'sprint.start.title': 'Schreib-Sprint starten',
@@ -1668,6 +1791,8 @@ function setLang(lang) {
   applyI18n();
   if (typeof renderInspiration === 'function') renderInspiration();
   if (typeof renderTodos === 'function') renderTodos();
+  if (typeof renderStoryLangBar === 'function') renderStoryLangBar();
+  if (typeof renderCover === 'function') renderCover();
   if (typeof renderChapterTree === 'function') renderChapterTree();
   if (typeof renderEditor === 'function') renderEditor();
   const activePage = document.querySelector('.page.active');
@@ -3731,6 +3856,7 @@ function renderPageHooks(page) {
   if (page === 'worldbuilding') renderWorldbuilding();
   if (page === 'ideas') renderIdeas();
   if (page === 'theme') renderTheme();
+  if (page === 'plot') renderPlotNotes();
   if (page === 'brainstorm') requestAnimationFrame(() => { bsCanvas.querySelectorAll('.bs-note-text').forEach(autoResize); expandCanvas(); });
   // Section textareas render at height 0 while the page is hidden (scrollHeight
   // is 0 off-screen); recompute once it's visible.
@@ -3769,7 +3895,7 @@ function switchPage(page) {
 }
 
 // ── Split view (two pages side by side, draggable divider) ──
-const SPLIT_PAGES = ['writing', 'brainstorm', 'moodboard', 'ideas', 'theme', 'beats', 'timeline', 'characters', 'worldbuilding', 'stats'];
+const SPLIT_PAGES = ['writing', 'brainstorm', 'plot', 'moodboard', 'ideas', 'theme', 'beats', 'timeline', 'characters', 'worldbuilding', 'stats'];
 
 function splitPageLabel(p) {
   return t(p === 'brainstorm' ? 'nav.notes' : 'nav.' + p);
@@ -3982,15 +4108,21 @@ async function renderHome() {
   grid.className = 'home-projects-grid';
 
   const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
+  const store = readProjectsStore();
   projects.forEach(p => {
+    const cover = store[p.name] && store[p.name].data && store[p.name].data.cover;
+    const coverSrc = cover && typeof cover.image === 'string' && cover.image.startsWith('data:image/') ? cover.image : '';
     const date = new Date(p.modified).toLocaleDateString(locale, {
       day: '2-digit', month: '2-digit', year: 'numeric'
     });
     const card = document.createElement('div');
     card.className = 'home-project-card';
     card.innerHTML = `
-      <div class="home-project-name">${ideaEsc(p.name)}</div>
-      <div class="home-project-date">${date}</div>
+      ${coverSrc ? `<img class="home-project-cover" src="${coverSrc}" alt="${t('cover.alt')}">` : ''}
+      <div class="home-project-info">
+        <div class="home-project-name">${ideaEsc(p.name)}</div>
+        <div class="home-project-date">${date}</div>
+      </div>
       <button class="home-project-del" title="${t('beat.delete.title')}">&times;</button>
     `;
     card.addEventListener('click', async e => {
@@ -6331,18 +6463,174 @@ function findSceneAnywhere(scId) {
   return {};
 }
 
+// ── Story languages (the same story in several language versions) ──
+// writing.languages = [{ id, name }]; the FIRST entry is the original, whose
+// text stays in the classic fields (chapter.title, scene.title/content) — so
+// single-language projects and older exports are untouched. Every other
+// language lives in obj.versions[langId] = { title, content }.
+// writing.activeLang picks the version shown in the editor.
+const MAIN_LANG_ID = 'main';
+function storyLanguages() {
+  return Array.isArray(writing.languages) && writing.languages.length
+    ? writing.languages : [{ id: MAIN_LANG_ID, name: '' }];
+}
+function storyLangName(lang) {
+  const l = storyLanguages().find(x => x.id === lang);
+  return (l && l.name) || t('lang.original');
+}
+function activeStoryLang() {
+  const langs = storyLanguages();
+  return langs.some(l => l.id === writing.activeLang) ? writing.activeLang : langs[0].id;
+}
+function isMainLang(lang) { return lang === storyLanguages()[0].id; }
+
+function textIn(obj, field, lang = activeStoryLang()) {
+  if (isMainLang(lang)) return obj[field] || '';
+  const v = obj.versions && obj.versions[lang];
+  return (v && v[field]) || '';
+}
+function setTextIn(obj, field, value, lang = activeStoryLang()) {
+  if (isMainLang(lang)) { obj[field] = value; return; }
+  if (!obj.versions || typeof obj.versions !== 'object') obj.versions = {};
+  if (!obj.versions[lang]) obj.versions[lang] = {};
+  obj.versions[lang][field] = value;
+}
+
+// Copies of the chapters with one language's text in the classic fields, so
+// the exporters (which only know title/content) can print any version.
+// Untranslated titles fall back to the original's rather than "Untitled".
+function chaptersInLang(chapters, lang) {
+  if (isMainLang(lang)) return chapters;
+  return chapters.map(ch => ({
+    ...ch,
+    title: textIn(ch, 'title', lang) || ch.title,
+    scenes: (ch.scenes || []).map(sc => ({ ...sc, title: textIn(sc, 'title', lang) || sc.title, content: textIn(sc, 'content', lang) })),
+  }));
+}
+
+function switchStoryLang(lang) {
+  if (lang === activeStoryLang()) return;
+  flushEditor();
+  writing.activeLang = lang;
+  saveProject();
+  renderStoryLangBar();
+  renderChapterTree();
+  renderEditor();
+}
+
+// Language pills above the chapter tree; a single quiet "add" button while
+// the story has only one language.
+function renderStoryLangBar() {
+  const bar = document.getElementById('story-lang-bar');
+  if (!bar) return;
+  const langs = storyLanguages();
+  const active = activeStoryLang();
+  if (langs.length < 2) {
+    bar.className = 'story-lang-bar single';
+    bar.innerHTML = `<button class="story-lang-add" id="story-lang-manage" title="${t('lang.add.title')}">&#127760; ${t('lang.add')}</button>`;
+  } else {
+    bar.className = 'story-lang-bar';
+    bar.innerHTML = `<span class="story-lang-icon" aria-hidden="true">&#127760;</span>` +
+      langs.map((l, i) => `<button class="story-lang-pill${l.id === active ? ' on' : ''}" data-lang="${ideaEsc(l.id)}" aria-pressed="${l.id === active}" title="${i === 0 ? t('lang.original.title') : t('lang.version.title')}">${ideaEsc(l.name || t('lang.original'))}</button>`).join('') +
+      `<button class="story-lang-gear" id="story-lang-manage" title="${t('lang.manage')}" aria-label="${t('lang.manage')}">&#9881;</button>`;
+    bar.querySelectorAll('.story-lang-pill').forEach(b => b.addEventListener('click', () => switchStoryLang(b.dataset.lang)));
+  }
+  bar.querySelector('#story-lang-manage').addEventListener('click', openStoryLangModal);
+}
+
+function openStoryLangModal() {
+  flushEditor();
+  // Work on a draft list; nothing changes until "Done".
+  const draft = storyLanguages().map(l => ({ ...l }));
+  const removed = [];
+  let addedId = null;
+  const c = document.createElement('div');
+
+  function render() {
+    c.innerHTML = `
+      <div class="modal-title">${t('lang.modal.title')}</div>
+      <div class="modal-empty" style="text-align:left;margin-bottom:14px">${t('lang.modal.intro')}</div>
+      <div class="story-lang-list">
+        ${draft.map((l, i) => `
+          <div class="story-lang-row">
+            <span class="story-lang-role">${i === 0 ? t('lang.original') : t('lang.version')}</span>
+            <input class="story-lang-name" data-i="${i}" value="${ideaEsc(l.name)}" placeholder="${i === 0 ? t('lang.name.main.placeholder') : t('lang.name.placeholder')}">
+            ${i === 0 ? '<span class="story-lang-del-spacer"></span>' : `<button class="tree-icon-btn del" data-del="${i}" title="${t('lang.remove')}" aria-label="${t('lang.remove')}">&times;</button>`}
+          </div>`).join('')}
+      </div>
+      <div class="story-lang-row story-lang-new">
+        <input class="story-lang-name" id="story-lang-new" placeholder="${t('lang.new.placeholder')}">
+        <button class="btn-secondary" id="story-lang-addbtn">${t('lang.add.btn')}</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:18px">
+        <button class="btn-primary" id="story-lang-done">${t('popover.done')}</button>
+      </div>`;
+
+    c.querySelectorAll('.story-lang-name[data-i]').forEach(inp =>
+      inp.addEventListener('input', () => { draft[Number(inp.dataset.i)].name = inp.value; }));
+    c.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => {
+      const l = draft[Number(btn.dataset.del)];
+      if (!confirm(t('lang.remove.confirm').replace('{name}', l.name || t('lang.version')))) return;
+      removed.push(l.id);
+      draft.splice(Number(btn.dataset.del), 1);
+      render();
+    }));
+    const newInput = c.querySelector('#story-lang-new');
+    const add = () => {
+      const name = newInput.value.trim();
+      if (!name) { newInput.focus(); return; }
+      addedId = 'l' + Date.now().toString(36);
+      draft.push({ id: addedId, name });
+      render();
+      c.querySelector('#story-lang-new').focus();
+    };
+    c.querySelector('#story-lang-addbtn').addEventListener('click', add);
+    newInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+    c.querySelector('#story-lang-done').addEventListener('click', () => {
+      // An unsubmitted name in the "new" field counts as added.
+      if (newInput.value.trim()) {
+        addedId = 'l' + Date.now().toString(36);
+        draft.push({ id: addedId, name: newInput.value.trim() });
+      }
+      draft.forEach(l => { l.name = (l.name || '').trim(); });
+      for (const id of removed) {
+        for (const ch of writing.chapters) {
+          if (ch.versions) delete ch.versions[id];
+          for (const sc of (ch.scenes || [])) if (sc.versions) delete sc.versions[id];
+        }
+      }
+      if (draft.length < 2 && !draft[0].name) { delete writing.languages; delete writing.activeLang; }
+      else writing.languages = draft;
+      if (!storyLanguages().some(l => l.id === writing.activeLang)) delete writing.activeLang;
+      // A freshly added language is where the author wants to go next.
+      if (addedId && draft.some(l => l.id === addedId)) writing.activeLang = addedId;
+      closeModal();
+      saveProject();
+      renderStoryLangBar();
+      renderChapterTree();
+      renderEditor();
+    });
+  }
+  render();
+  openModal(c);
+}
+
 // Scenes from before this feature have no status field — they count as drafts.
 const SCENE_STATUSES = ['draft', 'revised', 'done'];
 function sceneStatus(sc) {
   return SCENE_STATUSES.includes(sc && sc.status) ? sc.status : 'draft';
 }
 
+// Language version the open editor shows; flushes write back into it even if
+// writing.activeLang has changed in the meantime.
+let editorLang = null;
+
 // Read the live editor DOM back into state (call before switching scenes)
 function flushEditor() {
   const ms = document.getElementById('manuscript');
   if (ms && activeChapterId && activeSceneId) {
     const { scene } = findScene(activeChapterId, activeSceneId);
-    if (scene) scene.content = ms.innerHTML;
+    if (scene) setTextIn(scene, 'content', ms.innerHTML, editorLang || activeStoryLang());
   }
 }
 
@@ -6365,7 +6653,7 @@ function renderChapterTree() {
       <div class="chapter-row">
         <span class="chapter-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.chapter')}" style="cursor:grab;color:var(--text-muted);font-size:13px">&#8942;&#8942;</span>
         <button class="chapter-toggle" title="${t('writing.collapse')}" aria-expanded="${!collapsed}" aria-label="${t('writing.collapse')}">${collapsed ? '&#9656;' : '&#9662;'}</button>
-        <input class="chapter-title" value="${ideaEsc(ch.title)}" placeholder="${t('writing.chapter.placeholder')}">
+        <input class="chapter-title" value="${ideaEsc(textIn(ch, 'title'))}" placeholder="${isMainLang(activeStoryLang()) ? t('writing.chapter.placeholder') : ideaEsc(ch.title || t('writing.chapter.placeholder'))}">
         <div class="chapter-actions">
           <button class="tree-icon-btn del" title="${t('writing.delete.chapter')}">&times;</button>
         </div>
@@ -6379,9 +6667,11 @@ function renderChapterTree() {
       renderChapterTree();
     });
 
+    if (ch.notes) block.querySelector('.chapter-row').title = ch.notes;
+
     // Rename chapter
     block.querySelector('.chapter-title').addEventListener('input', e => {
-      ch.title = e.target.value;
+      setTextIn(ch, 'title', e.target.value);
       saveProjectDebounced();
     });
 
@@ -6437,7 +6727,7 @@ function renderChapterTree() {
           <span class="scene-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
           <span class="scene-status-dot status-${sceneStatus(sc)}"></span>
           ${povChar ? `<span class="scene-pov-badge">${ideaEsc(povInitials(povChar.name))}</span>` : ''}
-          <input class="scene-name-input" value="${ideaEsc(sc.title)}" placeholder="${t('writing.scene.placeholder')}">
+          <input class="scene-name-input" value="${ideaEsc(textIn(sc, 'title'))}" placeholder="${isMainLang(activeStoryLang()) ? t('writing.scene.placeholder') : ideaEsc(sc.title || t('writing.scene.placeholder'))}">
           <button class="scene-del" title="${t('writing.delete.scene')}" aria-label="${t('writing.delete.scene')}">&times;</button>
         `;
         const metaTip = [sc.summary, scenePlaceLabel(sc), sc.when].filter(Boolean).join(' · ');
@@ -6488,7 +6778,7 @@ function renderChapterTree() {
         const nameInput = li.querySelector('.scene-name-input');
         nameInput.addEventListener('focus', () => setActiveScene(ch.id, sc.id, false));
         nameInput.addEventListener('input', () => {
-          sc.title = nameInput.value;
+          setTextIn(sc, 'title', nameInput.value);
           const headerInput = document.getElementById('scene-title-input');
           if (headerInput && activeSceneId === sc.id) headerInput.value = nameInput.value;
           saveProjectDebounced();
@@ -6605,10 +6895,18 @@ function renderEditor() {
   }
 
   const st = sceneStatus(scene);
+  const { chapter } = findScene(activeChapterId, activeSceneId);
+  const lang = activeStoryLang();
+  const isTranslation = !isMainLang(lang);
+  editorLang = lang;
+  const planOpen = uiPrefs.planPanel !== false;
+  const showOriginal = isTranslation && uiPrefs.showOriginal !== false;
   editorPane.innerHTML = `
     <div class="editor-header">
-      <input class="scene-title-input" id="scene-title-input" value="${(scene.title || '').replace(/"/g, '&quot;')}" placeholder="${t('writing.scene.title.placeholder')}">
+      <input class="scene-title-input" id="scene-title-input" value="${ideaEsc(textIn(scene, 'title'))}" placeholder="${isTranslation ? ideaEsc(scene.title || t('writing.scene.title.placeholder')) : t('writing.scene.title.placeholder')}">
+      ${isTranslation ? `<span class="editor-lang-chip" title="${t('lang.version.title')}">&#127760; ${ideaEsc(storyLangName(lang))}</span>` : ''}
       <button class="scene-status-chip status-${st}" id="scene-status-chip" title="${t('writing.status.cycle')}">${t('writing.status.' + st)}</button>
+      <button class="icon-btn plan-toggle${planOpen ? ' on' : ''}${(scene.notes || (chapter && chapter.notes)) ? ' has-notes' : ''}" id="plan-toggle" title="${t('plan.toggle')}" aria-label="${t('plan.toggle')}" aria-pressed="${planOpen}">&#128204;</button>
       <button class="editor-theme-btn" id="theme-toggle" title="${t('editor.theme.toggle')}">&#9790;</button>
       <button class="icon-btn" id="search-toggle" title="${t('editor.search')}">&#128269;</button>
     </div>
@@ -6630,6 +6928,7 @@ function renderEditor() {
       <span class="fmt-divider"></span>
       <button class="btn-mini" id="insert-note">&#128221; ${t('editor.insert.note')}</button>
       <button class="btn-mini" id="sprint-btn" title="${t('sprint.btn.title')}">&#9201; ${t('sprint.btn')}</button>
+      ${isTranslation ? `<button class="btn-mini${showOriginal ? ' on' : ''}" id="original-toggle" title="${t('lang.original.toggle.title')}" aria-pressed="${showOriginal}">&#8646; ${t('lang.original.toggle')}</button>` : ''}
       <span class="editor-spacer"></span>
       <span class="word-count" id="word-count"></span>
     </div>
@@ -6639,19 +6938,65 @@ function renderEditor() {
       <button class="icon-btn" id="search-close" title="${t('editor.close')}">&times;</button>
       <div class="search-results" id="search-results"></div>
     </div>
-    <div class="manuscript" id="manuscript" contenteditable="true" data-placeholder="${t('editor.manuscript.placeholder')}"></div>
+    <div class="editor-body">
+      ${showOriginal ? `
+      <div class="manuscript-ref" id="manuscript-ref" aria-label="${t('lang.original.ref')}">
+        <div class="manuscript-ref-label">${t('lang.original.ref')} · ${ideaEsc(storyLangName(storyLanguages()[0].id))}</div>
+        <div class="manuscript-ref-text"></div>
+      </div>` : ''}
+      <div class="manuscript" id="manuscript" contenteditable="true" data-placeholder="${isTranslation ? t('lang.manuscript.placeholder').replace('{lang}', ideaEsc(storyLangName(lang))) : t('editor.manuscript.placeholder')}"></div>
+      ${planOpen ? `
+      <aside class="plan-panel" aria-label="${t('plan.toggle')}">
+        <label class="plan-label" for="plan-chapter">${t('plan.chapter')}
+          <span class="plan-sub">${ideaEsc((chapter && chapter.title) || t('writing.untitled.chapter'))}</span></label>
+        <textarea class="plan-text" id="plan-chapter" placeholder="${t('plan.chapter.placeholder')}">${ideaEsc((chapter && chapter.notes) || '')}</textarea>
+        <label class="plan-label" for="plan-scene">${t('plan.scene')}
+          <span class="plan-sub">${ideaEsc(scene.title || t('writing.untitled.scene'))}</span></label>
+        <textarea class="plan-text" id="plan-scene" placeholder="${t('plan.scene.placeholder')}">${ideaEsc(scene.notes || '')}</textarea>
+      </aside>` : ''}
+    </div>
   `;
 
   const titleInput = editorPane.querySelector('#scene-title-input');
   const manuscript = editorPane.querySelector('#manuscript');
   const wordCount = editorPane.querySelector('#word-count');
 
-  manuscript.innerHTML = scene.content || '';
+  manuscript.innerHTML = textIn(scene, 'content', lang);
   wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
   renderSceneMetaRow(scene);
 
+  const refText = editorPane.querySelector('.manuscript-ref-text');
+  if (refText) refText.innerHTML = scene.content || `<span class="manuscript-ref-empty">${t('lang.original.empty')}</span>`;
+  const originalToggle = editorPane.querySelector('#original-toggle');
+  if (originalToggle) originalToggle.addEventListener('click', () => {
+    flushEditor();
+    uiPrefs.showOriginal = !showOriginal;
+    saveUiPrefs();
+    renderEditor();
+  });
+
+  // Chapter & scene notes: planning text ("what should this show?"), shared
+  // by every language version and never part of the manuscript exports.
+  editorPane.querySelector('#plan-toggle').addEventListener('click', () => {
+    flushEditor();
+    uiPrefs.planPanel = !planOpen;
+    saveUiPrefs();
+    renderEditor();
+  });
+  editorPane.querySelectorAll('.plan-text').forEach(ta => {
+    ta.addEventListener('input', () => {
+      if (ta.id === 'plan-scene') scene.notes = ta.value;
+      else if (chapter) {
+        chapter.notes = ta.value;
+        const row = chapterTree.querySelector(`.chapter-block[data-chapter="${chapter.id}"] .chapter-row`);
+        if (row) { if (chapter.notes) row.title = chapter.notes; else row.removeAttribute('title'); }
+      }
+      saveProjectDebounced();
+    });
+  });
+
   function persist() {
-    scene.content = manuscript.innerHTML;
+    setTextIn(scene, 'content', manuscript.innerHTML, lang);
     wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
     saveProjectDebounced();
   }
@@ -6678,7 +7023,9 @@ function renderEditor() {
   });
 
   titleInput.addEventListener('input', () => {
-    scene.title = titleInput.value;
+    setTextIn(scene, 'title', titleInput.value, lang);
+    const planSub = editorPane.querySelector('label[for="plan-scene"] .plan-sub');
+    if (planSub && !isTranslation) planSub.textContent = titleInput.value || t('writing.untitled.scene');
     // sync the inline name in the tree without rebuilding focus
     const treeInput = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"] .scene-name-input`);
     if (treeInput && treeInput.value !== titleInput.value) treeInput.value = titleInput.value;
@@ -6874,9 +7221,9 @@ function runSceneSearch(term, container) {
   const hits = [];
   writing.chapters.forEach(ch => {
     (ch.scenes || []).forEach(sc => {
-      const text = plainTextOf(sc.content);
+      const text = plainTextOf(textIn(sc, 'content'));
       const lowText = text.toLowerCase();
-      const inTitle = (sc.title || '').toLowerCase().includes(q);
+      const inTitle = textIn(sc, 'title').toLowerCase().includes(q);
       const idx = lowText.indexOf(q);
       if (inTitle || idx >= 0) {
         let snippet = '';
@@ -6887,7 +7234,7 @@ function runSceneSearch(term, container) {
             '【' + text.substr(idx, term.length) + '】' +
             text.substring(idx + term.length, idx + term.length + 30) + '…';
         }
-        hits.push({ chId: ch.id, scId: sc.id, chTitle: ch.title || 'Kapitel', scTitle: sc.title || 'Szene', snippet });
+        hits.push({ chId: ch.id, scId: sc.id, chTitle: textIn(ch, 'title') || t('writing.untitled.chapter'), scTitle: textIn(sc, 'title') || t('writing.untitled.scene'), snippet });
       }
     });
   });
@@ -6919,7 +7266,7 @@ function runSceneSearch(term, container) {
 // notes. Each hit navigates to its page and flashes the target card.
 // The index is rebuilt on every open — cheap (plain string concat per item)
 // and always current; nothing can change while the overlay has focus.
-const GSEARCH_GROUPS = ['scenes', 'chapters', 'characters', 'world', 'beats', 'timeline', 'notes'];
+const GSEARCH_GROUPS = ['scenes', 'chapters', 'characters', 'world', 'beats', 'timeline', 'notes', 'plot'];
 const GSEARCH_PER_GROUP = 8;
 let gsearchIndex = [];
 let gsearchMatches = [];
@@ -6941,15 +7288,18 @@ function buildSearchIndex() {
   const add = (group, label, context, text, go) =>
     idx.push({ group, label, context, low: (text || '').toLowerCase(), raw: text || '', go });
 
+  // Every language version is searchable; the hit opens the scene as-is.
+  const versionText = (obj, withContent) => Object.values(obj.versions || {})
+    .map(v => [v.title, withContent ? plainTextOf(v.content) : ''].filter(Boolean).join('\n')).join('\n');
   writing.chapters.forEach(ch => {
-    add('chapters', ch.title || t('writing.untitled.chapter'), '', ch.title || '', () => {
+    add('chapters', ch.title || t('writing.untitled.chapter'), '', [ch.title, ch.notes, versionText(ch, false)].filter(Boolean).join('\n'), () => {
       switchPage('writing');
       const first = (ch.scenes || [])[0];
       if (first) selectScene(ch.id, first.id);
     });
     (ch.scenes || []).forEach(sc => {
       add('scenes', sc.title || t('writing.untitled.scene'), ch.title || '',
-        [sc.title, sc.summary, plainTextOf(sc.content)].filter(Boolean).join('\n'),
+        [sc.title, sc.summary, sc.notes, plainTextOf(sc.content), versionText(sc, true)].filter(Boolean).join('\n'),
         () => goToRef({ type: 'scene', id: sc.id }));
     });
   });
@@ -6981,6 +7331,12 @@ function buildSearchIndex() {
     if (!n.text) return;
     add('notes', n.text.slice(0, 48), '', n.text,
       () => { switchPage('brainstorm'); flashCard(`.bs-note[data-id="${n.id}"]`); });
+  });
+  plotNotes.notes.forEach(n => {
+    if (!n.text) return;
+    const cat = plotNotes.categories.find(c => c.id === n.cat);
+    add('plot', n.text.slice(0, 48), cat ? plotCatName(cat) : '', n.text,
+      () => { plotHideDone = false; switchPage('plot'); flashCard(`.plot-card[data-id="${n.id}"]`); });
   });
   gsearchIndex = idx;
 }
@@ -8244,6 +8600,351 @@ function addRow() {
 }
 
 // ══════════════════════════════════
+// ── BOOK COVER (project sidebar) ──
+// ══════════════════════════════════
+const coverFileInput = document.createElement('input');
+coverFileInput.type = 'file';
+coverFileInput.accept = 'image/*';
+coverFileInput.style.display = 'none';
+document.body.appendChild(coverFileInput);
+
+function renderCover() {
+  const el = document.getElementById('proj-cover');
+  if (!el) return;
+  if (!bookCover) {
+    el.className = 'proj-cover empty';
+    el.innerHTML = `<button class="proj-cover-add" id="cover-add" title="${t('cover.add.title')}">${t('cover.add')}</button>`;
+    el.querySelector('#cover-add').addEventListener('click', () => coverFileInput.click());
+    return;
+  }
+  el.className = 'proj-cover';
+  el.innerHTML = `
+    <img src="${bookCover.image}" alt="${t('cover.alt')}">
+    <div class="proj-cover-actions">
+      <button class="proj-cover-btn" id="cover-replace">${t('cover.replace')}</button>
+      <button class="proj-cover-btn danger" id="cover-remove">${t('cover.remove')}</button>
+    </div>`;
+  el.querySelector('#cover-replace').addEventListener('click', () => coverFileInput.click());
+  el.querySelector('#cover-remove').addEventListener('click', () => {
+    if (!confirm(t('cover.remove.confirm'))) return;
+    bookCover = null;
+    saveProject();
+    renderCover();
+  });
+}
+
+coverFileInput.addEventListener('change', async () => {
+  const file = coverFileInput.files && coverFileInput.files[0];
+  coverFileInput.value = '';
+  if (!file) return;
+  const result = await uploadImage(file);
+  if (typeof result.path !== 'string' || !result.path.startsWith('data:image/')) return;
+  bookCover = { id: 'cover', image: result.path };
+  saveProject();
+  renderCover();
+});
+
+// ══════════════════════════════════
+// ── PLOT NOTES (categorised planning board) ──
+// ══════════════════════════════════
+// One column per category; notes are plain text with an optional "settled"
+// tick, links to scenes/characters/places, and clickable web links.
+// Order in plotNotes.notes is the display order within each column.
+const PLOT_BUILTIN_KEYS = ['ideas', 'questions', 'research', 'sources'];
+const PLOT_COLORS = ['var(--c-amber)', 'var(--c-rose)', 'var(--c-teal)', 'var(--c-blue)',
+  'var(--c-purple)', 'var(--c-sage)', 'var(--c-terracotta)', 'var(--c-violet)'];
+const PLOT_REF_ICONS = { scene: '\u{1F4C4}', char: '\u{1F464}', world: '\u{1F30D}' };
+let plotHideDone = false;
+let plotDragId = null;
+
+function plotNotesFromData(d) {
+  if (!d || !Array.isArray(d.categories)) return plotNotesDefault();
+  const categories = d.categories
+    .filter(c => c && typeof c.id === 'string')
+    .map(c => {
+      const cat = { id: c.id, name: typeof c.name === 'string' ? c.name : '' };
+      if (PLOT_BUILTIN_KEYS.includes(c.key)) cat.key = c.key;
+      return cat;
+    });
+  const ids = new Set(categories.map(c => c.id));
+  const notes = (Array.isArray(d.notes) ? d.notes : [])
+    .filter(n => n && ids.has(n.cat))
+    .map(n => ({
+      id: String(n.id),
+      cat: n.cat,
+      text: typeof n.text === 'string' ? n.text : '',
+      done: !!n.done,
+      refs: (Array.isArray(n.refs) ? n.refs : [])
+        .filter(r => r && PLOT_REF_ICONS[r.type] && typeof r.id === 'number')
+        .map(r => ({ type: r.type, id: r.id })),
+    }));
+  return { categories, notes };
+}
+
+function plotCatName(cat) {
+  return cat.name || (cat.key ? t('plot.cat.' + cat.key) : t('plot.cat.new'));
+}
+
+function plotCatColor(cat) {
+  if (cat.key) return PLOT_COLORS[PLOT_BUILTIN_KEYS.indexOf(cat.key)];
+  let h = 0;
+  for (const ch of cat.id) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return PLOT_COLORS[4 + Math.abs(h) % 4];
+}
+
+// Moves a note into a category, before another note (or to the column's end).
+function plotMoveNote(id, catId, beforeId) {
+  const i = plotNotes.notes.findIndex(n => n.id === id);
+  if (i < 0) return;
+  const [note] = plotNotes.notes.splice(i, 1);
+  note.cat = catId;
+  let at = beforeId ? plotNotes.notes.findIndex(n => n.id === beforeId) : -1;
+  if (at < 0) {
+    let last = -1;
+    plotNotes.notes.forEach((n, k) => { if (n.cat === catId) last = k; });
+    at = last + 1 || plotNotes.notes.length;
+  }
+  plotNotes.notes.splice(at, 0, note);
+}
+
+function renderPlotNotes() {
+  const page = document.getElementById('page-plot');
+  if (!page) return;
+  page.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1>${t('nav.plot')}</h1>
+        <p class="plot-intro">${t('plot.intro')}</p>
+      </div>
+      <div class="plot-toolbar">
+        <label class="plot-hide-done"><input type="checkbox" id="plot-hide-done" ${plotHideDone ? 'checked' : ''}> ${t('plot.hide.done')}</label>
+        <button class="btn-primary" id="plot-add-cat">${t('plot.cat.add')}</button>
+      </div>
+    </div>
+    <div class="plot-board" id="plot-board"></div>`;
+
+  page.querySelector('#plot-hide-done').addEventListener('change', e => {
+    plotHideDone = e.target.checked;
+    renderPlotNotes();
+  });
+  page.querySelector('#plot-add-cat').addEventListener('click', () => {
+    const cat = { id: 'pc-' + ideaGenId(), name: '' };
+    plotNotes.categories.push(cat);
+    saveProject();
+    renderPlotNotes();
+    const inp = page.querySelector(`.plot-col[data-cat="${cat.id}"] .plot-col-name`);
+    if (inp) inp.focus();
+  });
+
+  const board = page.querySelector('#plot-board');
+  if (!plotNotes.categories.length) {
+    board.innerHTML = `<div class="empty-state">${t('plot.empty')}</div>`;
+    return;
+  }
+  plotNotes.categories.forEach(cat => board.appendChild(renderPlotColumn(cat)));
+  requestAnimationFrame(() => board.querySelectorAll('.plot-text').forEach(autoResize));
+}
+
+function renderPlotColumn(cat) {
+  const col = document.createElement('section');
+  col.className = 'plot-col';
+  col.dataset.cat = cat.id;
+  col.style.setProperty('--plot-color', plotCatColor(cat));
+  const notes = plotNotes.notes.filter(n => n.cat === cat.id);
+  const visible = plotHideDone ? notes.filter(n => !n.done) : notes;
+  col.innerHTML = `
+    <header class="plot-col-head">
+      <span class="plot-col-dot" aria-hidden="true"></span>
+      <input class="plot-col-name" value="${ideaEsc(plotCatName(cat))}" placeholder="${t('plot.cat.name')}" aria-label="${t('plot.cat.name')}">
+      <span class="plot-col-count">${notes.length}</span>
+      <button class="tree-icon-btn del plot-col-del" title="${t('plot.cat.delete')}" aria-label="${t('plot.cat.delete')}">&times;</button>
+    </header>
+    ${cat.key && !cat.name ? `<p class="plot-col-hint">${t('plot.cat.' + cat.key + '.hint')}</p>` : ''}
+    <div class="plot-cards"></div>
+    <button class="plot-add">${t('plot.note.add')}</button>`;
+
+  const nameInput = col.querySelector('.plot-col-name');
+  nameInput.addEventListener('input', () => {
+    const v = nameInput.value;
+    // Typing the built-in name back (or clearing it) returns to the translated default.
+    cat.name = cat.key && (!v.trim() || v.trim() === t('plot.cat.' + cat.key)) ? '' : v;
+    saveProjectDebounced();
+  });
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameInput.blur(); });
+
+  col.querySelector('.plot-col-del').addEventListener('click', () => {
+    if (notes.length && !confirm(t('plot.cat.delete.confirm').replace('{name}', plotCatName(cat)).replace('{n}', notes.length))) return;
+    plotNotes.categories = plotNotes.categories.filter(c => c !== cat);
+    plotNotes.notes = plotNotes.notes.filter(n => n.cat !== cat.id);
+    saveProject();
+    renderPlotNotes();
+  });
+
+  col.querySelector('.plot-add').addEventListener('click', () => {
+    const note = { id: ideaGenId(), cat: cat.id, text: '', done: false, refs: [] };
+    plotNotes.notes.push(note);
+    plotMoveNote(note.id, cat.id, null); // place it at the end of this column
+    saveProject();
+    renderPlotNotes();
+    const ta = document.querySelector(`.plot-card[data-id="${note.id}"] .plot-text`);
+    if (ta) ta.focus();
+  });
+
+  const cardsEl = col.querySelector('.plot-cards');
+  visible.forEach(n => cardsEl.appendChild(renderPlotCard(n)));
+
+  // Drop target: the card under the pointer decides the position.
+  const clearMarks = () => col.querySelectorAll('.drop-before').forEach(x => x.classList.remove('drop-before'));
+  const dropBeforeCard = y => [...cardsEl.querySelectorAll('.plot-card:not(.dragging)')]
+    .find(c => { const r = c.getBoundingClientRect(); return y < r.top + r.height / 2; });
+  col.addEventListener('dragover', e => {
+    if (!plotDragId) return;
+    e.preventDefault();
+    col.classList.add('drag-over');
+    clearMarks();
+    const before = dropBeforeCard(e.clientY);
+    if (before) before.classList.add('drop-before');
+  });
+  col.addEventListener('dragleave', e => {
+    if (col.contains(e.relatedTarget)) return;
+    col.classList.remove('drag-over');
+    clearMarks();
+  });
+  col.addEventListener('drop', e => {
+    if (!plotDragId) return;
+    e.preventDefault();
+    const before = dropBeforeCard(e.clientY);
+    plotMoveNote(plotDragId, cat.id, before ? before.dataset.id : null);
+    plotDragId = null;
+    saveProject();
+    renderPlotNotes();
+  });
+  return col;
+}
+
+function renderPlotCard(note) {
+  const card = document.createElement('div');
+  card.className = 'plot-card' + (note.done ? ' done' : '');
+  card.dataset.id = note.id;
+  card.innerHTML = `
+    <div class="plot-card-row">
+      <span class="plot-drag" draggable="true" title="${t('plot.note.drag')}" aria-hidden="true">&#8942;&#8942;</span>
+      <input type="checkbox" class="plot-done" ${note.done ? 'checked' : ''} title="${t('plot.note.done')}" aria-label="${t('plot.note.done')}">
+      <textarea class="plot-text" rows="1" placeholder="${t('plot.note.placeholder')}" aria-label="${t('plot.note.placeholder')}">${ideaEsc(note.text)}</textarea>
+      <div class="plot-card-actions">
+        <button class="plot-card-btn" data-act="link" title="${t('plot.note.link')}" aria-label="${t('plot.note.link')}">&#128279;</button>
+        <button class="plot-card-btn del" data-act="del" title="${t('plot.note.delete')}" aria-label="${t('plot.note.delete')}">&times;</button>
+      </div>
+    </div>
+    <div class="plot-card-extras"></div>`;
+
+  const ta = card.querySelector('.plot-text');
+  const extras = card.querySelector('.plot-card-extras');
+
+  // Chips for linked scenes/characters/places, plus any web links in the text.
+  function renderExtras() {
+    extras.innerHTML = '';
+    note.refs.forEach(ref => {
+      const target = resolveRef(ref);
+      if (!target) return; // target deleted — the chip simply disappears
+      const chip = document.createElement('span');
+      chip.className = 'plot-ref';
+      chip.innerHTML = `<button class="plot-ref-go">${PLOT_REF_ICONS[ref.type]} ${ideaEsc(target.label)}</button><button class="plot-ref-rm" title="${t('notes.ref.remove')}" aria-label="${t('notes.ref.remove')}">&times;</button>`;
+      chip.querySelector('.plot-ref-go').addEventListener('click', () => goToRef(ref));
+      chip.querySelector('.plot-ref-rm').addEventListener('click', () => {
+        note.refs = note.refs.filter(r => r !== ref);
+        saveProject();
+        renderExtras();
+      });
+      extras.appendChild(chip);
+    });
+    const urls = [...new Set(note.text.match(/https?:\/\/[^\s<>"'()\[\]]+/g) || [])].slice(0, 5);
+    urls.forEach(url => {
+      let host = url;
+      try { host = new URL(url).hostname.replace(/^www\./, ''); } catch {}
+      const a = document.createElement('a');
+      a.className = 'plot-url';
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = '↗ ' + host;
+      a.title = url;
+      extras.appendChild(a);
+    });
+    extras.hidden = !extras.children.length;
+  }
+  renderExtras();
+
+  ta.addEventListener('input', () => {
+    note.text = ta.value;
+    autoResize(ta);
+    saveProjectDebounced();
+    renderExtras();
+  });
+
+  // Alt+↑/↓ reorders, Alt+←/→ moves to the neighbouring category.
+  ta.addEventListener('keydown', e => {
+    if (!e.altKey || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    e.preventDefault();
+    const cats = plotNotes.categories;
+    const ci = cats.findIndex(c => c.id === note.cat);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const target = cats[ci + (e.key === 'ArrowLeft' ? -1 : 1)];
+      if (!target) return;
+      plotMoveNote(note.id, target.id, null);
+    } else {
+      const same = plotNotes.notes.filter(n => n.cat === note.cat);
+      const si = same.indexOf(note);
+      if (e.key === 'ArrowUp' && si > 0) plotMoveNote(note.id, note.cat, same[si - 1].id);
+      else if (e.key === 'ArrowDown' && si < same.length - 1) plotMoveNote(note.id, note.cat, same[si + 2] ? same[si + 2].id : null);
+      else return;
+    }
+    saveProject();
+    renderPlotNotes();
+    const again = document.querySelector(`.plot-card[data-id="${note.id}"] .plot-text`);
+    if (again) again.focus();
+  });
+
+  card.querySelector('.plot-done').addEventListener('change', e => {
+    note.done = e.target.checked;
+    card.classList.toggle('done', note.done);
+    saveProject();
+    if (plotHideDone && note.done) renderPlotNotes();
+  });
+
+  card.querySelector('[data-act="link"]').addEventListener('click', () => {
+    openRefPicker(ref => {
+      if (!note.refs.some(r => r.type === ref.type && r.id === ref.id)) note.refs.push(ref);
+      saveProject();
+      renderExtras();
+    });
+  });
+
+  card.querySelector('[data-act="del"]').addEventListener('click', () => {
+    if (note.text.trim() && !confirm(t('plot.note.delete.confirm'))) return;
+    plotNotes.notes = plotNotes.notes.filter(n => n !== note);
+    saveProject();
+    renderPlotNotes();
+  });
+
+  const handle = card.querySelector('.plot-drag');
+  handle.addEventListener('dragstart', e => {
+    plotDragId = note.id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'plot:' + note.id);
+    e.dataTransfer.setDragImage(card, 12, 12);
+    requestAnimationFrame(() => card.classList.add('dragging'));
+  });
+  handle.addEventListener('dragend', () => {
+    plotDragId = null;
+    card.classList.remove('dragging');
+    document.querySelectorAll('.plot-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+    document.querySelectorAll('.plot-card.drop-before').forEach(c => c.classList.remove('drop-before'));
+  });
+  return card;
+}
+
+// ══════════════════════════════════
 // ── PROJECT SAVE / LOAD ──
 // ══════════════════════════════════
 const projectTitle = document.getElementById('proj-title');
@@ -8312,15 +9013,39 @@ function applyProjectData(data) {
   moodImages = data.moodboard || [];
   projectBlurb = data.blurb || '';
   blurbInput.value = projectBlurb;
+  bookCover = data.cover && typeof data.cover.image === 'string' && data.cover.image.startsWith('data:image/')
+    ? { id: 'cover', image: data.cover.image } : null;
   writing = data.writing && Array.isArray(data.writing.chapters) ? data.writing : { chapters: [] };
+  // Story languages: keep only well-formed entries; versions of other
+  // languages are scrubbed exactly like the original text.
+  if (Array.isArray(writing.languages)) {
+    writing.languages = writing.languages
+      .filter(l => l && typeof l.id === 'string')
+      .map(l => ({ id: l.id, name: typeof l.name === 'string' ? l.name : '' }));
+    if (!writing.languages.length) delete writing.languages;
+  } else delete writing.languages;
+  const cleanVersions = (v, withContent) => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined;
+    const out = {};
+    for (const [id, ver] of Object.entries(v)) {
+      if (!ver || typeof ver !== 'object') continue;
+      out[id] = { title: typeof ver.title === 'string' ? ver.title : '' };
+      if (withContent) out[id].content = sanitizeHtml(ver.content);
+    }
+    return out;
+  };
   writing.chapters = writing.chapters
     .filter(ch => ch && typeof ch === 'object')
     .map(ch => ({
       ...ch,
+      notes: typeof ch.notes === 'string' ? ch.notes : '',
+      versions: cleanVersions(ch.versions, false),
       scenes: (Array.isArray(ch.scenes) ? ch.scenes : [])
         .filter(sc => sc && typeof sc === 'object')
         .map(sc => {
-          const out = { ...sc, content: sanitizeHtml(sc.content) };
+          const out = { ...sc, content: sanitizeHtml(sc.content), versions: cleanVersions(sc.versions, true) };
+          if (!out.versions) delete out.versions;
+          if (typeof out.notes !== 'string') delete out.notes;
           // Scene metadata is optional; drop malformed values from imports.
           if (typeof out.pov !== 'number') delete out.pov;
           if (out.place != null && typeof out.place !== 'string' &&
@@ -8329,6 +9054,7 @@ function applyProjectData(data) {
           return out;
         }),
     }));
+  writing.chapters.forEach(ch => { if (!ch.versions) delete ch.versions; if (!ch.notes) delete ch.notes; });
   // Select first available scene, if any
   activeChapterId = null;
   activeSceneId = null;
@@ -8342,6 +9068,7 @@ function applyProjectData(data) {
   brainstorm = data.brainstorm && Array.isArray(data.brainstorm.notes)
     ? { notes: data.brainstorm.notes, links: data.brainstorm.links || [] }
     : { notes: [], links: [] };
+  plotNotes = plotNotesFromData(data.plotNotes);
   timeline = data.timeline && Array.isArray(data.timeline.rows)
     ? { columns: data.timeline.columns || [], rows: data.timeline.rows }
     : { columns: [], rows: [] };
@@ -8371,12 +9098,15 @@ function applyProjectData(data) {
   renderBeats();
   renderCharacters();
   renderMoodboard();
+  renderStoryLangBar();
   renderChapterTree();
   renderEditor();
   renderBrainstorm();
+  renderPlotNotes();
   renderTimeline();
   renderInspiration();
   renderTodos();
+  renderCover();
   updateProjectLabel();
 }
 
@@ -8585,7 +9315,7 @@ function sceneHtmlToParagraphs(html) {
   return paragraphs;
 }
 
-async function exportToDocx(chapters = null, filenameBase = null) {
+async function exportToDocx(chapters = null, filenameBase = null, opts = {}) {
   if (typeof docx === 'undefined') { showToast('export.docx.unavailable'); return; }
   if (typeof flushEditor === 'function') flushEditor();
   chapters = chapters || writing.chapters;
@@ -8593,13 +9323,36 @@ async function exportToDocx(chapters = null, filenameBase = null) {
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
   const projectTitle = document.getElementById('proj-title').textContent || t('project.untitled');
 
-  const children = [
+  const children = [];
+  // Cover on its own first page, scaled to fit the page (max ~15 × 22 cm).
+  if (opts.cover && bookCover) {
+    try {
+      const { ImageRun, PageBreak } = docx;
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = bookCover.image;
+      });
+      const scale = Math.min(560 / img.naturalWidth, 820 / img.naturalHeight, 1.5);
+      children.push(new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [
+          new ImageRun({ data: bookCover.image, transformation: { width: img.naturalWidth * scale, height: img.naturalHeight * scale } }),
+          new PageBreak(),
+        ],
+      }));
+    } catch (e) {
+      console.warn('Cover could not be added to the export:', e);
+    }
+  }
+  children.push(
     new Paragraph({
       heading: HeadingLevel.TITLE,
       alignment: AlignmentType.CENTER,
       children: [new TextRun(projectTitle)],
     }),
-  ];
+  );
   for (const chapter of chapters) {
     children.push(new Paragraph({
       heading: HeadingLevel.HEADING_1,
@@ -8746,6 +9499,7 @@ function downloadTextFile(filename, mime, text) {
 function openExportModal() {
   if (typeof flushEditor === 'function') flushEditor();
   const activeIdx = Math.max(0, writing.chapters.findIndex(ch => ch.id === activeChapterId));
+  const langs = storyLanguages();
   const chapterOpts = writing.chapters.map((ch, i) =>
     `<option value="${i}" ${i === activeIdx ? 'selected' : ''}>${ideaEsc(ch.title) || t('writing.untitled.chapter')}</option>`).join('');
 
@@ -8757,6 +9511,17 @@ function openExportModal() {
       <label><input type="radio" name="exp-scope" value="chapter" ${writing.chapters.length ? '' : 'disabled'}> ${t('export.scope.chapter')}</label>
       <select id="exp-chapter" class="fmt-select" disabled>${chapterOpts}</select>
     </div>
+    ${langs.length > 1 ? `
+    <div class="export-scope">
+      <label>${t('export.lang')}
+        <select id="exp-lang" class="fmt-select">${langs.map(l =>
+          `<option value="${ideaEsc(l.id)}" ${l.id === activeStoryLang() ? 'selected' : ''}>${ideaEsc(l.name || t('lang.original'))}</option>`).join('')}</select>
+      </label>
+    </div>` : ''}
+    ${bookCover ? `
+    <div class="export-scope">
+      <label><input type="checkbox" id="exp-cover" checked> ${t('export.cover')}</label>
+    </div>` : ''}
     <div class="export-formats">
       <button class="btn-primary" data-fmt="docx">.docx</button>
       <button class="btn-secondary" data-fmt="md">.md</button>
@@ -8770,15 +9535,19 @@ function openExportModal() {
 
   c.querySelectorAll('[data-fmt]').forEach(btn => btn.addEventListener('click', () => {
     const scope = c.querySelector('input[name="exp-scope"]:checked').value;
-    const chapters = scope === 'chapter'
+    const langSel = c.querySelector('#exp-lang');
+    const lang = langSel ? langSel.value : activeStoryLang();
+    const coverBox = c.querySelector('#exp-cover');
+    const chapters = chaptersInLang(scope === 'chapter'
       ? [writing.chapters[Number(chapterSel.value)]].filter(Boolean)
-      : writing.chapters;
+      : writing.chapters, lang);
     if (!chapters.length) { closeModal(); return; }
     const projectTitle = document.getElementById('proj-title').textContent || t('project.untitled');
-    const suffix = scope === 'chapter' ? ' — ' + (chapters[0].title || t('writing.untitled.chapter')) : '';
+    const suffix = (scope === 'chapter' ? ' — ' + (chapters[0].title || t('writing.untitled.chapter')) : '') +
+      (langs.length > 1 ? ' (' + storyLangName(lang) + ')' : '');
     const base = ((currentProjectName || projectTitle || 'export') + suffix).replace(/[<>:"/\\|?*]/g, '_');
     closeModal();
-    if (btn.dataset.fmt === 'docx') exportToDocx(chapters, base);
+    if (btn.dataset.fmt === 'docx') exportToDocx(chapters, base, { cover: !!(coverBox && coverBox.checked) });
     else if (btn.dataset.fmt === 'md') downloadTextFile(base + '.md', 'text/markdown', manuscriptToMarkdown(chapters, projectTitle));
     else downloadTextFile(base + '.txt', 'text/plain', manuscriptToText(chapters, projectTitle));
   }));

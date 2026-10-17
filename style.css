@@ -5484,3 +5484,459 @@ body.sb-collapsed .content { margin-left: calc(var(--icon-nav) + 18px); }
 
 .ip-keep { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
 .ip-keep input { cursor: pointer; }
+
+/* ══════════════════════════════════ */
+/* ── Story languages ── */
+/* ══════════════════════════════════ */
+.story-lang-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.story-lang-bar.single { padding: 5px 10px; }
+.story-lang-add {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+}
+.story-lang-add:hover { background: var(--bg-hover); color: var(--text); }
+.story-lang-icon { font-size: 12px; margin-right: 2px; opacity: 0.8; }
+.story-lang-pill {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.story-lang-pill:hover { color: var(--text); border-color: var(--border-strong); }
+.story-lang-pill.on { background: var(--accent-dim); color: var(--accent); border-color: transparent; }
+.story-lang-gear {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+.story-lang-gear:hover { background: var(--bg-hover); color: var(--text); }
+
+.story-lang-list { display: flex; flex-direction: column; gap: 8px; }
+.story-lang-row { display: flex; align-items: center; gap: 10px; }
+.story-lang-role {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.story-lang-name {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+}
+.story-lang-name:focus { outline: none; border-color: var(--accent); }
+.story-lang-del-spacer { width: 22px; flex-shrink: 0; }
+.story-lang-new { margin-top: 12px; padding-left: 74px; }
+
+.editor-lang-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.btn-mini.on { background: var(--accent); color: var(--on-accent); }
+
+/* Editor body: [original for reference] manuscript [chapter & scene notes] */
+.editor-pane { container-type: inline-size; }
+.editor-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.manuscript-ref {
+  flex: 1;
+  min-width: 0;
+  max-width: 600px;
+  overflow-y: auto;
+  padding: 32px 28px 32px 36px;
+  border-right: 1px solid var(--border);
+  background: rgba(74, 60, 42, 0.035);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-muted);
+}
+.manuscript-ref-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+}
+.manuscript-ref-empty { font-style: italic; opacity: 0.7; }
+.manuscript-ref .inline-note { opacity: 0.6; }
+
+.plan-panel {
+  width: 270px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 16px 18px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  background: rgba(74, 60, 42, 0.04);
+}
+.plan-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+.plan-sub {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plan-text {
+  flex: 1;
+  width: 100%;
+  min-height: 130px;
+  resize: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.plan-text:focus { outline: none; border-color: var(--accent); }
+.plan-text::placeholder { color: var(--text-muted); opacity: 0.7; }
+.plan-toggle { position: relative; }
+.plan-toggle.on { background: var(--accent-dim); }
+.plan-toggle.has-notes:not(.on)::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c-terracotta);
+}
+
+/* Narrow editor: stack the panels instead of squeezing the manuscript */
+@container (max-width: 860px) {
+  .editor-body { flex-direction: column; }
+  .manuscript-ref {
+    max-width: none;
+    max-height: 32%;
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+  }
+  .plan-panel {
+    width: auto;
+    max-height: 210px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    grid-auto-flow: column;
+    column-gap: 14px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .plan-text { min-height: 80px; }
+}
+
+/* ══════════════════════════════════ */
+/* ── Book cover (project sidebar + home cards) ── */
+/* ══════════════════════════════════ */
+.proj-cover.empty { margin-bottom: -8px; }
+.proj-cover-add {
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11.5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.proj-cover-add:hover { color: var(--accent); border-color: var(--accent); }
+.proj-cover:not(.empty) {
+  position: relative;
+  align-self: flex-start;
+  line-height: 0;
+}
+.proj-cover img {
+  max-width: 130px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  border-radius: 3px 8px 8px 3px;
+  box-shadow: var(--shadow);
+}
+/* a hint of a book spine */
+.proj-cover:not(.empty)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 7px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 70%, transparent);
+  pointer-events: none;
+}
+.proj-cover-actions {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  line-height: normal;
+}
+.proj-cover:hover .proj-cover-actions,
+.proj-cover:focus-within .proj-cover-actions { opacity: 1; }
+.proj-cover-btn {
+  flex: 1;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.92);
+  color: #3c352b;
+  cursor: pointer;
+}
+.proj-cover-btn.danger:hover { color: var(--danger); }
+
+.home-project-card { flex-direction: row; align-items: center; gap: 14px; }
+.home-project-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.home-project-cover {
+  width: 44px;
+  height: 66px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 2px 5px 5px 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ══════════════════════════════════ */
+/* ── Plot notes (categorised board) ── */
+/* ══════════════════════════════════ */
+#page-plot .page-header { align-items: flex-start; }
+.plot-intro { margin-top: 6px; font-size: 13px; color: var(--text-muted); }
+.plot-toolbar { display: flex; align-items: center; gap: 14px; }
+.plot-hide-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.plot-hide-done input { accent-color: var(--accent); }
+.plot-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.plot-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--plot-color);
+  border-radius: var(--radius);
+  transition: box-shadow 0.15s;
+}
+.plot-col.drag-over { box-shadow: 0 0 0 2px var(--plot-color); }
+.plot-col-head { display: flex; align-items: center; gap: 8px; }
+.plot-col-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--plot-color); flex-shrink: 0; }
+.plot-col-name {
+  flex: 1;
+  min-width: 0;
+  margin-left: -4px;
+  padding: 3px 5px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.plot-col-name:hover { background: var(--bg-hover); }
+.plot-col-name:focus { outline: none; background: var(--bg-card); border-color: var(--accent); }
+.plot-col-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+.plot-col-del { opacity: 0; }
+.plot-col:hover .plot-col-del,
+.plot-col-del:focus-visible { opacity: 1; }
+.plot-col-hint { margin: -2px 0 2px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
+.plot-cards { display: flex; flex-direction: column; gap: 8px; min-height: 6px; }
+.plot-card {
+  position: relative;
+  padding: 8px 8px 8px 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.plot-card:hover { border-color: var(--border-strong); }
+.plot-card.dragging { opacity: 0.4; }
+.plot-card.drop-before::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 4px;
+  right: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--plot-color);
+}
+.plot-card-row { display: flex; align-items: flex-start; gap: 6px; }
+.plot-drag {
+  width: 12px;
+  padding-top: 3px;
+  flex-shrink: 0;
+  cursor: grab;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: -3px;
+  opacity: 0.45;
+  user-select: none;
+}
+.plot-card:hover .plot-drag { opacity: 1; }
+.plot-done { margin-top: 4px; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
+.plot-text {
+  flex: 1;
+  min-width: 0;
+  padding: 1px 2px;
+  overflow: hidden;
+  resize: none;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.plot-text:focus { outline: none; }
+.plot-text::placeholder { color: var(--text-muted); opacity: 0.7; }
+.plot-card.done .plot-text { text-decoration: line-through; color: var(--text-muted); }
+.plot-card-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.plot-card:hover .plot-card-actions,
+.plot-card:focus-within .plot-card-actions { opacity: 1; }
+.plot-card-btn {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 4px;
+  line-height: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.plot-card-btn:hover { background: var(--bg-hover); color: var(--text); }
+.plot-card-btn.del:hover { color: var(--danger); }
+.plot-card-extras { display: flex; flex-wrap: wrap; gap: 5px; padding: 6px 0 0 32px; }
+.plot-card-extras[hidden] { display: none; }
+.plot-ref { display: inline-flex; align-items: center; background: var(--accent-dim); border-radius: 999px; font-size: 11.5px; }
+.plot-ref-go {
+  max-width: 170px;
+  padding: 2px 4px 2px 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+}
+.plot-ref-rm { background: none; border: none; padding: 2px 8px 2px 2px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.plot-ref-rm:hover { color: var(--danger); }
+.plot-url {
+  max-width: 200px;
+  padding: 2px 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--c-blue);
+  background: var(--bg-hover);
+  border-radius: 999px;
+  text-decoration: none;
+}
+.plot-url:hover { text-decoration: underline; }
+.plot-add {
+  padding: 7px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.plot-add:hover { color: var(--text); border-color: var(--plot-color); }

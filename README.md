@@ -10,7 +10,10 @@ InkTink is a hobby project I thought about for a long time and could finally rea
 
 ## Features
 
-- **Writing** — chapters and scenes with a distraction-free editor
+- **Writing** — chapters and scenes with a distraction-free editor, plus a notes panel per chapter and scene for what each one should show or achieve
+- **Story languages** — write the same story in several languages; switch versions above the chapter list and keep the original open alongside while you write
+- **Book cover** — add a cover image to your project; it shows in the sidebar and on the home page, and can be the first page of a Word export
+- **Plot Notes** — a board of categorised notes: ideas for the story, open questions to decide, research notes, references & sources, or your own categories
 - **Story Beats** — structure your plot with beat boards
 - **Characters** — character profiles with images
 - **Worldbuilding** — entries for places, objects, lore, and custom categories
@@ -19,7 +22,7 @@ InkTink is a hobby project I thought about for a long time and could finally rea
 - **Moodboard** — collect images for atmosphere and inspiration
 - **Brainstorming** — a freeform canvas for notes and ideas
 - **Stats** — word count, writing goals, and progress over time
-- **Export** — download your manuscript as a Word document
+- **Export** — download your manuscript (or one chapter, in any story language) as Word, Markdown, or plain text
 
 ## Your data & privacy
 
@@ -29,6 +32,8 @@ Two things to keep in mind:
 
 - **Your projects live in this browser, on this device.** They are stored unencrypted, like a document file on your disk. Anyone who uses the same computer account and browser could open InkTink and read them.
 - **On a shared or public computer** (library, work, a friend's laptop), either use a **private/incognito window** — everything vanishes when you close it — or use **"Delete all data from this browser"** at the bottom of the home page when you're done. That dialog also offers a full backup download (every project plus the idea pool in one file) which **Import** can restore later.
+
+**No AI reads your writing.** InkTink has no AI features and sends nothing anywhere. InkTink is developed with the help of an AI coding assistant (Claude Code), and this repository is set up so that assistant can only work on the code, never on your stories: a guard in `.claude/` blocks it from opening the desktop data folder, project exports and backups, and the browser storage keys that hold your projects (see [CLAUDE.md](CLAUDE.md)).
 
 And as with anything that lives in a browser: clearing your browsing data deletes your projects too, so export a backup now and then.
 
