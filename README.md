@@ -33,7 +33,7 @@ Two things to keep in mind:
 - **Your projects live in this browser, on this device.** They are stored unencrypted, like a document file on your disk. Anyone who uses the same computer account and browser could open InkTink and read them.
 - **On a shared or public computer** (library, work, a friend's laptop), either use a **private/incognito window** — everything vanishes when you close it — or use **"Delete all data from this browser"** at the bottom of the home page when you're done. That dialog also offers a full backup download (every project plus the idea pool in one file) which **Import** can restore later.
 
-**No AI reads your writing.** InkTink has no AI features and sends nothing anywhere. InkTink is developed with the help of an AI coding assistant (Claude Code), and this repository is set up so that assistant can only work on the code, never on your stories: a guard in `.claude/` blocks it from opening the desktop data folder, project exports and backups, and the browser storage keys that hold your projects (see [CLAUDE.md](CLAUDE.md)).
+**No AI reads your writing.** InkTink has no AI features and sends nothing anywhere. InkTink is developed with the help of an AI coding assistant, and the development setup only lets that assistant work on the code, never on stories: it is blocked from opening the desktop data folder, project exports and backups, and the browser storage that holds projects.
 
 And as with anything that lives in a browser: clearing your browsing data deletes your projects too, so export a backup now and then.
 

@@ -12,7 +12,8 @@
 // index.json keeps listing cheap (no reading of the big files); if it is ever
 // missing or corrupt the list is simply empty until the next snapshot rebuilds
 // it — the snapshot files themselves are plain project exports and can always
-// be imported by hand.
+// be imported by hand (encrypted ones, written while encryption is on, import
+// with the passphrase).
 
 const fs = require('fs');
 const path = require('path');
@@ -70,6 +71,40 @@ class SnapshotStore {
 
   list(project) {
     return this.readIndex(this.dirFor(project)).map(({ ts, words }) => ({ ts, words }));
+  }
+
+  // Every snapshot file, for re-writing them all when the renderer switches
+  // encryption on or off. dir/file are names inside root, as returned here.
+  files() {
+    const out = [];
+    let dirs = [];
+    try { dirs = fs.readdirSync(this.root, { withFileTypes: true }); } catch { return out; }
+    for (const d of dirs) {
+      if (!d.isDirectory()) continue;
+      for (const e of this.readIndex(path.join(this.root, d.name))) out.push({ dir: d.name, file: e.file });
+    }
+    return out;
+  }
+
+  // Resolves dir/file from files() inside root; anything else (path
+  // separators, "..", index.json) is refused.
+  fileFor(dir, file) {
+    const ok = n => typeof n === 'string' && n && n === path.basename(n) && n !== '.' && n !== '..';
+    if (!ok(dir) || !ok(file) || !/\.json$/i.test(file) || file.toLowerCase() === 'index.json') return null;
+    return path.join(this.root, dir, file);
+  }
+
+  readFile(dir, file) {
+    const f = this.fileFor(dir, file);
+    if (!f) return null;
+    try { return fs.readFileSync(f, 'utf8'); } catch { return null; }
+  }
+
+  rewriteFile(dir, file, json) {
+    const f = this.fileFor(dir, file);
+    if (!f || !fs.existsSync(f)) return false;
+    atomicWrite(f, json);
+    return true;
   }
 
   read(project, ts) {

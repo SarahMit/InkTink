@@ -127,6 +127,20 @@ if (!app.requestSingleInstanceLock()) {
       try { e.returnValue = snaps.read(String(project), Number(ts)); }
       catch { e.returnValue = null; }
     });
+    // Bulk re-write when encryption is switched on/off (sync: the renderer
+    // waits for each file before reporting success).
+    ipcMain.on('snapshots:files', (e) => {
+      try { e.returnValue = snaps.files(); }
+      catch { e.returnValue = []; }
+    });
+    ipcMain.on('snapshots:readFile', (e, dir, file) => {
+      try { e.returnValue = snaps.readFile(String(dir), String(file)); }
+      catch { e.returnValue = null; }
+    });
+    ipcMain.on('snapshots:rewriteFile', (e, dir, file, json) => {
+      try { e.returnValue = snaps.rewriteFile(String(dir), String(file), String(json)); }
+      catch (err) { console.warn('InkTink: snapshot re-write failed', err); e.returnValue = false; }
+    });
 
     buildMenu();
     createWindow();

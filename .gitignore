@@ -135,6 +135,22 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# AI assistant files: local only, never published
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+.gemini/
+.codex/
+.cursor/
+.cursorrules
+.cursorignore
+.windsurfrules
+.aider*
+.continue/
+.github/copilot-instructions.md
+
 # InkTink
 uploads/
 project.json

@@ -772,6 +772,49 @@ a.tb-util {
   cursor: pointer;
 }
 .home-danger:hover { color: var(--danger); }
+.home-vault:hover { color: var(--text); }
+
+/* ── Encryption: settings dialog, passphrase prompt, lock screen ── */
+.vault-modal { max-width: 520px; }
+.vault-text { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+.vault-subtitle { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.vault-warning {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: rgba(248, 113, 113, 0.1);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.vault-label { display: block; margin: 12px 0 0; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.vault-input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+}
+.vault-input:focus { outline: none; border-color: var(--accent); }
+.vault-hint { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+.vault-check { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 0; font-size: 13px; line-height: 1.45; cursor: pointer; }
+.vault-check input { margin-top: 3px; flex-shrink: 0; }
+.vault-error { min-height: 18px; margin-top: 8px; font-size: 13px; color: var(--danger); }
+.vault-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+.vault-buttons-start { justify-content: flex-start; margin: 0 0 4px; }
+.vault-sep { margin: 20px 0 16px; border-top: 1px solid var(--border); }
+.vault-lock-panel { width: 100%; }
+.vault-lock-panel .vault-input { margin: 0 0 4px; text-align: center; }
+.vault-lock-panel .vault-error { margin: 0 0 10px; }
+.vault-forgot { margin-top: 18px; font-size: 12px; color: var(--text-muted); text-align: left; }
+.vault-forgot summary { cursor: pointer; text-align: center; }
+.vault-forgot p { margin: 10px 0 !important; font-size: 12px !important; }
 
 .btn-secondary:hover {
   background: var(--bg-hover);

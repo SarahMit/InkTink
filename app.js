@@ -5,12 +5,317 @@
 //
 // window.inktinkDesktop is injected by the desktop app's (Electron) preload
 // script and backs the same keys with .json files on disk (no quota). Absent
-// (web): appStorage IS localStorage — behavior identical to a plain browser.
+// (web): rawStorage IS localStorage — behavior identical to a plain browser.
+// appStorage (below) sits on top and adds the optional encryption.
 const IS_DESKTOP = !!window.inktinkDesktop;
-const appStorage = IS_DESKTOP ? window.inktinkDesktop.storage : localStorage;
+const rawStorage = IS_DESKTOP ? window.inktinkDesktop.storage : localStorage;
 const LS_CURRENT = 'inktink.current';
 const LS_PROJECTS = 'inktink.projects'; // { [name]: { data, modified } }
 const LS_CURRENT_NAME = 'inktink.currentName'; // which named project is open
+
+// ── Encryption at rest (optional, per device) ──
+// When switched on, the keys that hold writing (VAULT_KEYS) are stored as
+// AES-GCM ciphertext. The key is derived from a passphrase (PBKDF2-SHA256)
+// and exists only in memory while InkTink is open; the passphrase itself is
+// never stored, so forgetting it makes the data unrecoverable.
+//
+// Web Crypto is async, but the rest of app.js reads and writes storage
+// synchronously. So appStorage keeps a plaintext copy of the vault keys in
+// memory (filled once at unlock) and seals writes in the background, in the
+// order they were made; vaultIdle() resolves once everything is stored.
+//
+// Stored form ("envelope"), self-describing so it decrypts anywhere the
+// passphrase is known:   { inktinkEncrypted: 1, salt, iter, iv, ct }  (base64)
+// LS_PROJECTS keeps its { [name]: { data, modified } } shape with each `data`
+// sealed on its own — the desktop DiskStore still writes one file per project.
+// Project names and dates stay readable (they are file names on desktop).
+const LS_VAULT = 'inktink.vault'; // { v: 1, salt, iter, check: envelope } — no secrets
+const VAULT_KEYS = new Set([LS_CURRENT, LS_PROJECTS, 'inktink.snapshots', 'inktink.ideapool']);
+const VAULT_ITER = 600000;
+const VAULT_CHECK = 'inktink-vault-ok';
+const VAULT_SUPPORTED = !!(window.crypto && crypto.subtle && window.TextEncoder);
+const vault = {
+  cfg: null,           // parsed LS_VAULT; null = encryption off
+  key: null,           // CryptoKey while unlocked
+  cache: new Map(),    // vault key → plaintext string (the synchronous view)
+  dirty: new Set(),    // keys waiting to be sealed, in write order
+  pumping: false,
+  waiters: [],
+  sealed: new Map(),   // project name → { plain, env }: unchanged projects keep their ciphertext
+  keys: new Map(),     // salt → CryptoKey (this device's key + passphrases typed for imports)
+};
+
+function vaultB64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function vaultUnb64(str) {
+  const s = atob(str);
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out;
+}
+function isEnvelope(o) {
+  return !!o && typeof o === 'object' && o.inktinkEncrypted === 1 &&
+    typeof o.salt === 'string' && typeof o.iv === 'string' && typeof o.ct === 'string';
+}
+
+async function vaultDeriveKey(passphrase, salt, iter) {
+  // Files may come from anywhere: refuse absurd work factors instead of hanging.
+  if (!Number.isInteger(iter) || iter < 10000 || iter > 10000000) throw new Error('bad iteration count');
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: vaultUnb64(salt), iterations: iter },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function vaultSeal(key, salt, iter, text) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text)));
+  return { inktinkEncrypted: 1, salt, iter, iv: vaultB64(iv), ct: vaultB64(ct) };
+}
+// Throws on a wrong key or damaged data (AES-GCM authenticates).
+async function vaultOpen(key, env) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: vaultUnb64(env.iv) }, key, vaultUnb64(env.ct));
+  return new TextDecoder().decode(pt);
+}
+// Opens an envelope with a key already known for its salt (null if none).
+async function vaultOpenKnown(env) {
+  const key = vault.keys.get(env.salt);
+  return key ? vaultOpen(key, env) : null;
+}
+// Seals text with this device's key — for files outside appStorage (desktop snapshots, exports).
+async function vaultSealText(text) {
+  return JSON.stringify(await vaultSeal(vault.key, vault.cfg.salt, vault.cfg.iter, text));
+}
+
+// Finds the vault config. If LS_VAULT is missing or damaged but sealed data
+// exists, the config is rebuilt from that data (every envelope carries its
+// salt) — never fall back to "off" while ciphertext is stored.
+function vaultDetect() {
+  try {
+    const cfg = JSON.parse(rawStorage.getItem(LS_VAULT) || 'null');
+    if (cfg && isEnvelope(cfg.check)) return cfg;
+  } catch {}
+  for (const k of VAULT_KEYS) {
+    const raw = rawStorage.getItem(k);
+    if (!raw || !raw.includes('"inktinkEncrypted"')) continue;
+    try {
+      const v = JSON.parse(raw);
+      const env = k === LS_PROJECTS ? Object.values(v || {}).map(e => e && e.data).find(isEnvelope) : (isEnvelope(v) ? v : null);
+      if (env) return { v: 1, salt: env.salt, iter: env.iter, check: env };
+    } catch {}
+  }
+  return null;
+}
+vault.cfg = vaultDetect();
+
+async function vaultSealValue(k, plain) {
+  const { salt, iter } = vault.cfg;
+  if (k === LS_PROJECTS) {
+    const store = JSON.parse(plain) || {};
+    const out = {};
+    const sealed = new Map();
+    for (const [name, entry] of Object.entries(store)) {
+      if (!entry || typeof entry !== 'object') continue;
+      const dataStr = JSON.stringify(entry.data ?? null);
+      const prev = vault.sealed.get(name);
+      const env = (prev && prev.plain === dataStr) ? prev.env : await vaultSeal(vault.key, salt, iter, dataStr);
+      sealed.set(name, { plain: dataStr, env });
+      out[name] = { ...entry, data: env };
+    }
+    vault.sealed = sealed;
+    return JSON.stringify(out);
+  }
+  return JSON.stringify(await vaultSeal(vault.key, salt, iter, plain));
+}
+
+// raw → plaintext. `legacy` = some of it was still unencrypted (stored before
+// encryption was switched on, or interrupted) and should be sealed now.
+async function vaultOpenValue(k, raw) {
+  if (k === LS_PROJECTS) {
+    const store = JSON.parse(raw) || {};
+    let legacy = false;
+    vault.sealed = new Map();
+    for (const [name, entry] of Object.entries(store)) {
+      if (!entry || !isEnvelope(entry.data)) { legacy = true; continue; }
+      const env = entry.data;
+      const plain = await vaultOpenKnown(env);
+      if (plain == null) throw new Error('no key for project ' + name);
+      entry.data = JSON.parse(plain);
+      if (env.salt === vault.cfg.salt) vault.sealed.set(name, { plain, env });
+      else legacy = true;
+    }
+    return { plain: JSON.stringify(store), legacy };
+  }
+  let parsed = null;
+  try { parsed = JSON.parse(raw); } catch {}
+  if (!isEnvelope(parsed)) return { plain: raw, legacy: true };
+  const plain = await vaultOpenKnown(parsed);
+  if (plain == null) throw new Error('no key for ' + k);
+  return { plain, legacy: parsed.salt !== vault.cfg.salt };
+}
+
+// Decrypts every vault key into the in-memory view and returns the keys that
+// still need sealing. Throws if anything can't be decrypted — the app must
+// then stay locked rather than overwrite it.
+async function vaultLoadCache() {
+  const cache = new Map();
+  const legacy = [];
+  for (const k of VAULT_KEYS) {
+    const raw = rawStorage.getItem(k);
+    if (raw == null) continue;
+    const r = await vaultOpenValue(k, raw);
+    cache.set(k, r.plain);
+    if (r.legacy) legacy.push(k);
+  }
+  vault.cache = cache;
+  return legacy;
+}
+
+// true = unlocked; false = wrong passphrase. Throws if the passphrase is right
+// but stored data is damaged.
+async function vaultUnlock(passphrase) {
+  const { salt, iter, check } = vault.cfg;
+  const key = await vaultDeriveKey(passphrase, salt, iter);
+  try { await vaultOpen(key, check); } catch { return false; }
+  vault.keys.set(salt, key);
+  const legacy = await vaultLoadCache();
+  vault.key = key;
+  if (!rawStorage.getItem(LS_VAULT)) rawStorage.setItem(LS_VAULT, JSON.stringify(vault.cfg)); // rebuilt config
+  legacy.forEach(vaultMarkDirty);
+  return true;
+}
+
+// Switches encryption on: config first (sealed data must never exist without
+// it), then every vault key is re-written sealed. Plaintext that is still
+// stored when this is interrupted gets sealed at the next unlock.
+async function vaultEnable(passphrase) {
+  const salt = vaultB64(crypto.getRandomValues(new Uint8Array(16)));
+  const key = await vaultDeriveKey(passphrase, salt, VAULT_ITER);
+  const check = await vaultSeal(key, salt, VAULT_ITER, VAULT_CHECK);
+  const cache = new Map();
+  for (const k of VAULT_KEYS) {
+    const v = rawStorage.getItem(k);
+    if (v != null) cache.set(k, v);
+  }
+  vault.cfg = { v: 1, salt, iter: VAULT_ITER, check };
+  vault.key = key;
+  vault.keys.set(salt, key);
+  vault.cache = cache;
+  vault.sealed = new Map();
+  rawStorage.setItem(LS_VAULT, JSON.stringify(vault.cfg));
+  for (const k of cache.keys()) vaultMarkDirty(k);
+  await vaultIdle();
+  await vaultRewriteDiskSnapshots(true);
+  if (IS_DESKTOP) window.inktinkDesktop.flushSync();
+}
+
+// Switches encryption off: everything is written back as plaintext, and the
+// config goes last (until then, a restart still asks for the passphrase and
+// simply reads whatever is already plain).
+async function vaultDisable() {
+  await vaultIdle();
+  await vaultRewriteDiskSnapshots(false);
+  for (const k of VAULT_KEYS) {
+    if (vault.cache.has(k)) rawStorage.setItem(k, vault.cache.get(k));
+    else rawStorage.removeItem(k);
+  }
+  rawStorage.removeItem(LS_VAULT);
+  vault.cfg = null;
+  vault.key = null;
+  vault.cache = new Map();
+  vault.sealed = new Map();
+  if (IS_DESKTOP) window.inktinkDesktop.flushSync();
+}
+
+// Desktop snapshot files live outside appStorage (see desktop/snapshots.js),
+// so switching encryption on/off re-writes them here. Files that can't be
+// opened (sealed with another passphrase) are left as they are.
+async function vaultRewriteDiskSnapshots(seal) {
+  const snaps = IS_DESKTOP && window.inktinkDesktop.snapshots;
+  if (!snaps || typeof snaps.files !== 'function') return;
+  let files = [];
+  try { files = snaps.files() || []; } catch { return; }
+  for (const { dir, file } of files) {
+    try {
+      const json = snaps.readFile(dir, file);
+      if (json == null) continue;
+      let parsed = null;
+      try { parsed = JSON.parse(json); } catch { continue; }
+      if (seal && !isEnvelope(parsed)) snaps.rewriteFile(dir, file, await vaultSealText(json));
+      if (!seal && isEnvelope(parsed)) {
+        const plain = await vaultOpenKnown(parsed);
+        if (plain != null) snaps.rewriteFile(dir, file, plain);
+      }
+    } catch (e) { console.warn('Snapshot re-write failed:', dir, file, e); }
+  }
+}
+
+async function vaultCheckPassphrase(passphrase) {
+  const { salt, iter, check } = vault.cfg;
+  try { await vaultOpen(await vaultDeriveKey(passphrase, salt, iter), check); return true; }
+  catch { return false; }
+}
+
+function vaultMarkDirty(k) {
+  vault.dirty.delete(k);
+  vault.dirty.add(k);
+  vaultPump();
+}
+async function vaultPump() {
+  if (vault.pumping) return;
+  vault.pumping = true;
+  try {
+    while (vault.dirty.size) {
+      const k = vault.dirty.values().next().value;
+      vault.dirty.delete(k);
+      try {
+        if (vault.cache.has(k)) rawStorage.setItem(k, await vaultSealValue(k, vault.cache.get(k)));
+        else rawStorage.removeItem(k);
+      } catch (e) {
+        console.warn('Encrypted save failed:', e);
+        showSaveWarning(); // usually the quota: ciphertext is base64, ~⅓ larger
+      }
+    }
+  } finally {
+    vault.pumping = false;
+    vault.waiters.splice(0).forEach(r => r());
+  }
+}
+function vaultBusy() { return vault.pumping || vault.dirty.size > 0; }
+function vaultIdle() { return vaultBusy() ? new Promise(r => vault.waiters.push(r)) : Promise.resolve(); }
+
+// The storage every other part of app.js uses. Vault keys go through the
+// in-memory view while encryption is on; everything else passes straight
+// through. Locked (before unlock): reads return null and writes throw, so
+// nothing can overwrite the encrypted data with empty defaults.
+const appStorage = {
+  getItem(k) {
+    if (vault.cfg && VAULT_KEYS.has(k)) return vault.cache.has(k) ? vault.cache.get(k) : null;
+    return rawStorage.getItem(k);
+  },
+  setItem(k, v) {
+    if (vault.cfg && VAULT_KEYS.has(k)) {
+      if (!vault.key) throw new Error('InkTink storage is locked');
+      vault.cache.set(k, String(v));
+      vaultMarkDirty(k);
+      return;
+    }
+    rawStorage.setItem(k, v);
+  },
+  removeItem(k) {
+    if (vault.cfg && VAULT_KEYS.has(k)) {
+      if (!vault.key) throw new Error('InkTink storage is locked');
+      vault.cache.delete(k);
+      vaultMarkDirty(k); // queued too, so it stays ordered after earlier writes
+      return;
+    }
+    rawStorage.removeItem(k);
+  },
+  get length() { return rawStorage.length; },
+  key(i) { return rawStorage.key(i); },
+};
 
 // Named projects live only in LS_PROJECTS; LS_CURRENT_NAME points at the open
 // one. Unnamed work-in-progress lives in LS_CURRENT instead. Storing the open
@@ -226,8 +531,16 @@ const tabGuard = (!IS_DESKTOP && typeof BroadcastChannel !== 'undefined') && (()
 
   async function takeover() {
     post('takeover');
-    // Give the old writer a moment to flush its pending save (writes are sync).
-    await new Promise(r => setTimeout(r, 150));
+    // Give the old writer a moment to flush its pending save (writes are sync;
+    // encrypted ones finish a few ms later, hence the longer wait).
+    await new Promise(r => setTimeout(r, vault.cfg ? 400 : 150));
+    // The other tab switched encryption on/off: start over (unlock if needed).
+    const vaultNow = rawStorage.getItem(LS_VAULT);
+    if (vaultNow !== (vault.cfg ? JSON.stringify(vault.cfg) : null)) { location.reload(); return; }
+    if (vault.cfg) {
+      try { (await vaultLoadCache()).forEach(vaultMarkDirty); } // pick up the other tab's latest data
+      catch { location.reload(); return; }
+    }
     const data = await loadInitialProject();
     applyProjectData(data);
     updateProjectLabel();
@@ -371,7 +684,13 @@ function takeSnapshot() {
       const hash = snapProjectKey() + '|' + snapHash(json);
       if (hash === snapLastHash) return;
       snapLastHash = hash;
-      snapDisk.write(snapProjectKey(), ts, words, json);
+      const project = snapProjectKey();
+      if (vault.cfg) {
+        vaultSealText(json).then(sealed => snapDisk.write(project, ts, words, sealed))
+          .catch(e => console.warn('Snapshot failed:', e));
+      } else {
+        snapDisk.write(project, ts, words, json);
+      }
       return;
     }
     const json = JSON.stringify({ version: 2, ...snapStripImages(collectProjectData()) });
@@ -414,11 +733,15 @@ function readSnapshotJson(ts) {
   return hit ? hit.json : null;
 }
 
-function restoreSnapshot(ts) {
+async function restoreSnapshot(ts) {
   const json = readSnapshotJson(ts);
   if (!json) { showToast('import.error'); return; }
   let data;
   try { data = JSON.parse(json); } catch { showToast('import.error'); return; }
+  if (isEnvelope(data)) { // desktop snapshot file written while encryption was on
+    try { data = JSON.parse(await vaultOpenKnown(data)); } catch { data = null; }
+    if (!data) { showToast('import.error'); return; }
+  }
   if (typeof flushEditor === 'function') flushEditor();
   takeSnapshot(); // the current state becomes restorable too
   if (!snapDisk) data = snapRehydrate(data, snapCollectImages(collectProjectData(), new Map()));
@@ -589,23 +912,46 @@ async function deleteProjectByName(name) {
 }
 
 // ── File export / import (move work between devices) ──
-function exportProjectToFile() {
-  snapshotWordHistory();
-  // version marks the export format; imports without it are treated as v1.
-  const data = { version: 2, ...collectProjectData() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+// Exports are plain .json by default. With `encrypt` (from the encryption
+// dialog) the same payload is wrapped in an envelope: { version: 2, ...envelope }.
+// `encrypt` is a passphrase, or true to use this device's encryption key.
+async function downloadJsonFile(baseName, payload, encrypt) {
+  let text = JSON.stringify(payload, null, 2);
+  let suffix = '.json';
+  if (encrypt) {
+    const env = encrypt === true
+      ? await vaultSeal(vault.key, vault.cfg.salt, vault.cfg.iter, text)
+      : await vaultSealWithPassphrase(encrypt, text);
+    text = JSON.stringify({ version: 2, ...env });
+    suffix = '.encrypted.json';
+  }
+  const blob = new Blob([text], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const base = (currentProjectName || 'inktink-project').replace(/[<>:"/\\|?*]/g, '_');
   a.href = url;
-  a.download = base + '.json';
+  a.download = baseName + suffix;
   a.click();
   URL.revokeObjectURL(url);
 }
 
+async function vaultSealWithPassphrase(passphrase, text) {
+  const salt = vaultB64(crypto.getRandomValues(new Uint8Array(16)));
+  const key = await vaultDeriveKey(passphrase, salt, VAULT_ITER);
+  vault.keys.set(salt, key);
+  return vaultSeal(key, salt, VAULT_ITER, text);
+}
+
+function exportProjectToFile(encrypt) {
+  snapshotWordHistory();
+  // version marks the export format; imports without it are treated as v1.
+  const data = { version: 2, ...collectProjectData() };
+  const base = (currentProjectName || 'inktink-project').replace(/[<>:"/\\|?*]/g, '_');
+  return downloadJsonFile(base, data, encrypt === true || typeof encrypt === 'string' ? encrypt : null);
+}
+
 // Full-browser backup: every saved project, the unnamed working copy, and the
 // idea pool in one file. importProjectFromFile() recognizes and restores it.
-function exportFullBackup() {
+function exportFullBackup(encrypt) {
   snapshotWordHistory();
   const store = readProjectsStore();
   if (currentProjectName) {
@@ -619,25 +965,23 @@ function exportFullBackup() {
     current: currentProjectName ? null : collectProjectData(),
     ideaPool,
   };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'inktink-backup.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  return downloadJsonFile('inktink-backup', payload, encrypt === true || typeof encrypt === 'string' ? encrypt : null);
 }
 
 // Removes everything InkTink has stored in this browser (all projects, the
-// idea pool, UI settings) — for leaving no trace on a shared computer.
+// idea pool, UI settings, the encryption setting) — for leaving no trace on a
+// shared computer, or starting over after a forgotten passphrase. Goes to
+// rawStorage directly: works while locked, and nothing is left queued.
 // Exported .json files are untouched. Reloads into a fresh, empty app.
 function deleteAllLocalData() {
   projectReady = false; // block the unload flush from re-saving anything
   isDirty = false;
+  vault.dirty.clear();
   ['inktink.current', 'inktink.currentName', 'inktink.projects', 'inktink.ideapool',
-   'inktink.snapshots', 'inktink-ui', 'inktink-theme', 'inktink-lang'].forEach(k => {
-    try { appStorage.removeItem(k); } catch {}
+   'inktink.snapshots', 'inktink-ui', 'inktink-theme', 'inktink-lang', LS_VAULT].forEach(k => {
+    try { rawStorage.removeItem(k); } catch {}
   });
+  if (IS_DESKTOP) { try { window.inktinkDesktop.flushSync(); } catch {} }
   location.reload();
 }
 
@@ -698,9 +1042,14 @@ function importProjectFromFile() {
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        const data = JSON.parse(reader.result);
+        let data = JSON.parse(reader.result);
+        if (isEnvelope(data)) { // encrypted export, or a desktop file stored encrypted
+          const plain = await vaultOpenWithPrompt(data);
+          if (plain == null) return; // cancelled
+          data = JSON.parse(plain);
+        }
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('not a project file');
         if (typeof flushEditor === 'function') flushEditor();
         takeSnapshot(); // the state being imported over stays restorable
@@ -710,7 +1059,7 @@ function importProjectFromFile() {
           return;
         }
 
-        setCurrentProjectName(file.name.replace(/\.json$/i, ''));
+        setCurrentProjectName(file.name.replace(/(\.encrypted)?\.json$/i, ''));
         applyProjectData(data);
         updateProjectLabel();
         saveProject();
@@ -722,6 +1071,282 @@ function importProjectFromFile() {
     reader.readAsText(file);
   });
   input.click();
+}
+
+// ── Encryption: settings dialog, passphrase prompt, unlock screen ──
+// (storage side: see "Encryption at rest" at the top of the file)
+const VAULT_MIN_PASS = 8;
+
+function vaultNewPassError(p1, p2) {
+  if (p1.length < VAULT_MIN_PASS) return 'vault.err.short';
+  if (p1 !== p2) return 'vault.err.mismatch';
+  return null;
+}
+
+function vaultPassFields(confirm) {
+  return `
+    <label class="vault-label">${t('vault.pass.label')}
+      <input type="password" class="vault-input" id="vault-pass-1" autocomplete="${confirm ? 'new-password' : 'current-password'}">
+    </label>
+    ${confirm ? `
+    <label class="vault-label">${t('vault.pass2.label')}
+      <input type="password" class="vault-input" id="vault-pass-2" autocomplete="new-password">
+    </label>
+    <div class="vault-hint">${t('vault.pass.hint')}</div>` : ''}`;
+}
+
+// Modal passphrase prompt. confirm = new passphrase (asked twice). check(p)
+// may return an error key to keep the prompt open. Resolves with the
+// passphrase, or null when cancelled.
+function vaultAskPassphrase({ title, msg, confirm = false, check = null }) {
+  return new Promise(resolve => {
+    const c = document.createElement('form');
+    c.innerHTML = `
+      <div class="modal-title">${t(title)}</div>
+      <p class="vault-text">${t(msg)}</p>
+      ${vaultPassFields(confirm)}
+      <div class="vault-error" role="alert"></div>
+      <div class="vault-buttons">
+        <button type="button" class="btn-secondary" data-act="cancel">${t('btn.cancel')}</button>
+        <button type="submit" class="btn-primary" data-act="ok">${t('vault.ask.ok')}</button>
+      </div>`;
+    openModal(c);
+    const err = c.querySelector('.vault-error');
+    const ok = c.querySelector('[data-act="ok"]');
+    c.querySelector('[data-act="cancel"]').addEventListener('click', () => { closeModal(); resolve(null); });
+    c.addEventListener('submit', async e => {
+      e.preventDefault();
+      const p1 = c.querySelector('#vault-pass-1').value;
+      let problem = confirm ? vaultNewPassError(p1, c.querySelector('#vault-pass-2').value) : (p1 ? null : 'vault.err.wrong');
+      if (!problem && check) {
+        ok.disabled = true;
+        ok.textContent = t('vault.working');
+        problem = await check(p1);
+        ok.disabled = false;
+        ok.textContent = t('vault.ask.ok');
+      }
+      if (problem) { err.textContent = t(problem); return; }
+      closeModal();
+      resolve(p1);
+    });
+  });
+}
+
+// Decrypts an envelope from a file: with a key already known for its salt,
+// else by asking for the passphrase. null = cancelled.
+async function vaultOpenWithPrompt(env) {
+  try { const p = await vaultOpenKnown(env); if (p != null) return p; } catch {}
+  let plain = null;
+  const pass = await vaultAskPassphrase({
+    title: 'vault.ask.title.import', msg: 'vault.ask.msg.import',
+    check: async p => {
+      try {
+        const key = await vaultDeriveKey(p, env.salt, env.iter);
+        plain = await vaultOpen(key, env);
+        vault.keys.set(env.salt, key);
+        return null;
+      } catch { return 'vault.err.wrong'; }
+    },
+  });
+  return pass == null ? null : plain;
+}
+
+// Encrypted export: with encryption on, this device's key is used (same
+// passphrase); otherwise a passphrase is chosen for the file.
+async function vaultExport(kind) {
+  let encrypt = true;
+  if (!vault.cfg) {
+    encrypt = await vaultAskPassphrase({ title: 'vault.ask.title.export', msg: 'vault.ask.msg.export', confirm: true });
+    if (encrypt == null) return;
+  }
+  try {
+    await (kind === 'backup' ? exportFullBackup(encrypt) : exportProjectToFile(encrypt));
+  } catch (e) {
+    console.warn('Encrypted export failed:', e);
+    showToast('vault.err.export');
+  }
+}
+
+function openVaultModal() {
+  const c = document.createElement('div');
+  c.className = 'vault-modal';
+  if (!VAULT_SUPPORTED) {
+    c.innerHTML = `<div class="modal-title">${t('vault.title.off')}</div><p class="vault-text">${t('vault.unsupported')}</p>`;
+    openModal(c);
+    return;
+  }
+  const exportSection = `
+    <div class="vault-sep"></div>
+    <div class="vault-subtitle">${t('vault.export.title')}</div>
+    <p class="vault-text">${t(vault.cfg ? 'vault.export.intro.on' : 'vault.export.intro')}</p>
+    <div class="vault-buttons vault-buttons-start">
+      <button class="btn-secondary" data-act="export-project">${t('vault.export.project')}</button>
+      <button class="btn-secondary" data-act="export-backup">${t('vault.export.backup')}</button>
+    </div>`;
+
+  if (!vault.cfg) {
+    c.innerHTML = `
+      <div class="modal-title">${t('vault.title.off')}</div>
+      <p class="vault-text">${t('vault.intro')}</p>
+      <div class="vault-warning" role="note">${t('vault.warning')}</div>
+      <p class="vault-text">${t('vault.backup.hint')}</p>
+      <div class="vault-buttons vault-buttons-start">
+        <button class="btn-secondary" data-act="backup">${t('vault.backup.btn')}</button>
+      </div>
+      <form class="vault-form">
+        ${vaultPassFields(true)}
+        <label class="vault-check"><input type="checkbox" id="vault-understand"> <span>${t('vault.understand')}</span></label>
+        <p class="vault-hint">${t('vault.old.copies')}</p>
+        <div class="vault-error" role="alert"></div>
+        <div class="vault-buttons">
+          <button type="button" class="btn-secondary" data-act="cancel">${t('btn.cancel')}</button>
+          <button type="submit" class="btn-primary" data-act="enable">${t('vault.enable.btn')}</button>
+        </div>
+      </form>
+      ${exportSection}`;
+  } else {
+    c.innerHTML = `
+      <div class="modal-title">${t('vault.title.on')}</div>
+      <p class="vault-text">${t('vault.on.intro')}</p>
+      <div class="vault-buttons vault-buttons-start">
+        <button class="btn-secondary" data-act="lock">${t('vault.lock.btn')}</button>
+      </div>
+      ${exportSection}
+      <div class="vault-sep"></div>
+      <div class="vault-subtitle">${t('vault.off.title')}</div>
+      <form class="vault-form">
+        <p class="vault-text">${t('vault.off.intro')}</p>
+        ${vaultPassFields(false)}
+        <div class="vault-error" role="alert"></div>
+        <div class="vault-buttons">
+          <button type="submit" class="btn-danger" data-act="disable">${t('vault.off.btn')}</button>
+        </div>
+      </form>`;
+  }
+  openModal(c);
+
+  const on = (act, fn) => { const b = c.querySelector(`[data-act="${act}"]`); if (b) b.addEventListener('click', fn); };
+  on('cancel', closeModal);
+  on('backup', () => exportFullBackup());
+  on('export-project', () => vaultExport('project'));
+  on('export-backup', () => vaultExport('backup'));
+  on('lock', async () => {
+    flushPendingSave();
+    await vaultIdle();
+    if (IS_DESKTOP) window.inktinkDesktop.flushSync();
+    location.reload(); // the key only lives in memory: a reload locks
+  });
+
+  const form = c.querySelector('.vault-form');
+  const err = form.querySelector('.vault-error');
+  const submit = form.querySelector('[type="submit"]');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (tabReadOnly || submit.disabled) return;
+    const p1 = form.querySelector('#vault-pass-1').value;
+    const label = submit.textContent;
+    err.textContent = '';
+    if (!vault.cfg) {
+      const problem = vaultNewPassError(p1, form.querySelector('#vault-pass-2').value) ||
+        (form.querySelector('#vault-understand').checked ? null : 'vault.err.understand');
+      if (problem) { err.textContent = t(problem); return; }
+    }
+    submit.disabled = true;
+    submit.textContent = t('vault.working');
+    try {
+      if (vault.cfg) {
+        if (!(await vaultCheckPassphrase(p1))) {
+          err.textContent = t('vault.err.wrong');
+          submit.disabled = false;
+          submit.textContent = label;
+          return;
+        }
+        flushPendingSave();
+        await vaultDisable();
+        showToast('vault.disabled.toast', { kind: 'success' });
+      } else {
+        flushPendingSave();
+        await vaultEnable(p1);
+        showToast('vault.enabled.toast', { kind: 'success' });
+      }
+      closeModal();
+      if (document.getElementById('page-home').classList.contains('active')) renderHome();
+    } catch (ex) {
+      console.warn('Changing encryption failed:', ex);
+      err.textContent = t('vault.err.failed');
+      submit.disabled = false;
+      submit.textContent = label;
+    }
+  });
+}
+
+// Boot-time lock screen: resolves once the passphrase is right and every
+// vault key is decrypted. Until then the app behind it is inert and
+// appStorage refuses to write the vault keys.
+function vaultBootUnlock() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'tab-guard vault-lock';
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'vault-lock-title');
+    overlay.innerHTML = `
+      <form class="tab-guard-panel vault-lock-panel">
+        <h2 id="vault-lock-title">${t('vault.lock.title')}</h2>
+        <p>${t(VAULT_SUPPORTED ? 'vault.lock.msg' : 'vault.unsupported')}</p>
+        ${VAULT_SUPPORTED ? `
+        <input type="password" class="vault-input" id="vault-lock-pass" autocomplete="current-password" aria-label="${t('vault.pass.label')}" placeholder="${t('vault.pass.label')}">
+        <div class="vault-error" role="alert"></div>
+        <button type="submit" class="tb-cta" data-act="unlock">${t('vault.unlock.btn')}</button>` : ''}
+        <details class="vault-forgot">
+          <summary>${t('vault.forgot')}</summary>
+          <p>${t('vault.forgot.msg')}</p>
+          <button type="button" class="btn-danger" data-act="reset">${t('vault.forgot.reset')}</button>
+        </details>
+      </form>`;
+    const appParts = ['.topbar', '.icon-nav', '.sidebar', '.sb-expand', '.content']
+      .map(sel => document.querySelector(sel)).filter(Boolean);
+    appParts.forEach(el => { el.inert = true; });
+    document.body.appendChild(overlay);
+
+    const form = overlay.querySelector('form');
+    const input = overlay.querySelector('#vault-lock-pass');
+    const err = overlay.querySelector('.vault-error');
+    const btn = overlay.querySelector('[data-act="unlock"]');
+    if (input) requestAnimationFrame(() => input.focus());
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!input || btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = t('vault.unlock.working');
+      err.textContent = '';
+      let ok = false;
+      try {
+        ok = await vaultUnlock(input.value);
+        if (!ok) err.textContent = t('vault.err.wrong');
+      } catch (ex) {
+        console.warn('Unlock failed:', ex);
+        err.textContent = t('vault.unlock.corrupt');
+      }
+      if (ok) {
+        overlay.remove();
+        appParts.forEach(el => { el.inert = false; });
+        resolve();
+        return;
+      }
+      btn.disabled = false;
+      btn.textContent = t('vault.unlock.btn');
+      input.select();
+    });
+
+    const reset = overlay.querySelector('[data-act="reset"]');
+    reset.addEventListener('click', () => {
+      if (reset.dataset.armed) { deleteAllLocalData(); return; }
+      reset.dataset.armed = '1';
+      reset.textContent = t('vault.forgot.confirm');
+    });
+  });
 }
 
 // ── State ──
@@ -1105,6 +1730,54 @@ const TR = {
     'privacy.delete.msg': 'This removes every project, the idea pool, and all settings InkTink has stored in this browser — on this device only. Exported .json files are not affected. Download a full backup first if you want to keep anything.',
     'privacy.delete.backup': '⬇ Download full backup',
     'privacy.delete.confirm': 'Delete everything',
+    'vault.home.off': 'Encrypt projects on this device…',
+    'vault.home.on': '🔒 Encryption is on',
+    'vault.title.off': 'Encrypt your projects on this device',
+    'vault.intro': 'Your projects, snapshots and idea pool are then stored encrypted (AES-256). Anything else that reads the stored data — another program, a sync service, an AI tool — only sees scrambled text. You enter the passphrase each time you open InkTink. Project names and dates stay readable. This setting applies to this device only.',
+    'vault.warning': 'A forgotten passphrase cannot be recovered or reset. If you lose it, your projects on this device are gone for good — nobody can unlock them, not even InkTink itself.',
+    'vault.backup.hint': 'Download an unencrypted full backup first and keep it somewhere safe.',
+    'vault.backup.btn': '⬇ Download full backup (unencrypted)',
+    'vault.pass.label': 'Passphrase',
+    'vault.pass2.label': 'Repeat passphrase',
+    'vault.pass.hint': 'At least 8 characters. A few random words are easy to remember and hard to guess.',
+    'vault.understand': 'I understand: if I forget this passphrase, my data cannot be recovered.',
+    'vault.old.copies': 'Copies made earlier stay unencrypted: exported files, backups, and in the desktop app the trash folder.',
+    'vault.enable.btn': 'Turn on encryption',
+    'vault.working': 'Working…',
+    'vault.err.short': 'The passphrase needs at least 8 characters.',
+    'vault.err.mismatch': 'The passphrases do not match.',
+    'vault.err.understand': 'Please tick the box to confirm you understand the warning.',
+    'vault.err.wrong': 'Wrong passphrase.',
+    'vault.err.failed': 'Something went wrong. Reload InkTink and try again.',
+    'vault.err.export': 'The encrypted export failed.',
+    'vault.enabled.toast': 'Encryption is on.',
+    'vault.disabled.toast': 'Encryption is off — your data is stored unencrypted again.',
+    'vault.title.on': 'Encryption is on',
+    'vault.on.intro': 'Your projects, snapshots and idea pool are stored encrypted on this device. They stay unlocked until you close or reload InkTink.',
+    'vault.lock.btn': 'Lock now',
+    'vault.export.title': 'Encrypted export',
+    'vault.export.intro': 'The normal Export and backup files are unencrypted. These buttons save an encrypted file instead. You choose a passphrase for it and need it to import the file again; only InkTink versions with encryption can open it.',
+    'vault.export.intro.on': 'The normal Export and backup files are unencrypted. These buttons save an encrypted file instead, locked with your current passphrase. Only InkTink versions with encryption can open it.',
+    'vault.export.project': '⬇ This project, encrypted',
+    'vault.export.backup': '⬇ Full backup, encrypted',
+    'vault.off.title': 'Turn off encryption',
+    'vault.off.intro': 'Decrypts everything on this device and stores it unencrypted again. Enter your passphrase to confirm.',
+    'vault.off.btn': 'Turn off encryption',
+    'vault.lock.title': 'InkTink is locked',
+    'vault.lock.msg': 'Your projects on this device are encrypted. Enter your passphrase to open them.',
+    'vault.unlock.btn': 'Unlock',
+    'vault.unlock.working': 'Unlocking…',
+    'vault.unlock.corrupt': 'The passphrase is right, but some stored data could not be decrypted. Nothing was changed.',
+    'vault.unsupported': 'This browser cannot use encryption here (it needs a secure https:// page).',
+    'vault.forgot': 'Forgot your passphrase?',
+    'vault.forgot.msg': 'It cannot be recovered or reset. The only way forward is to delete the encrypted data on this device and start over — then restore an unencrypted backup if you have one.',
+    'vault.forgot.reset': 'Delete encrypted data and start over',
+    'vault.forgot.confirm': 'Really delete everything?',
+    'vault.ask.title.export': 'Passphrase for the encrypted file',
+    'vault.ask.msg.export': 'Choose a passphrase for this file. You will need it to import the file again — it cannot be recovered.',
+    'vault.ask.title.import': 'This file is encrypted',
+    'vault.ask.msg.import': 'Enter the passphrase it was encrypted with.',
+    'vault.ask.ok': 'OK',
     'backup.imported': 'Backup restored — {n} project(s) are back.',
     'split.toggle.title': 'Split view: two pages side by side',
     'split.select.title': 'Page shown on the right',
@@ -1512,6 +2185,54 @@ const TR = {
     'privacy.delete.msg': 'Das entfernt alle Projekte, den Ideen-Pool und sämtliche Einstellungen, die InkTink in diesem Browser gespeichert hat — nur auf diesem Gerät. Exportierte .json-Dateien sind nicht betroffen. Lade vorher ein komplettes Backup herunter, wenn du etwas behalten möchtest.',
     'privacy.delete.backup': '⬇ Komplettes Backup herunterladen',
     'privacy.delete.confirm': 'Alles löschen',
+    'vault.home.off': 'Projekte auf diesem Gerät verschlüsseln…',
+    'vault.home.on': '🔒 Verschlüsselung ist an',
+    'vault.title.off': 'Projekte auf diesem Gerät verschlüsseln',
+    'vault.intro': 'Deine Projekte, Schnappschüsse und der Ideen-Pool werden dann verschlüsselt gespeichert (AES-256). Alles andere, was die gespeicherten Daten liest — ein anderes Programm, ein Sync-Dienst, ein KI-Tool — sieht nur Zeichensalat. Du gibst die Passphrase bei jedem Öffnen von InkTink ein. Projektnamen und Datumsangaben bleiben lesbar. Die Einstellung gilt nur für dieses Gerät.',
+    'vault.warning': 'Eine vergessene Passphrase lässt sich weder wiederherstellen noch zurücksetzen. Wenn du sie verlierst, sind deine Projekte auf diesem Gerät endgültig weg — niemand kann sie entsperren, auch nicht InkTink selbst.',
+    'vault.backup.hint': 'Lade vorher ein unverschlüsseltes komplettes Backup herunter und bewahre es sicher auf.',
+    'vault.backup.btn': '⬇ Komplettes Backup herunterladen (unverschlüsselt)',
+    'vault.pass.label': 'Passphrase',
+    'vault.pass2.label': 'Passphrase wiederholen',
+    'vault.pass.hint': 'Mindestens 8 Zeichen. Ein paar zufällige Wörter sind leicht zu merken und schwer zu erraten.',
+    'vault.understand': 'Ich habe verstanden: Wenn ich diese Passphrase vergesse, sind meine Daten nicht wiederherstellbar.',
+    'vault.old.copies': 'Früher erstellte Kopien bleiben unverschlüsselt: exportierte Dateien, Backups und in der Desktop-App der Papierkorb-Ordner.',
+    'vault.enable.btn': 'Verschlüsselung einschalten',
+    'vault.working': 'Einen Moment…',
+    'vault.err.short': 'Die Passphrase braucht mindestens 8 Zeichen.',
+    'vault.err.mismatch': 'Die Passphrasen stimmen nicht überein.',
+    'vault.err.understand': 'Bitte bestätige mit dem Häkchen, dass du die Warnung verstanden hast.',
+    'vault.err.wrong': 'Falsche Passphrase.',
+    'vault.err.failed': 'Etwas ist schiefgegangen. Lade InkTink neu und versuch es noch einmal.',
+    'vault.err.export': 'Der verschlüsselte Export ist fehlgeschlagen.',
+    'vault.enabled.toast': 'Verschlüsselung ist an.',
+    'vault.disabled.toast': 'Verschlüsselung ist aus — deine Daten werden wieder unverschlüsselt gespeichert.',
+    'vault.title.on': 'Verschlüsselung ist an',
+    'vault.on.intro': 'Deine Projekte, Schnappschüsse und der Ideen-Pool sind auf diesem Gerät verschlüsselt gespeichert. Sie bleiben entsperrt, bis du InkTink schließt oder neu lädst.',
+    'vault.lock.btn': 'Jetzt sperren',
+    'vault.export.title': 'Verschlüsselter Export',
+    'vault.export.intro': 'Der normale Export und das Backup sind unverschlüsselt. Diese Buttons speichern stattdessen eine verschlüsselte Datei. Du wählst eine Passphrase dafür und brauchst sie, um die Datei wieder zu importieren; nur InkTink-Versionen mit Verschlüsselung können sie öffnen.',
+    'vault.export.intro.on': 'Der normale Export und das Backup sind unverschlüsselt. Diese Buttons speichern stattdessen eine verschlüsselte Datei, gesperrt mit deiner aktuellen Passphrase. Nur InkTink-Versionen mit Verschlüsselung können sie öffnen.',
+    'vault.export.project': '⬇ Dieses Projekt, verschlüsselt',
+    'vault.export.backup': '⬇ Komplettes Backup, verschlüsselt',
+    'vault.off.title': 'Verschlüsselung ausschalten',
+    'vault.off.intro': 'Entschlüsselt alles auf diesem Gerät und speichert es wieder unverschlüsselt. Gib zur Bestätigung deine Passphrase ein.',
+    'vault.off.btn': 'Verschlüsselung ausschalten',
+    'vault.lock.title': 'InkTink ist gesperrt',
+    'vault.lock.msg': 'Deine Projekte auf diesem Gerät sind verschlüsselt. Gib deine Passphrase ein, um sie zu öffnen.',
+    'vault.unlock.btn': 'Entsperren',
+    'vault.unlock.working': 'Wird entsperrt…',
+    'vault.unlock.corrupt': 'Die Passphrase stimmt, aber einige gespeicherte Daten ließen sich nicht entschlüsseln. Es wurde nichts verändert.',
+    'vault.unsupported': 'Dieser Browser kann hier keine Verschlüsselung nutzen (dafür braucht es eine sichere https://-Seite).',
+    'vault.forgot': 'Passphrase vergessen?',
+    'vault.forgot.msg': 'Sie lässt sich weder wiederherstellen noch zurücksetzen. Der einzige Weg ist, die verschlüsselten Daten auf diesem Gerät zu löschen und neu anzufangen — und dann ein unverschlüsseltes Backup einzuspielen, falls du eins hast.',
+    'vault.forgot.reset': 'Verschlüsselte Daten löschen und neu anfangen',
+    'vault.forgot.confirm': 'Wirklich alles löschen?',
+    'vault.ask.title.export': 'Passphrase für die verschlüsselte Datei',
+    'vault.ask.msg.export': 'Wähle eine Passphrase für diese Datei. Du brauchst sie, um die Datei wieder zu importieren — sie lässt sich nicht wiederherstellen.',
+    'vault.ask.title.import': 'Diese Datei ist verschlüsselt',
+    'vault.ask.msg.import': 'Gib die Passphrase ein, mit der sie verschlüsselt wurde.',
+    'vault.ask.ok': 'OK',
     'backup.imported': 'Backup wiederhergestellt — {n} Projekt(e) sind zurück.',
     'split.toggle.title': 'Geteilte Ansicht: zwei Seiten nebeneinander',
     'split.select.title': 'Seite in der rechten Hälfte',
@@ -4063,9 +4784,9 @@ document.getElementById('chnav-expand').addEventListener('click', () => {
 // deleting images/projects actually frees space (strings are UTF-16, 2 B/char).
 function inktinkStorageSize() {
   let chars = 0;
-  for (let i = 0; i < appStorage.length; i++) {
-    const k = appStorage.key(i);
-    if (k && k.startsWith('inktink')) chars += k.length + (appStorage.getItem(k) || '').length;
+  for (let i = 0; i < rawStorage.length; i++) { // raw: what is really stored (ciphertext if encrypted)
+    const k = rawStorage.key(i);
+    if (k && k.startsWith('inktink')) chars += k.length + (rawStorage.getItem(k) || '').length;
   }
   return chars * 2;
 }
@@ -4078,6 +4799,8 @@ function formatBytes(b) {
 async function renderHome() {
   const storageEl = document.getElementById('home-storage');
   if (storageEl) storageEl.textContent = t('home.storage').replace('{size}', formatBytes(inktinkStorageSize()));
+  const vaultBtn = document.getElementById('btn-vault');
+  if (vaultBtn) vaultBtn.textContent = t(vault.cfg ? 'vault.home.on' : 'vault.home.off');
 
   // Pointless inside the desktop app itself — it has no storage limit.
   const desktopEl = document.getElementById('home-desktop');
@@ -6441,9 +7164,17 @@ function flushPendingSave() {
 window.addEventListener('pagehide', flushPendingSave);
 window.addEventListener('beforeunload', e => {
   flushPendingSave();
-  if (isDirty) {
+  // With encryption on, the flushed save is still being sealed (async, a few
+  // ms). Hold the close until it is stored: the browser shows its "leave
+  // page?" prompt; Electron silently cancels the close, and the window closes
+  // itself once the data is on disk.
+  const sealing = vaultBusy();
+  if (isDirty || sealing) {
     e.preventDefault();
     e.returnValue = '';
+  }
+  if (sealing && IS_DESKTOP && !isDirty) {
+    vaultIdle().then(() => { window.inktinkDesktop.flushSync(); window.close(); });
   }
 });
 
@@ -9558,6 +10289,7 @@ document.getElementById('btn-export-project').addEventListener('click', exportPr
 document.getElementById('btn-import-project').addEventListener('click', importProjectFromFile);
 document.getElementById('save-warning-backup').addEventListener('click', exportProjectToFile);
 document.getElementById('btn-delete-all').addEventListener('click', openDeleteAllModal);
+document.getElementById('btn-vault').addEventListener('click', openVaultModal);
 
 // Sidebar title: click to rename — doubles as the project name (and export filename)
 const projTitleEl = document.getElementById('proj-title');
@@ -9570,9 +10302,12 @@ projTitleEl.addEventListener('blur', () => commitProjectTitle(projTitleEl.textCo
 // Load button
 // ── Init: load from server ──
 (async function init() {
+  if (vault.cfg) await vaultBootUnlock(); // encrypted: nothing loads before the passphrase
   loadIdeaPool();
   if (tabGuard) await tabGuard.negotiate(); // multi-tab guard: decide writer/read-only first
   const data = await loadInitialProject();
   projectReady = true; // loaded — saving is safe from here on
   applyProjectData(data);
+  // The home page rendered while still locked (empty) — show the projects now.
+  if (vault.cfg && document.getElementById('page-home').classList.contains('active')) renderHome();
 })();

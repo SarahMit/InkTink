@@ -26,5 +26,8 @@ contextBridge.exposeInMainWorld('inktinkDesktop', {
     write: (project, ts, words, json) => ipcRenderer.send('snapshots:write', project, ts, words, json),
     list: (project) => ipcRenderer.sendSync('snapshots:list', project),
     read: (project, ts) => ipcRenderer.sendSync('snapshots:read', project, ts),
+    files: () => ipcRenderer.sendSync('snapshots:files'),
+    readFile: (dir, file) => ipcRenderer.sendSync('snapshots:readFile', dir, file),
+    rewriteFile: (dir, file, json) => ipcRenderer.sendSync('snapshots:rewriteFile', dir, file, json),
   },
 });

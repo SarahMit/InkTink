@@ -15,6 +15,11 @@
 // Reads happen once at boot (synchronous snapshot); writes are debounced and
 // atomic (tmp + rename). flush() completes every pending write synchronously —
 // called via the renderer's flushPendingSave() and on before-quit.
+//
+// With encryption switched on (see "Encryption at rest" in app.js) the project
+// files and current.json hold { version, name, modified, inktinkEncrypted,
+// salt, iter, iv, ct } instead of plain project fields. Nothing here decrypts;
+// the format just passes through.
 
 const fs = require('fs');
 const path = require('path');
@@ -33,6 +38,15 @@ function sanitizeFilename(name) {
   return base;
 }
 
+// What diffProjects compares to decide whether a project file is stale.
+// `modified` alone misses the renderer switching encryption on/off (same
+// project, same date, different bytes); the IV of an encrypted project
+// (see "Encryption at rest" in app.js) changes whenever it is re-sealed.
+function fingerprint(modified, data) {
+  const sealed = data && data.inktinkEncrypted === 1 && typeof data.iv === 'string';
+  return String(modified) + '|' + (sealed ? data.iv : 'plain');
+}
+
 function atomicWrite(file, text) {
   const tmp = file + '.tmp';
   fs.writeFileSync(tmp, text);
@@ -46,7 +60,7 @@ class DiskStore {
     this.trashDir = path.join(dataDir, 'trash');
     this.kv = new Map(); // authoritative key → string, mirrors what app.js sees
     this.meta = {}; // raw strings for the small keys
-    this.files = new Map(); // project name → { filename, modified } as last written
+    this.files = new Map(); // project name → { filename, modified: fingerprint() } as last written
     this.pending = new Map(); // debounce label → { timer, run }
     this.load();
   }
@@ -76,7 +90,7 @@ class DiskStore {
       if (this.files.has(name)) { console.warn('InkTink: duplicate project name, ignoring', file); continue; }
       const modified = parsed.modified || fs.statSync(file).mtime.toISOString();
       store[name] = { data: parsed.data, modified };
-      this.files.set(name, { filename, modified });
+      this.files.set(name, { filename, modified: fingerprint(modified, parsed.data) });
     }
     this.kv.set('inktink.projects', JSON.stringify(store));
   }
@@ -124,14 +138,15 @@ class DiskStore {
   }
 
   // Compares the incoming full store against what was last written and only
-  // touches files whose project changed (by `modified`), appeared, or vanished.
+  // touches files whose project changed (by fingerprint), appeared, or vanished.
   diffProjects(store) {
     for (const [name, entry] of Object.entries(store)) {
       if (!entry || !entry.data || typeof entry.data !== 'object') continue;
       const prev = this.files.get(name);
-      if (prev && prev.modified === entry.modified) continue;
+      const fp = fingerprint(entry.modified, entry.data);
+      if (prev && prev.modified === fp) continue;
       const filename = prev ? prev.filename : this.claimFilename(name);
-      this.files.set(name, { filename, modified: entry.modified });
+      this.files.set(name, { filename, modified: fp });
       const file = path.join(this.projectsDir, filename);
       const payload = { version: 2, name, modified: entry.modified, ...entry.data };
       this.schedule('project:' + name, () => atomicWrite(file, JSON.stringify(payload, null, 2)));
