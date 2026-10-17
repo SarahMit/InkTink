@@ -329,7 +329,7 @@ function setCurrentProjectName(name) {
 }
 
 function collectProjectData() {
-  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, cover: bookCover, writing, brainstorm, plotNotes, timeline, inspiration, todos, writingGoal, wordHistory, sprints, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
+  return { beats, characters, moodboard: moodImages, blurb: projectBlurb, cover: bookCover, settings: projectSettings, writing, brainstorm, plotNotes, timeline, inspiration, todos, writingGoal, wordHistory, sprints, selectedStructure, worldbuilding, ideaMap, redThread, storyTheme, ideaWorkshops };
 }
 
 function readProjectsStore() {
@@ -1379,6 +1379,9 @@ function plotNotesDefault() {
 // Book cover: { id, image } — the id lets browser snapshots re-attach the
 // image on restore (see snapCollectImages), like every other embedded image.
 let bookCover = null;
+// Per-project preferences (scene statuses, paragraph style, export layout);
+// see the SETTINGS section. Saved with the project.
+let projectSettings = projectSettingsDefault();
 let timeline = { columns: [], rows: [] };
 let inspiration = [];
 let todos = [];
@@ -1585,6 +1588,55 @@ const TR = {
     'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Timeline',
     'gsearch.group.notes': 'Notes',
     'gsearch.group.plot': 'Plot Notes',
+    'settings.title': 'Settings',
+    'settings.tab.device': 'This device', 'settings.tab.project': 'This project',
+    'settings.device.hint': 'Saved on this device only (this browser or the desktop app).',
+    'settings.project.hint': 'Saved with the project — travels along with Export and Import.',
+    'settings.appearance': 'Appearance',
+    'settings.scheme': 'Colour scheme',
+    'settings.scheme.light': 'Light', 'settings.scheme.sepia': 'Sepia', 'settings.scheme.contrast': 'High contrast',
+    'settings.scheme.dark': 'Dark', 'settings.scheme.night': 'Night', 'settings.scheme.system': 'Match system',
+    'settings.accent': 'Accent colour', 'settings.accent.default': 'Default (changes with light/dark)',
+    'settings.accent.sage': 'Sage', 'settings.accent.terracotta': 'Terracotta', 'settings.accent.blue': 'Blue',
+    'settings.accent.plum': 'Plum', 'settings.accent.amber': 'Amber', 'settings.accent.rose': 'Rose', 'settings.accent.teal': 'Teal',
+    'settings.editor': 'Editor',
+    'settings.font': 'Font', 'settings.font.system': 'System',
+    'settings.size': 'Font size', 'settings.line': 'Line spacing', 'settings.width': 'Text width', 'settings.width.full': 'Full width',
+    'settings.preview': 'The lighthouse keeper had not spoken to anyone in eleven days, and she was beginning to like it. Every story starts with a single sentence.',
+    'settings.focus': 'Focus mode',
+    'settings.focus.hint': 'Hides everything except your text. Turn it on with ⛶ Focus in the editor toolbar or Ctrl+Shift+F; Esc leaves it.',
+    'settings.focus.typewriter': 'Typewriter scrolling — keep the current line in the middle of the screen',
+    'settings.focus.dim': 'Dim every paragraph except the one you are writing',
+    'settings.nav': 'Navigation',
+    'settings.nav.hint': 'Choose which pages appear in the bar on the left, and in which order.',
+    'settings.nav.up': 'Move up', 'settings.nav.down': 'Move down', 'settings.nav.reset': 'Show all in the original order',
+    'settings.start': 'When InkTink opens',
+    'settings.start.home': 'Show the home page', 'settings.start.last': 'Continue in the scene I worked on last',
+    'settings.security': 'Privacy', 'settings.vault.btn': 'Encryption…',
+    'settings.statuses': 'Scene statuses',
+    'settings.statuses.hint': 'Your own stages for scenes, in order. Clicking the status chip in the editor moves a scene to the next one.',
+    'settings.status.unnamed': 'Status', 'settings.status.add': '+ Status', 'settings.status.remove': 'Remove status',
+    'settings.status.color': 'Colour', 'settings.status.reset': 'Back to Draft / Revised / Done',
+    'settings.status.remove.confirm': 'Scenes marked "{name}" will be set to "{first}". Remove this status?',
+    'settings.paragraphs': 'Paragraphs',
+    'settings.indent': 'Indent the first line of each paragraph, like in a printed book (editor and .docx)',
+    'settings.targets': 'Word targets',
+    'settings.targets.hint': 'Set a target for any chapter or scene in the 📌 notes panel of the editor. Progress bars then show up in the chapter list.',
+    'settings.export': 'Manuscript export',
+    'settings.export.font': 'Font', 'settings.export.size': 'Size', 'settings.export.line': 'Line spacing',
+    'settings.export.break': 'Between scenes',
+    'settings.export.break.titles': 'Scene titles', 'settings.export.break.stars': 'Asterisks  * * *',
+    'settings.export.break.hash': 'Hash  #', 'settings.export.break.blank': 'Blank line',
+    'settings.export.chapter': 'Chapter headings',
+    'settings.export.chapter.title': 'Title only', 'settings.export.chapter.numbered': 'Chapter 1: Title', 'settings.export.chapter.number': 'Chapter 1',
+    'settings.export.chapter.word': 'Word for "Chapter"',
+    'settings.export.hint': 'Headings and scene breaks apply to .docx, .md and .txt; font, size and line spacing to .docx.',
+    'export.chapter.word': 'Chapter',
+    'focus.btn': 'Focus', 'focus.btn.title': 'Focus mode (Ctrl+Shift+F)', 'focus.exit': 'Leave focus mode (Esc)',
+    'plan.target': 'words target', 'plan.target.placeholder': '—',
+    'target.progress': '{n} of {target} words',
+    'color.none': 'No colour', 'color.default': 'Default colour', 'color.neutral': 'Neutral grey',
+    'color.pick': 'Choose a colour', 'color.chapter': 'Chapter colour',
     'lang.original': 'Original', 'lang.version': 'Version',
     'lang.add': 'Add a language',
     'lang.add.title': 'Write this story in another language too',
@@ -2040,6 +2092,55 @@ const TR = {
     'gsearch.group.beats': 'Story Beats', 'gsearch.group.timeline': 'Zeitstrahl',
     'gsearch.group.notes': 'Notizen',
     'gsearch.group.plot': 'Plot-Notizen',
+    'settings.title': 'Einstellungen',
+    'settings.tab.device': 'Dieses Gerät', 'settings.tab.project': 'Dieses Projekt',
+    'settings.device.hint': 'Nur auf diesem Gerät gespeichert (dieser Browser bzw. die Desktop-App).',
+    'settings.project.hint': 'Wird mit dem Projekt gespeichert — reist bei Export und Import mit.',
+    'settings.appearance': 'Aussehen',
+    'settings.scheme': 'Farbschema',
+    'settings.scheme.light': 'Hell', 'settings.scheme.sepia': 'Sepia', 'settings.scheme.contrast': 'Hoher Kontrast',
+    'settings.scheme.dark': 'Dunkel', 'settings.scheme.night': 'Nacht', 'settings.scheme.system': 'Wie das System',
+    'settings.accent': 'Akzentfarbe', 'settings.accent.default': 'Standard (wechselt mit hell/dunkel)',
+    'settings.accent.sage': 'Salbei', 'settings.accent.terracotta': 'Terrakotta', 'settings.accent.blue': 'Blau',
+    'settings.accent.plum': 'Pflaume', 'settings.accent.amber': 'Bernstein', 'settings.accent.rose': 'Rosé', 'settings.accent.teal': 'Petrol',
+    'settings.editor': 'Editor',
+    'settings.font': 'Schrift', 'settings.font.system': 'System',
+    'settings.size': 'Schriftgröße', 'settings.line': 'Zeilenabstand', 'settings.width': 'Textbreite', 'settings.width.full': 'Volle Breite',
+    'settings.preview': 'Die Leuchtturmwärterin hatte seit elf Tagen mit niemandem gesprochen, und langsam gefiel es ihr. Jede Geschichte beginnt mit einem einzigen Satz.',
+    'settings.focus': 'Fokusmodus',
+    'settings.focus.hint': 'Blendet alles außer deinem Text aus. Einschalten mit ⛶ Fokus in der Editor-Leiste oder Strg+Umschalt+F; Esc beendet ihn.',
+    'settings.focus.typewriter': 'Schreibmaschinen-Scrollen — die aktuelle Zeile bleibt in der Bildschirmmitte',
+    'settings.focus.dim': 'Alle Absätze außer dem aktuellen abdunkeln',
+    'settings.nav': 'Navigation',
+    'settings.nav.hint': 'Wähle, welche Seiten in der Leiste links erscheinen und in welcher Reihenfolge.',
+    'settings.nav.up': 'Nach oben', 'settings.nav.down': 'Nach unten', 'settings.nav.reset': 'Alle in ursprünglicher Reihenfolge zeigen',
+    'settings.start': 'Beim Öffnen von InkTink',
+    'settings.start.home': 'Die Startseite zeigen', 'settings.start.last': 'In der zuletzt bearbeiteten Szene weitermachen',
+    'settings.security': 'Privatsphäre', 'settings.vault.btn': 'Verschlüsselung…',
+    'settings.statuses': 'Szenen-Status',
+    'settings.statuses.hint': 'Eigene Stufen für Szenen, in Reihenfolge. Ein Klick auf den Status im Editor schiebt eine Szene zur nächsten Stufe.',
+    'settings.status.unnamed': 'Status', 'settings.status.add': '+ Status', 'settings.status.remove': 'Status entfernen',
+    'settings.status.color': 'Farbe', 'settings.status.reset': 'Zurück zu Entwurf / Überarbeitet / Fertig',
+    'settings.status.remove.confirm': 'Szenen mit „{name}" bekommen „{first}". Diesen Status entfernen?',
+    'settings.paragraphs': 'Absätze',
+    'settings.indent': 'Erste Zeile jedes Absatzes einrücken, wie in einem gedruckten Buch (Editor und .docx)',
+    'settings.targets': 'Wortziele',
+    'settings.targets.hint': 'Ziele für Kapitel und Szenen setzt du im 📌 Notizbereich des Editors. Fortschrittsbalken erscheinen dann in der Kapitelliste.',
+    'settings.export': 'Manuskript-Export',
+    'settings.export.font': 'Schrift', 'settings.export.size': 'Größe', 'settings.export.line': 'Zeilenabstand',
+    'settings.export.break': 'Zwischen Szenen',
+    'settings.export.break.titles': 'Szenentitel', 'settings.export.break.stars': 'Sternchen  * * *',
+    'settings.export.break.hash': 'Raute  #', 'settings.export.break.blank': 'Leerzeile',
+    'settings.export.chapter': 'Kapitelüberschriften',
+    'settings.export.chapter.title': 'Nur Titel', 'settings.export.chapter.numbered': 'Kapitel 1: Titel', 'settings.export.chapter.number': 'Kapitel 1',
+    'settings.export.chapter.word': 'Wort für „Kapitel"',
+    'settings.export.hint': 'Überschriften und Szenentrenner gelten für .docx, .md und .txt; Schrift, Größe und Zeilenabstand für .docx.',
+    'export.chapter.word': 'Kapitel',
+    'focus.btn': 'Fokus', 'focus.btn.title': 'Fokusmodus (Strg+Umschalt+F)', 'focus.exit': 'Fokusmodus verlassen (Esc)',
+    'plan.target': 'Wörter Ziel', 'plan.target.placeholder': '—',
+    'target.progress': '{n} von {target} Wörtern',
+    'color.none': 'Keine Farbe', 'color.default': 'Standardfarbe', 'color.neutral': 'Neutrales Grau',
+    'color.pick': 'Farbe wählen', 'color.chapter': 'Kapitelfarbe',
     'lang.original': 'Original', 'lang.version': 'Fassung',
     'lang.add': 'Sprache hinzufügen',
     'lang.add.title': 'Diese Geschichte zusätzlich in einer anderen Sprache schreiben',
@@ -2484,6 +2585,10 @@ function applyI18n() {
     gsearchBtn.title = t('gsearch.btn.title');
     gsearchBtn.setAttribute('aria-label', t('gsearch.btn.title'));
   }
+  [['settings-btn', 'settings.title'], ['focus-exit', 'focus.exit']].forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) { el.title = t(key); el.setAttribute('aria-label', t(key)); }
+  });
   const gsearchInput = document.getElementById('gsearch-input');
   if (gsearchInput) gsearchInput.placeholder = t('gsearch.placeholder');
   // Split view & sidebar controls carry translated tooltips/options.
@@ -4634,7 +4739,7 @@ function buildSplitPicker() {
   if (!menu || !btn) return;
   btn.innerHTML = navIconSvg(uiPrefs.splitPage) + '<span class="split-picker-caret">&#9662;</span>';
   btn.title = t('split.select.title') + ': ' + splitPageLabel(uiPrefs.splitPage);
-  menu.innerHTML = SPLIT_PAGES.map(p =>
+  menu.innerHTML = SPLIT_PAGES.filter(p => !navHidden(p) || p === uiPrefs.splitPage).map(p =>
     `<button class="split-menu-item${p === uiPrefs.splitPage ? ' on' : ''}" data-page="${p}" title="${splitPageLabel(p)}">${navIconSvg(p)}</button>`
   ).join('');
   menu.querySelectorAll('.split-menu-item').forEach(item => item.addEventListener('click', () => {
@@ -5847,11 +5952,14 @@ function renderStats() {
                 const shade = 100 - (i % 5) * 15; // shades of the theme accent: 100,85,70,55,40
                 return `<div class="stats-stack-seg" style="flex:${sc.words || 0.01};background:color-mix(in srgb, var(--accent) ${shade}%, var(--bg-card))" title="${ideaEsc(sc.title)}: ${sc.words.toLocaleString('de-DE')} ${t('stats.words')}"></div>`;
               }).join('');
-              const statusCounts = { done: 0, revised: 0, draft: 0 };
-              ch.scenes.forEach(sc => statusCounts[sc.status]++);
-              const statusSegs = ['done', 'revised', 'draft']
-                .filter(s => statusCounts[s])
-                .map(s => `<div class="stats-status-seg status-${s}" style="flex:${statusCounts[s]}" title="${t('writing.status.' + s)}: ${statusCounts[s]}"></div>`)
+              const statusCounts = {};
+              ch.scenes.forEach(sc => { statusCounts[sc.status] = (statusCounts[sc.status] || 0) + 1; });
+              const statusSegs = sceneStatuses().slice().reverse()
+                .filter(s => statusCounts[s.id])
+                .map(s => {
+                  const info = statusInfo(s.id);
+                  return `<div class="stats-status-seg" style="flex:${statusCounts[s.id]};background:${info.css}" title="${ideaEsc(info.label)}: ${statusCounts[s.id]}"></div>`;
+                })
                 .join('');
               return `
                 <div class="stats-bar-row">
@@ -5927,22 +6035,654 @@ document.querySelector('.topbar-brand').addEventListener('click', () => switchPa
 document.getElementById('home-btn-new').addEventListener('click', () => document.getElementById('btn-new-project').click());
 document.getElementById('home-btn-import').addEventListener('click', () => document.getElementById('btn-import-project').click());
 
-// ── Global light / dark theme ──
-function applyTheme(theme) {
-  const dark = theme === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  appStorage.setItem('inktink-theme', dark ? 'dark' : 'light');
+// ── Global colour scheme (light / sepia / contrast / dark / night / system) ──
+// data-theme stays "light" or "dark" (every existing dark tweak keys off it);
+// data-scheme picks a variant on top. The <head> script in index.html applies
+// the same mapping before first paint.
+const THEMES = {
+  light: ['light', ''], sepia: ['light', 'sepia'], contrast: ['light', 'contrast'],
+  dark: ['dark', ''], night: ['dark', 'night'],
+};
+const THEME_CHOICES = ['light', 'sepia', 'contrast', 'dark', 'night', 'system'];
+const systemDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+let themeChoice = 'light';
+
+function resolveTheme(choice) {
+  if (choice === 'system') return systemDarkQuery && systemDarkQuery.matches ? 'dark' : 'light';
+  return THEMES[choice] ? choice : 'light';
+}
+
+function applyTheme(choice) {
+  themeChoice = THEME_CHOICES.includes(choice) ? choice : 'light';
+  const [base, scheme] = THEMES[resolveTheme(themeChoice)];
+  const html = document.documentElement;
+  html.setAttribute('data-theme', base);
+  if (scheme) html.setAttribute('data-scheme', scheme); else html.removeAttribute('data-scheme');
+  try { appStorage.setItem('inktink-theme', themeChoice); } catch {}
   const btn = document.getElementById('theme-switch');
   if (btn) {
-    btn.textContent = dark ? '☀' : '☾';
-    btn.title = dark ? 'Switch to light' : 'Switch to dark';
+    btn.textContent = base === 'dark' ? '☀' : '☾';
+    btn.title = base === 'dark' ? 'Switch to light' : 'Switch to dark';
   }
 }
 applyTheme(appStorage.getItem('inktink-theme') || 'light');
+if (systemDarkQuery) systemDarkQuery.addEventListener('change', () => { if (themeChoice === 'system') applyTheme('system'); });
 document.getElementById('theme-switch').addEventListener('click', () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   applyTheme(isDark ? 'light' : 'dark');
 });
+
+// ══════════════════════════════════
+// ── SETTINGS (per device + per project) ──
+// ══════════════════════════════════
+// Device preferences live in uiPrefs (inktink-ui); project preferences in
+// projectSettings, saved with the project. Everything applies live.
+
+// Theme-aware palette shared by statuses, chapter colours and plot categories.
+const PALETTE_KEYS = ['terracotta', 'amber', 'sage', 'teal', 'blue', 'purple', 'violet', 'rose'];
+function paletteColor(key) {
+  return PALETTE_KEYS.includes(key) ? `var(--c-${key})` : 'var(--border-strong)';
+}
+
+const ACCENTS = ['sage', 'terracotta', 'blue', 'plum', 'amber', 'rose', 'teal'];
+
+const EDITOR_FONTS = {
+  georgia:  { label: 'Georgia', stack: "Georgia, 'Times New Roman', serif" },
+  lora:     { label: 'Lora', stack: "'Lora', Georgia, serif" },
+  palatino: { label: 'Palatino', stack: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif" },
+  sans:     { label: 'Hanken Grotesk', stack: "'Hanken Grotesk', system-ui, sans-serif" },
+  system:   { labelKey: 'settings.font.system', stack: "system-ui, 'Segoe UI', Roboto, sans-serif" },
+  mono:     { label: 'Courier', stack: "'Courier Prime', 'Courier New', ui-monospace, monospace" },
+};
+const ED_WIDTH_FULL = 1200; // slider maximum = no width limit
+
+uiPrefs = {
+  accent: '', editorFont: 'georgia', editorSize: 17, editorLine: 1.8, editorWidth: 760,
+  typewriter: true, dimParas: false, navOrder: null, navHidden: [], startPage: 'home', lastScene: null,
+  ...uiPrefs,
+};
+
+const clampNum = (v, lo, hi, def) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : def);
+
+function applyDevicePrefs() {
+  const html = document.documentElement;
+  if (ACCENTS.includes(uiPrefs.accent)) html.setAttribute('data-accent', uiPrefs.accent);
+  else html.removeAttribute('data-accent');
+  const font = EDITOR_FONTS[uiPrefs.editorFont] || EDITOR_FONTS.georgia;
+  html.style.setProperty('--ed-font', font.stack);
+  html.style.setProperty('--ed-size', clampNum(uiPrefs.editorSize, 13, 26, 17) + 'px');
+  html.style.setProperty('--ed-line', String(clampNum(uiPrefs.editorLine, 1.3, 2.4, 1.8)));
+  const w = clampNum(uiPrefs.editorWidth, 520, ED_WIDTH_FULL, 760);
+  html.style.setProperty('--ed-width', w >= ED_WIDTH_FULL ? 'none' : w + 'px');
+  document.body.classList.toggle('fm-typewriter', !!uiPrefs.typewriter);
+  document.body.classList.toggle('fm-dim', !!uiPrefs.dimParas);
+  applyNavPrefs();
+}
+
+// ── Navigation rail: order + hidden pages ──
+const NAV_PAGES = [...document.querySelectorAll('.icon-nav-btn')].map(b => b.dataset.page);
+function navOrder() {
+  const saved = Array.isArray(uiPrefs.navOrder) ? uiPrefs.navOrder.filter(p => NAV_PAGES.includes(p)) : [];
+  return [...saved, ...NAV_PAGES.filter(p => !saved.includes(p))];
+}
+function navHidden(page) {
+  return page !== 'writing' && Array.isArray(uiPrefs.navHidden) && uiPrefs.navHidden.includes(page);
+}
+function applyNavPrefs() {
+  const nav = document.querySelector('.icon-nav');
+  if (!nav) return;
+  navOrder().forEach(p => {
+    const b = nav.querySelector(`.icon-nav-btn[data-page="${p}"]`);
+    if (!b) return;
+    nav.appendChild(b);
+    b.hidden = navHidden(p);
+  });
+}
+applyDevicePrefs();
+
+// ── Focus mode ──
+// Hides everything but the manuscript. Optional typewriter scrolling keeps the
+// caret line near the middle; optional dimming fades every paragraph except
+// the current one (via a generated nth-child rule, so no class ever ends up in
+// the saved scene HTML).
+function isFocusMode() { return document.body.classList.contains('focus-mode'); }
+
+function setFocusMode(on) {
+  if (on && activePageName() !== 'writing') switchPage('writing');
+  document.body.classList.toggle('focus-mode', on);
+  const exitBtn = document.getElementById('focus-exit');
+  if (exitBtn) exitBtn.hidden = !on;
+  const toggle = document.getElementById('focus-btn');
+  if (toggle) toggle.classList.toggle('on', on);
+  focusDimStyle().textContent = '';
+  if (on) {
+    const ms = document.getElementById('manuscript');
+    if (ms) { ms.focus(); focusFollowCaret(ms); }
+  }
+}
+
+function focusDimStyle() {
+  let el = document.getElementById('fm-dim-style');
+  if (!el) {
+    el = document.createElement('style');
+    el.id = 'fm-dim-style';
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+function focusFollowCaret(ms) {
+  if (!isFocusMode()) return;
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || !ms.contains(sel.anchorNode)) return;
+  if (uiPrefs.dimParas) {
+    let node = sel.anchorNode;
+    while (node && node.parentNode !== ms) node = node.parentNode;
+    const idx = node && node.nodeType === Node.ELEMENT_NODE ? [...ms.children].indexOf(node) + 1 : 0;
+    focusDimStyle().textContent = idx
+      ? `body.focus-mode.fm-dim .manuscript > :nth-child(${idx}) { opacity: 1; }`
+      : 'body.focus-mode.fm-dim .manuscript > * { opacity: 1; }';
+  }
+  if (uiPrefs.typewriter) {
+    const range = sel.getRangeAt(0).cloneRange();
+    range.collapse(true);
+    let rect = range.getClientRects()[0];
+    if (!rect) {
+      const el = sel.anchorNode.nodeType === Node.ELEMENT_NODE ? sel.anchorNode : sel.anchorNode.parentElement;
+      rect = el && el.getBoundingClientRect();
+    }
+    if (!rect) return;
+    const box = ms.getBoundingClientRect();
+    ms.scrollTop += rect.top - (box.top + box.height * 0.45);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+    e.preventDefault();
+    setFocusMode(!isFocusMode());
+  } else if (e.key === 'Escape' && isFocusMode()) {
+    const gs = document.getElementById('global-search');
+    if (modalOverlay.classList.contains('open') || (gs && !gs.hidden)) return;
+    setFocusMode(false);
+  }
+});
+// Null-safe: an offline cache may pair this script with an older index.html.
+document.getElementById('focus-exit')?.addEventListener('click', () => setFocusMode(false));
+
+// ── Start behaviour: reopen the last scene ──
+function rememberLastScene(chId, scId) {
+  uiPrefs.lastScene = { p: currentProjectName || '', ch: chId, sc: scId };
+  saveUiPrefs();
+}
+function openLastScene() {
+  const ls = uiPrefs.lastScene;
+  if (ls && ls.p === (currentProjectName || '')) {
+    const { scene } = findScene(ls.ch, ls.sc);
+    if (scene) {
+      activeChapterId = ls.ch;
+      activeSceneId = ls.sc;
+      renderChapterTree();
+      renderEditor();
+    }
+  }
+  switchPage('writing');
+}
+
+// ── Project settings ──
+const EXPORT_FONTS = ['Georgia', 'Times New Roman', 'Garamond', 'Palatino Linotype', 'Book Antiqua', 'Calibri', 'Arial', 'Courier New'];
+const BUILTIN_STATUS_IDS = ['draft', 'revised', 'done'];
+
+function projectSettingsDefault() {
+  return {
+    statuses: [
+      { id: 'draft', name: '', color: 'muted' },
+      { id: 'revised', name: '', color: 'amber' },
+      { id: 'done', name: '', color: 'sage' },
+    ],
+    indent: false,
+    export: { font: 'Georgia', size: 12, lineSpacing: 1.15, sceneBreak: 'titles', chapterStyle: 'title', chapterWord: '' },
+  };
+}
+
+function projectSettingsFromData(d) {
+  const def = projectSettingsDefault();
+  if (!d || typeof d !== 'object') return def;
+  const seen = new Set();
+  let statuses = (Array.isArray(d.statuses) ? d.statuses : [])
+    .filter(s => s && typeof s.id === 'string' && s.id && !seen.has(s.id) && seen.add(s.id))
+    .slice(0, 8)
+    .map(s => ({
+      id: s.id,
+      name: typeof s.name === 'string' ? s.name : '',
+      color: PALETTE_KEYS.includes(s.color) ? s.color : 'muted',
+    }));
+  if (!statuses.length) statuses = def.statuses;
+  const ex = d.export && typeof d.export === 'object' ? d.export : {};
+  const pick = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
+  return {
+    statuses,
+    indent: !!d.indent,
+    export: {
+      font: pick(ex.font, EXPORT_FONTS, def.export.font),
+      size: pick(ex.size, [10, 11, 12, 13, 14], 12),
+      lineSpacing: pick(ex.lineSpacing, [1, 1.15, 1.5, 2], 1.15),
+      sceneBreak: pick(ex.sceneBreak, ['titles', 'stars', 'hash', 'blank'], 'titles'),
+      chapterStyle: pick(ex.chapterStyle, ['title', 'numbered', 'number'], 'title'),
+      chapterWord: typeof ex.chapterWord === 'string' ? ex.chapterWord : '',
+    },
+  };
+}
+
+// Scene statuses — the order is the workflow; clicking the chip advances it.
+function sceneStatuses() { return projectSettings.statuses; }
+function sceneStatus(sc) {
+  const list = sceneStatuses();
+  return list.some(s => s.id === (sc && sc.status)) ? sc.status : list[0].id;
+}
+function statusInfo(id) {
+  const list = sceneStatuses();
+  const s = list.find(x => x.id === id) || list[0];
+  const label = s.name || (BUILTIN_STATUS_IDS.includes(s.id) ? t('writing.status.' + s.id) : t('settings.status.unnamed'));
+  return { ...s, label, css: paletteColor(s.color) };
+}
+
+// Export headings / scene breaks, shared by .docx, .md and .txt.
+// Numbers follow the chapter's place in the book, also for single-chapter exports.
+function exportChapterHeading(chapter, index) {
+  const ex = projectSettings.export;
+  const title = chapter.title || '';
+  const word = ex.chapterWord.trim() || t('export.chapter.word');
+  const pos = writing.chapters.findIndex(c => c.id === chapter.id);
+  const num = (pos >= 0 ? pos : index) + 1;
+  if (ex.chapterStyle === 'number') return `${word} ${num}`;
+  if (ex.chapterStyle === 'numbered') return title ? `${word} ${num}: ${title}` : `${word} ${num}`;
+  return title || t('writing.untitled.chapter');
+}
+
+// "340 / 1,000 words" when the scene has a target.
+function wordCountLabel(n, target) {
+  return target ? `${n.toLocaleString()} / ${target.toLocaleString()} ${t('stats.words')}` : `${n} ${t('stats.words')}`;
+}
+let planTargetTimer = null;
+// null = show scene titles (the classic layout); otherwise the separator text.
+function exportSceneBreak() {
+  return { titles: null, stars: '* * *', hash: '#', blank: '' }[projectSettings.export.sceneBreak];
+}
+
+// ── Word targets: progress bars in the chapter tree ──
+function targetPct(words, target) { return Math.min(100, Math.round((words / target) * 100)); }
+function targetBarHtml(words, target, cls) {
+  return `<div class="target-bar ${cls}" title="${t('target.progress').replace('{n}', words.toLocaleString()).replace('{target}', target.toLocaleString())}"><span style="width:${targetPct(words, target)}%"></span></div>`;
+}
+let targetBarTimer = null;
+function scheduleTargetBars(chapter, scene) {
+  clearTimeout(targetBarTimer);
+  targetBarTimer = setTimeout(() => {
+    const words = sc => countWords(sc.content || '');
+    if (scene && scene.target) {
+      const bar = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"] .target-bar span`);
+      if (bar) bar.style.width = targetPct(words(scene), scene.target) + '%';
+    }
+    if (chapter && chapter.target) {
+      const total = (chapter.scenes || []).reduce((n, sc) => n + words(sc), 0);
+      const bar = chapterTree.querySelector(`.chapter-block[data-chapter="${chapter.id}"] > .target-bar span`);
+      if (bar) bar.style.width = targetPct(total, chapter.target) + '%';
+    }
+  }, 600);
+}
+
+// ── Colour swatch popover (chapters, plot categories, statuses) ──
+function closeSwatchPicker() {
+  const old = document.getElementById('swatch-pop');
+  if (old) old.remove();
+  document.removeEventListener('mousedown', swatchOutside, true);
+}
+function swatchOutside(e) {
+  const pop = document.getElementById('swatch-pop');
+  if (pop && !pop.contains(e.target)) closeSwatchPicker();
+}
+function openSwatchPicker(anchor, current, onPick, { allowNone = true, noneKey = 'color.none' } = {}) {
+  closeSwatchPicker();
+  const pop = document.createElement('div');
+  pop.id = 'swatch-pop';
+  pop.className = 'swatch-pop';
+  pop.setAttribute('role', 'dialog');
+  pop.setAttribute('aria-label', t('color.pick'));
+  pop.innerHTML =
+    (allowNone ? `<button class="swatch swatch-none${!current || current === 'muted' ? ' on' : ''}" data-key="" title="${t(noneKey)}" aria-label="${t(noneKey)}"></button>` : '') +
+    PALETTE_KEYS.map(k => `<button class="swatch${k === current ? ' on' : ''}" data-key="${k}" style="background:var(--c-${k})" aria-label="${k}"></button>`).join('');
+  document.body.appendChild(pop);
+  const r = anchor.getBoundingClientRect();
+  pop.style.left = Math.min(window.innerWidth - pop.offsetWidth - 8, Math.max(8, r.left)) + 'px';
+  pop.style.top = (r.bottom + 6 + pop.offsetHeight > window.innerHeight ? r.top - pop.offsetHeight - 6 : r.bottom + 6) + 'px';
+  pop.querySelectorAll('.swatch').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    closeSwatchPicker();
+    onPick(b.dataset.key || null);
+  }));
+  pop.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSwatchPicker(); anchor.focus(); } });
+  setTimeout(() => document.addEventListener('mousedown', swatchOutside, true), 0);
+  const first = pop.querySelector('.swatch.on') || pop.querySelector('.swatch');
+  if (first) first.focus();
+}
+
+// ── Settings dialog ──
+let settingsTab = 'device';
+
+function openSettings(tab) {
+  if (tab) settingsTab = tab;
+  if (typeof flushEditor === 'function') flushEditor();
+  const c = document.createElement('div');
+  c.className = 'settings-wrap';
+  openModal(c);
+  renderSettings(c);
+}
+
+function renderSettings(c) {
+  c.innerHTML = `
+    <div class="modal-title">${t('settings.title')}</div>
+    <div class="settings-tabs" role="tablist">
+      <button class="settings-tab${settingsTab === 'device' ? ' on' : ''}" data-tab="device" role="tab" aria-selected="${settingsTab === 'device'}">${t('settings.tab.device')}</button>
+      <button class="settings-tab${settingsTab === 'project' ? ' on' : ''}" data-tab="project" role="tab" aria-selected="${settingsTab === 'project'}">${t('settings.tab.project')}</button>
+    </div>
+    <p class="settings-scope">${t(settingsTab === 'device' ? 'settings.device.hint' : 'settings.project.hint')}</p>
+    <div class="settings-body"></div>
+    <div class="settings-foot"><button class="btn-primary" id="settings-done">${t('popover.done')}</button></div>`;
+  c.querySelectorAll('.settings-tab').forEach(b => b.addEventListener('click', () => {
+    settingsTab = b.dataset.tab;
+    renderSettings(c);
+  }));
+  c.querySelector('#settings-done').addEventListener('click', closeModal);
+  const body = c.querySelector('.settings-body');
+  if (settingsTab === 'device') renderDeviceSettings(body, c); else renderProjectSettings(body, c);
+}
+
+function renderDeviceSettings(body, c) {
+  const range = (id, min, max, step, value, fmt) => `
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${value}">
+    <output for="${id}">${fmt(value)}</output>`;
+  const fmtWidth = v => (Number(v) >= ED_WIDTH_FULL ? t('settings.width.full') : v + ' px');
+  body.innerHTML = `
+    <section class="settings-sec">
+      <h3>${t('settings.appearance')}</h3>
+      <div class="settings-label">${t('settings.scheme')}</div>
+      <div class="scheme-grid">
+        ${THEME_CHOICES.map(s => `
+          <button class="scheme-card${themeChoice === s ? ' on' : ''}" data-scheme="${s}" aria-pressed="${themeChoice === s}">
+            <span class="scheme-swatch scheme-${s}" aria-hidden="true"></span>${t('settings.scheme.' + s)}
+          </button>`).join('')}
+      </div>
+      <div class="settings-label">${t('settings.accent')}</div>
+      <div class="accent-row">
+        <button class="accent-dot accent-default${!uiPrefs.accent ? ' on' : ''}" data-accent="" title="${t('settings.accent.default')}" aria-label="${t('settings.accent.default')}"></button>
+        ${ACCENTS.map(a => `<button class="accent-dot${uiPrefs.accent === a ? ' on' : ''}" data-accent="${a}" style="--dot:var(--accent-${a})" title="${t('settings.accent.' + a)}" aria-label="${t('settings.accent.' + a)}"></button>`).join('')}
+      </div>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.editor')}</h3>
+      <div class="settings-label">${t('settings.font')}</div>
+      <div class="font-grid">
+        ${Object.entries(EDITOR_FONTS).map(([k, f]) => `
+          <button class="font-card${uiPrefs.editorFont === k ? ' on' : ''}" data-font="${k}" aria-pressed="${uiPrefs.editorFont === k}">
+            <span class="font-sample" style="font-family:${f.stack.replace(/"/g, '&quot;')}">Aa</span>${f.labelKey ? t(f.labelKey) : f.label}
+          </button>`).join('')}
+      </div>
+      <label class="settings-range">${t('settings.size')}${range('set-size', 13, 26, 1, uiPrefs.editorSize, v => v + ' px')}</label>
+      <label class="settings-range">${t('settings.line')}${range('set-line', 1.3, 2.4, 0.1, uiPrefs.editorLine, v => Number(v).toFixed(1))}</label>
+      <label class="settings-range">${t('settings.width')}${range('set-width', 520, ED_WIDTH_FULL, 20, uiPrefs.editorWidth, fmtWidth)}</label>
+      <div class="settings-preview">${t('settings.preview')}</div>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.focus')}</h3>
+      <p class="settings-hint">${t('settings.focus.hint')}</p>
+      <label class="settings-check"><input type="checkbox" id="set-typewriter" ${uiPrefs.typewriter ? 'checked' : ''}> ${t('settings.focus.typewriter')}</label>
+      <label class="settings-check"><input type="checkbox" id="set-dim" ${uiPrefs.dimParas ? 'checked' : ''}> ${t('settings.focus.dim')}</label>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.nav')}</h3>
+      <p class="settings-hint">${t('settings.nav.hint')}</p>
+      <div class="nav-list"></div>
+      <button class="settings-link" id="set-nav-reset">${t('settings.nav.reset')}</button>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.start')}</h3>
+      <label class="settings-check"><input type="radio" name="set-start" value="home" ${uiPrefs.startPage !== 'last' ? 'checked' : ''}> ${t('settings.start.home')}</label>
+      <label class="settings-check"><input type="radio" name="set-start" value="last" ${uiPrefs.startPage === 'last' ? 'checked' : ''}> ${t('settings.start.last')}</label>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.security')}</h3>
+      <button class="btn-secondary" id="set-vault">${t('settings.vault.btn')}</button>
+    </section>`;
+
+  const save = () => { saveUiPrefs(); applyDevicePrefs(); };
+
+  body.querySelectorAll('.scheme-card').forEach(b => b.addEventListener('click', () => {
+    applyTheme(b.dataset.scheme);
+    body.querySelectorAll('.scheme-card').forEach(x => {
+      x.classList.toggle('on', x === b);
+      x.setAttribute('aria-pressed', x === b);
+    });
+  }));
+  body.querySelectorAll('.accent-dot').forEach(b => b.addEventListener('click', () => {
+    uiPrefs.accent = b.dataset.accent;
+    save();
+    body.querySelectorAll('.accent-dot').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  body.querySelectorAll('.font-card').forEach(b => b.addEventListener('click', () => {
+    uiPrefs.editorFont = b.dataset.font;
+    save();
+    body.querySelectorAll('.font-card').forEach(x => {
+      x.classList.toggle('on', x === b);
+      x.setAttribute('aria-pressed', x === b);
+    });
+  }));
+  const bindRange = (id, key, fmt) => {
+    const input = body.querySelector('#' + id);
+    const out = input.nextElementSibling;
+    input.addEventListener('input', () => {
+      uiPrefs[key] = Number(input.value);
+      out.textContent = fmt(input.value);
+      save();
+    });
+  };
+  bindRange('set-size', 'editorSize', v => v + ' px');
+  bindRange('set-line', 'editorLine', v => Number(v).toFixed(1));
+  bindRange('set-width', 'editorWidth', fmtWidth);
+  body.querySelector('#set-typewriter').addEventListener('change', e => { uiPrefs.typewriter = e.target.checked; save(); });
+  body.querySelector('#set-dim').addEventListener('change', e => {
+    uiPrefs.dimParas = e.target.checked;
+    focusDimStyle().textContent = '';
+    save();
+  });
+  body.querySelectorAll('input[name="set-start"]').forEach(r => r.addEventListener('change', () => {
+    uiPrefs.startPage = r.value;
+    saveUiPrefs();
+  }));
+  body.querySelector('#set-vault').addEventListener('click', openVaultModal);
+
+  const navList = body.querySelector('.nav-list');
+  function renderNavList() {
+    const order = navOrder();
+    navList.innerHTML = order.map((p, i) => `
+      <div class="nav-row${navHidden(p) ? ' off' : ''}">
+        <label class="nav-row-main">
+          <input type="checkbox" data-page="${p}" ${navHidden(p) ? '' : 'checked'} ${p === 'writing' ? 'disabled' : ''}>
+          <span class="nav-row-icon" aria-hidden="true">${navIconSvg(p)}</span>
+          ${splitPageLabel(p)}
+        </label>
+        <button class="nav-move" data-move="-1" data-i="${i}" ${i === 0 ? 'disabled' : ''} title="${t('settings.nav.up')}" aria-label="${t('settings.nav.up')}">&#8593;</button>
+        <button class="nav-move" data-move="1" data-i="${i}" ${i === order.length - 1 ? 'disabled' : ''} title="${t('settings.nav.down')}" aria-label="${t('settings.nav.down')}">&#8595;</button>
+      </div>`).join('');
+    navList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => {
+      const hidden = new Set(uiPrefs.navHidden || []);
+      if (cb.checked) hidden.delete(cb.dataset.page); else hidden.add(cb.dataset.page);
+      uiPrefs.navHidden = [...hidden];
+      save();
+      buildSplitPicker();
+      renderNavList();
+    }));
+    navList.querySelectorAll('.nav-move').forEach(b => b.addEventListener('click', () => {
+      const list = navOrder();
+      const i = Number(b.dataset.i);
+      const j = i + Number(b.dataset.move);
+      [list[i], list[j]] = [list[j], list[i]];
+      uiPrefs.navOrder = list;
+      save();
+      renderNavList();
+      const again = navList.querySelector(`.nav-move[data-i="${j}"][data-move="${b.dataset.move}"]`);
+      if (again && !again.disabled) again.focus();
+    }));
+  }
+  renderNavList();
+  body.querySelector('#set-nav-reset').addEventListener('click', () => {
+    uiPrefs.navOrder = null;
+    uiPrefs.navHidden = [];
+    save();
+    buildSplitPicker();
+    renderNavList();
+  });
+}
+
+function renderProjectSettings(body, c) {
+  const ps = projectSettings;
+  const ex = ps.export;
+  const opt = (value, current, label) => `<option value="${value}" ${String(value) === String(current) ? 'selected' : ''}>${label}</option>`;
+  body.innerHTML = `
+    <section class="settings-sec">
+      <h3>${t('settings.statuses')}</h3>
+      <p class="settings-hint">${t('settings.statuses.hint')}</p>
+      <div class="status-list"></div>
+      <div class="settings-row-btns">
+        <button class="btn-secondary" id="set-status-add" ${ps.statuses.length >= 8 ? 'disabled' : ''}>${t('settings.status.add')}</button>
+        <button class="settings-link" id="set-status-reset">${t('settings.status.reset')}</button>
+      </div>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.paragraphs')}</h3>
+      <label class="settings-check"><input type="checkbox" id="set-indent" ${ps.indent ? 'checked' : ''}> ${t('settings.indent')}</label>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.targets')}</h3>
+      <p class="settings-hint">${t('settings.targets.hint')}</p>
+    </section>
+
+    <section class="settings-sec">
+      <h3>${t('settings.export')}</h3>
+      <div class="settings-grid">
+        <label>${t('settings.export.font')}<select id="set-ex-font" class="fmt-select">${EXPORT_FONTS.map(f => opt(f, ex.font, f)).join('')}</select></label>
+        <label>${t('settings.export.size')}<select id="set-ex-size" class="fmt-select">${[10, 11, 12, 13, 14].map(s => opt(s, ex.size, s + ' pt')).join('')}</select></label>
+        <label>${t('settings.export.line')}<select id="set-ex-line" class="fmt-select">${[1, 1.15, 1.5, 2].map(s => opt(s, ex.lineSpacing, s)).join('')}</select></label>
+        <label>${t('settings.export.break')}<select id="set-ex-break" class="fmt-select">${['titles', 'stars', 'hash', 'blank'].map(s => opt(s, ex.sceneBreak, t('settings.export.break.' + s))).join('')}</select></label>
+        <label>${t('settings.export.chapter')}<select id="set-ex-chapter" class="fmt-select">${['title', 'numbered', 'number'].map(s => opt(s, ex.chapterStyle, t('settings.export.chapter.' + s))).join('')}</select></label>
+        <label>${t('settings.export.chapter.word')}<input id="set-ex-word" class="settings-input" value="${ideaEsc(ex.chapterWord)}" placeholder="${t('export.chapter.word')}"></label>
+      </div>
+      <p class="settings-hint">${t('settings.export.hint')}</p>
+    </section>`;
+
+  const changedStatuses = () => {
+    saveProject();
+    flushEditor();
+    renderChapterTree();
+    renderEditor();
+  };
+
+  const statusList = body.querySelector('.status-list');
+  function renderStatusList() {
+    statusList.innerHTML = ps.statuses.map((s, i) => `
+      <div class="status-row">
+        <button class="status-color" data-i="${i}" style="background:${paletteColor(s.color)}" title="${t('settings.status.color')}" aria-label="${t('settings.status.color')}"></button>
+        <input class="settings-input status-name" data-i="${i}" value="${ideaEsc(statusInfo(s.id).label)}" aria-label="${t('settings.status.unnamed')} ${i + 1}">
+        <button class="nav-move" data-move="-1" data-i="${i}" ${i === 0 ? 'disabled' : ''} title="${t('settings.nav.up')}" aria-label="${t('settings.nav.up')}">&#8593;</button>
+        <button class="nav-move" data-move="1" data-i="${i}" ${i === ps.statuses.length - 1 ? 'disabled' : ''} title="${t('settings.nav.down')}" aria-label="${t('settings.nav.down')}">&#8595;</button>
+        <button class="tree-icon-btn del" data-del="${i}" ${ps.statuses.length < 2 ? 'disabled' : ''} title="${t('settings.status.remove')}" aria-label="${t('settings.status.remove')}">&times;</button>
+      </div>`).join('');
+    statusList.querySelectorAll('.status-name').forEach(inp => inp.addEventListener('input', () => {
+      const s = ps.statuses[Number(inp.dataset.i)];
+      const builtin = BUILTIN_STATUS_IDS.includes(s.id) ? t('writing.status.' + s.id) : null;
+      s.name = builtin && inp.value.trim() === builtin ? '' : inp.value;
+      saveProjectDebounced();
+    }));
+    statusList.querySelectorAll('.status-name').forEach(inp => inp.addEventListener('change', changedStatuses));
+    statusList.querySelectorAll('.status-color').forEach(b => b.addEventListener('click', () => {
+      const s = ps.statuses[Number(b.dataset.i)];
+      openSwatchPicker(b, s.color, key => {
+        s.color = key || 'muted';
+        changedStatuses();
+        renderStatusList();
+      }, { noneKey: 'color.neutral' });
+    }));
+    statusList.querySelectorAll('.nav-move').forEach(b => b.addEventListener('click', () => {
+      const i = Number(b.dataset.i);
+      const j = i + Number(b.dataset.move);
+      [ps.statuses[i], ps.statuses[j]] = [ps.statuses[j], ps.statuses[i]];
+      changedStatuses();
+      renderStatusList();
+    }));
+    statusList.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      const i = Number(b.dataset.del);
+      const gone = statusInfo(ps.statuses[i].id);
+      const rest = ps.statuses.filter((_, k) => k !== i);
+      const first = statusInfo(rest[0].id);
+      if (!confirm(t('settings.status.remove.confirm').replace('{name}', gone.label).replace('{first}', first.label))) return;
+      ps.statuses = rest;
+      // Scenes on the removed status fall back to the first one.
+      for (const ch of writing.chapters) for (const sc of (ch.scenes || [])) if (sc.status === gone.id) sc.status = rest[0].id;
+      changedStatuses();
+      renderSettings(c);
+    }));
+  }
+  renderStatusList();
+
+  body.querySelector('#set-status-add').addEventListener('click', () => {
+    if (ps.statuses.length >= 8) return;
+    const used = new Set(ps.statuses.map(s => s.color));
+    ps.statuses.push({ id: 's' + ideaGenId(), name: '', color: PALETTE_KEYS.find(k => !used.has(k)) || 'blue' });
+    changedStatuses();
+    renderSettings(c);
+    const inputs = c.querySelectorAll('.status-name');
+    const last = inputs[inputs.length - 1];
+    if (last) { last.value = ''; last.focus(); }
+  });
+  body.querySelector('#set-status-reset').addEventListener('click', () => {
+    const def = projectSettingsDefault().statuses;
+    const ids = new Set(def.map(s => s.id));
+    ps.statuses = def;
+    for (const ch of writing.chapters) for (const sc of (ch.scenes || [])) if (sc.status && !ids.has(sc.status)) sc.status = 'draft';
+    changedStatuses();
+    renderSettings(c);
+  });
+
+  body.querySelector('#set-indent').addEventListener('change', e => {
+    ps.indent = e.target.checked;
+    const ms = document.getElementById('manuscript');
+    if (ms) ms.classList.toggle('indent-paras', ps.indent);
+    saveProject();
+  });
+
+  const bindSelect = (id, key, cast) => body.querySelector('#' + id).addEventListener('change', e => {
+    ex[key] = cast(e.target.value);
+    saveProject();
+  });
+  bindSelect('set-ex-font', 'font', String);
+  bindSelect('set-ex-size', 'size', Number);
+  bindSelect('set-ex-line', 'lineSpacing', Number);
+  bindSelect('set-ex-break', 'sceneBreak', String);
+  bindSelect('set-ex-chapter', 'chapterStyle', String);
+  body.querySelector('#set-ex-word').addEventListener('input', e => {
+    ex.chapterWord = e.target.value;
+    saveProjectDebounced();
+  });
+}
+
+document.getElementById('settings-btn')?.addEventListener('click', () => openSettings());
 
 // ── Modal ──
 const modalOverlay = document.getElementById('modal-overlay');
@@ -7346,11 +8086,8 @@ function openStoryLangModal() {
   openModal(c);
 }
 
-// Scenes from before this feature have no status field — they count as drafts.
-const SCENE_STATUSES = ['draft', 'revised', 'done'];
-function sceneStatus(sc) {
-  return SCENE_STATUSES.includes(sc && sc.status) ? sc.status : 'draft';
-}
+// Scene statuses are per project (see sceneStatuses() in SETTINGS); scenes
+// without a known status count as the first one.
 
 // Language version the open editor shows; flushes write back into it even if
 // writing.activeLang has changed in the meantime.
@@ -7384,12 +8121,25 @@ function renderChapterTree() {
       <div class="chapter-row">
         <span class="chapter-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.chapter')}" style="cursor:grab;color:var(--text-muted);font-size:13px">&#8942;&#8942;</span>
         <button class="chapter-toggle" title="${t('writing.collapse')}" aria-expanded="${!collapsed}" aria-label="${t('writing.collapse')}">${collapsed ? '&#9656;' : '&#9662;'}</button>
+        <button class="chapter-color${ch.color ? ' set' : ''}" style="${ch.color ? 'background:' + paletteColor(ch.color) : ''}" title="${t('color.chapter')}" aria-label="${t('color.chapter')}"></button>
         <input class="chapter-title" value="${ideaEsc(textIn(ch, 'title'))}" placeholder="${isMainLang(activeStoryLang()) ? t('writing.chapter.placeholder') : ideaEsc(ch.title || t('writing.chapter.placeholder'))}">
         <div class="chapter-actions">
           <button class="tree-icon-btn del" title="${t('writing.delete.chapter')}">&times;</button>
         </div>
       </div>
+      ${ch.target ? targetBarHtml((ch.scenes || []).reduce((n, sc) => n + countWords(sc.content || ''), 0), ch.target, 'chapter-target') : ''}
     `;
+    if (ch.color) {
+      block.classList.add('has-color');
+      block.style.setProperty('--ch-color', paletteColor(ch.color));
+    }
+    block.querySelector('.chapter-color').addEventListener('click', e => {
+      openSwatchPicker(e.currentTarget, ch.color, key => {
+        if (key) ch.color = key; else delete ch.color;
+        saveProject();
+        renderChapterTree();
+      });
+    });
 
     // Toggle collapse
     block.querySelector('.chapter-toggle').addEventListener('click', () => {
@@ -7456,10 +8206,11 @@ function renderChapterTree() {
         const povChar = characters.find(c => c.id === sc.pov);
         li.innerHTML = `
           <span class="scene-drag" draggable="true" aria-hidden="true" title="${t('writing.drag.scene')}">&#8942;&#8942;</span>
-          <span class="scene-status-dot status-${sceneStatus(sc)}"></span>
+          <span class="scene-status-dot" style="background:${statusInfo(sceneStatus(sc)).css}"></span>
           ${povChar ? `<span class="scene-pov-badge">${ideaEsc(povInitials(povChar.name))}</span>` : ''}
           <input class="scene-name-input" value="${ideaEsc(textIn(sc, 'title'))}" placeholder="${isMainLang(activeStoryLang()) ? t('writing.scene.placeholder') : ideaEsc(sc.title || t('writing.scene.placeholder'))}">
           <button class="scene-del" title="${t('writing.delete.scene')}" aria-label="${t('writing.delete.scene')}">&times;</button>
+          ${sc.target ? targetBarHtml(countWords(sc.content || ''), sc.target, 'scene-target') : ''}
         `;
         const metaTip = [sc.summary, scenePlaceLabel(sc), sc.when].filter(Boolean).join(' · ');
         if (metaTip) li.title = metaTip;
@@ -7592,6 +8343,7 @@ function setActiveScene(chId, scId, focusEditor) {
   flushEditor();
   activeChapterId = chId;
   activeSceneId = scId;
+  rememberLastScene(chId, scId);
   chapterTree.querySelectorAll('.scene-item').forEach(el => {
     el.classList.toggle('active', el.dataset.scene === String(scId));
   });
@@ -7636,7 +8388,7 @@ function renderEditor() {
     <div class="editor-header">
       <input class="scene-title-input" id="scene-title-input" value="${ideaEsc(textIn(scene, 'title'))}" placeholder="${isTranslation ? ideaEsc(scene.title || t('writing.scene.title.placeholder')) : t('writing.scene.title.placeholder')}">
       ${isTranslation ? `<span class="editor-lang-chip" title="${t('lang.version.title')}">&#127760; ${ideaEsc(storyLangName(lang))}</span>` : ''}
-      <button class="scene-status-chip status-${st}" id="scene-status-chip" title="${t('writing.status.cycle')}">${t('writing.status.' + st)}</button>
+      <button class="scene-status-chip" id="scene-status-chip" style="--st:${statusInfo(st).css}" title="${t('writing.status.cycle')}">${ideaEsc(statusInfo(st).label)}</button>
       <button class="icon-btn plan-toggle${planOpen ? ' on' : ''}${(scene.notes || (chapter && chapter.notes)) ? ' has-notes' : ''}" id="plan-toggle" title="${t('plan.toggle')}" aria-label="${t('plan.toggle')}" aria-pressed="${planOpen}">&#128204;</button>
       <button class="editor-theme-btn" id="theme-toggle" title="${t('editor.theme.toggle')}">&#9790;</button>
       <button class="icon-btn" id="search-toggle" title="${t('editor.search')}">&#128269;</button>
@@ -7659,6 +8411,7 @@ function renderEditor() {
       <span class="fmt-divider"></span>
       <button class="btn-mini" id="insert-note">&#128221; ${t('editor.insert.note')}</button>
       <button class="btn-mini" id="sprint-btn" title="${t('sprint.btn.title')}">&#9201; ${t('sprint.btn')}</button>
+      <button class="btn-mini${isFocusMode() ? ' on' : ''}" id="focus-btn" title="${t('focus.btn.title')}">&#9974; ${t('focus.btn')}</button>
       ${isTranslation ? `<button class="btn-mini${showOriginal ? ' on' : ''}" id="original-toggle" title="${t('lang.original.toggle.title')}" aria-pressed="${showOriginal}">&#8646; ${t('lang.original.toggle')}</button>` : ''}
       <span class="editor-spacer"></span>
       <span class="word-count" id="word-count"></span>
@@ -7675,15 +8428,17 @@ function renderEditor() {
         <div class="manuscript-ref-label">${t('lang.original.ref')} · ${ideaEsc(storyLangName(storyLanguages()[0].id))}</div>
         <div class="manuscript-ref-text"></div>
       </div>` : ''}
-      <div class="manuscript" id="manuscript" contenteditable="true" data-placeholder="${isTranslation ? t('lang.manuscript.placeholder').replace('{lang}', ideaEsc(storyLangName(lang))) : t('editor.manuscript.placeholder')}"></div>
+      <div class="manuscript${projectSettings.indent ? ' indent-paras' : ''}" id="manuscript" contenteditable="true" data-placeholder="${isTranslation ? t('lang.manuscript.placeholder').replace('{lang}', ideaEsc(storyLangName(lang))) : t('editor.manuscript.placeholder')}"></div>
       ${planOpen ? `
       <aside class="plan-panel" aria-label="${t('plan.toggle')}">
         <label class="plan-label" for="plan-chapter">${t('plan.chapter')}
           <span class="plan-sub">${ideaEsc((chapter && chapter.title) || t('writing.untitled.chapter'))}</span></label>
         <textarea class="plan-text" id="plan-chapter" placeholder="${t('plan.chapter.placeholder')}">${ideaEsc((chapter && chapter.notes) || '')}</textarea>
+        <label class="plan-target">&#127919; <input type="number" class="plan-target-input" data-for="chapter" min="0" step="100" value="${chapter && chapter.target ? chapter.target : ''}" placeholder="${t('plan.target.placeholder')}"> ${t('plan.target')}</label>
         <label class="plan-label" for="plan-scene">${t('plan.scene')}
           <span class="plan-sub">${ideaEsc(scene.title || t('writing.untitled.scene'))}</span></label>
         <textarea class="plan-text" id="plan-scene" placeholder="${t('plan.scene.placeholder')}">${ideaEsc(scene.notes || '')}</textarea>
+        <label class="plan-target">&#127919; <input type="number" class="plan-target-input" data-for="scene" min="0" step="100" value="${scene && scene.target ? scene.target : ''}" placeholder="${t('plan.target.placeholder')}"> ${t('plan.target')}</label>
       </aside>` : ''}
     </div>
   `;
@@ -7693,7 +8448,7 @@ function renderEditor() {
   const wordCount = editorPane.querySelector('#word-count');
 
   manuscript.innerHTML = textIn(scene, 'content', lang);
-  wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
+  wordCount.textContent = wordCountLabel(countWords(manuscript.innerHTML), scene.target);
   renderSceneMetaRow(scene);
 
   const refText = editorPane.querySelector('.manuscript-ref-text');
@@ -7714,6 +8469,16 @@ function renderEditor() {
     saveUiPrefs();
     renderEditor();
   });
+  editorPane.querySelectorAll('.plan-target-input').forEach(inp => inp.addEventListener('input', () => {
+    const obj = inp.dataset.for === 'scene' ? scene : chapter;
+    if (!obj) return;
+    const v = Math.round(Number(inp.value));
+    if (v > 0) obj.target = v; else delete obj.target;
+    if (obj === scene) wordCount.textContent = wordCountLabel(countWords(manuscript.innerHTML), scene.target);
+    saveProjectDebounced();
+    clearTimeout(planTargetTimer);
+    planTargetTimer = setTimeout(renderChapterTree, 700); // tree bars; focus stays in the input
+  }));
   editorPane.querySelectorAll('.plan-text').forEach(ta => {
     ta.addEventListener('input', () => {
       if (ta.id === 'plan-scene') scene.notes = ta.value;
@@ -7728,20 +8493,23 @@ function renderEditor() {
 
   function persist() {
     setTextIn(scene, 'content', manuscript.innerHTML, lang);
-    wordCount.textContent = countWords(manuscript.innerHTML) + ' ' + t('stats.words');
+    scheduleTargetBars(chapter, scene);
+    wordCount.textContent = wordCountLabel(countWords(manuscript.innerHTML), scene.target);
     saveProjectDebounced();
   }
 
-  // Status chip cycles draft → revised → done; the tree dot is patched in place
-  // (a full renderChapterTree would steal focus, same as the title sync below).
+  // Status chip cycles through the project's statuses; the tree dot is patched
+  // in place (a full renderChapterTree would steal focus, same as the title sync below).
   const statusChip = editorPane.querySelector('#scene-status-chip');
   statusChip.addEventListener('click', () => {
-    const next = SCENE_STATUSES[(SCENE_STATUSES.indexOf(sceneStatus(scene)) + 1) % SCENE_STATUSES.length];
+    const ids = sceneStatuses().map(s => s.id);
+    const next = ids[(ids.indexOf(sceneStatus(scene)) + 1) % ids.length];
+    const info = statusInfo(next);
     scene.status = next;
-    statusChip.className = 'scene-status-chip status-' + next;
-    statusChip.textContent = t('writing.status.' + next);
+    statusChip.style.setProperty('--st', info.css);
+    statusChip.textContent = info.label;
     const treeDot = chapterTree.querySelector(`.scene-item[data-scene="${scene.id}"] .scene-status-dot`);
-    if (treeDot) treeDot.className = 'scene-status-dot status-' + next;
+    if (treeDot) treeDot.style.background = info.css;
     saveProject();
   });
 
@@ -7764,6 +8532,8 @@ function renderEditor() {
   });
 
   manuscript.addEventListener('input', persist);
+  // Focus mode: typewriter scrolling / paragraph dimming follow the caret.
+  ['input', 'keyup', 'mouseup'].forEach(ev => manuscript.addEventListener(ev, () => focusFollowCaret(manuscript)));
 
   // ── Formatting toolbar (bold / italic / underline) ──
   editorPane.querySelectorAll('.fmt-btn').forEach(btn => {
@@ -7802,6 +8572,7 @@ function renderEditor() {
   });
 
   editorPane.querySelector('#insert-note').addEventListener('click', () => insertNoteAtCursor(manuscript));
+  editorPane.querySelector('#focus-btn').addEventListener('click', () => setFocusMode(!isFocusMode()));
   editorPane.querySelector('#sprint-btn').addEventListener('click', () => {
     if (sprintState) endSprint(); else openSprintModal();
   });
@@ -8407,7 +9178,7 @@ document.getElementById('note-popover-delete').addEventListener('click', () => {
     if (ms && scene) {
       scene.content = ms.innerHTML;
       const wc = document.getElementById('word-count');
-      if (wc) wc.textContent = countWords(ms.innerHTML) + ' ' + t('stats.words');
+      if (wc) wc.textContent = wordCountLabel(countWords(ms.innerHTML), scene.target);
     }
     saveProjectDebounced();
   }
@@ -9395,6 +10166,7 @@ function plotNotesFromData(d) {
     .map(c => {
       const cat = { id: c.id, name: typeof c.name === 'string' ? c.name : '' };
       if (PLOT_BUILTIN_KEYS.includes(c.key)) cat.key = c.key;
+      if (PALETTE_KEYS.includes(c.color)) cat.color = c.color;
       return cat;
     });
   const ids = new Set(categories.map(c => c.id));
@@ -9417,6 +10189,7 @@ function plotCatName(cat) {
 }
 
 function plotCatColor(cat) {
+  if (cat.color) return paletteColor(cat.color);
   if (cat.key) return PLOT_COLORS[PLOT_BUILTIN_KEYS.indexOf(cat.key)];
   let h = 0;
   for (const ch of cat.id) h = (h * 31 + ch.charCodeAt(0)) | 0;
@@ -9485,7 +10258,7 @@ function renderPlotColumn(cat) {
   const visible = plotHideDone ? notes.filter(n => !n.done) : notes;
   col.innerHTML = `
     <header class="plot-col-head">
-      <span class="plot-col-dot" aria-hidden="true"></span>
+      <button class="plot-col-dot" title="${t('color.pick')}" aria-label="${t('color.pick')}"></button>
       <input class="plot-col-name" value="${ideaEsc(plotCatName(cat))}" placeholder="${t('plot.cat.name')}" aria-label="${t('plot.cat.name')}">
       <span class="plot-col-count">${notes.length}</span>
       <button class="tree-icon-btn del plot-col-del" title="${t('plot.cat.delete')}" aria-label="${t('plot.cat.delete')}">&times;</button>
@@ -9502,6 +10275,13 @@ function renderPlotColumn(cat) {
     saveProjectDebounced();
   });
   nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameInput.blur(); });
+  col.querySelector('.plot-col-dot').addEventListener('click', e => {
+    openSwatchPicker(e.currentTarget, cat.color, key => {
+      if (key) cat.color = key; else delete cat.color;
+      saveProject();
+      renderPlotNotes();
+    }, { noneKey: 'color.default' });
+  });
 
   col.querySelector('.plot-col-del').addEventListener('click', () => {
     if (notes.length && !confirm(t('plot.cat.delete.confirm').replace('{name}', plotCatName(cat)).replace('{n}', notes.length))) return;
@@ -9744,6 +10524,7 @@ function applyProjectData(data) {
   moodImages = data.moodboard || [];
   projectBlurb = data.blurb || '';
   blurbInput.value = projectBlurb;
+  projectSettings = projectSettingsFromData(data.settings);
   bookCover = data.cover && typeof data.cover.image === 'string' && data.cover.image.startsWith('data:image/')
     ? { id: 'cover', image: data.cover.image } : null;
   writing = data.writing && Array.isArray(data.writing.chapters) ? data.writing : { chapters: [] };
@@ -9785,7 +10566,14 @@ function applyProjectData(data) {
           return out;
         }),
     }));
-  writing.chapters.forEach(ch => { if (!ch.versions) delete ch.versions; if (!ch.notes) delete ch.notes; });
+  const validTarget = v => typeof v === 'number' && isFinite(v) && v > 0;
+  writing.chapters.forEach(ch => {
+    if (!ch.versions) delete ch.versions;
+    if (!ch.notes) delete ch.notes;
+    if (!validTarget(ch.target)) delete ch.target;
+    if (!PALETTE_KEYS.includes(ch.color)) delete ch.color;
+    ch.scenes.forEach(sc => { if (!validTarget(sc.target)) delete sc.target; });
+  });
   // Select first available scene, if any
   activeChapterId = null;
   activeSceneId = null;
@@ -9999,7 +10787,7 @@ document.getElementById('btn-new-project').addEventListener('click', () => {
 // Converts a scene's editor HTML (p/div/h1-h3 blocks; b/strong, i/em, u, br
 // inline; span.inline-note margin notes) into docx Paragraph objects.
 // Margin notes are working notes, not manuscript — they are dropped.
-function sceneHtmlToParagraphs(html) {
+function sceneHtmlToParagraphs(html, opts = {}) {
   const { Paragraph, TextRun, HeadingLevel } = docx;
   const HEADINGS = { H1: HeadingLevel.HEADING_1, H2: HeadingLevel.HEADING_2, H3: HeadingLevel.HEADING_3 };
   const BLOCKS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'UL', 'OL', 'LI']);
@@ -10024,9 +10812,17 @@ function sceneHtmlToParagraphs(html) {
   tpl.innerHTML = html || '';
   const paragraphs = [];
   let loose = []; // top-level text/inline nodes collect into an implicit paragraph
+  // Book-style first-line indent (project setting): never on the first
+  // paragraph of a scene or right after a heading.
+  let afterHeading = true;
+  const para = (children, heading) => {
+    const indent = opts.indent && !heading && children.length && !afterHeading ? { firstLine: 340 } : undefined;
+    if (heading || children.length) afterHeading = !!heading;
+    paragraphs.push(new Paragraph({ children, heading, indent }));
+  };
 
   const flushLoose = () => {
-    if (loose.length) { paragraphs.push(new Paragraph({ children: loose })); loose = []; }
+    if (loose.length) { para(loose); loose = []; }
   };
 
   for (const node of tpl.content.childNodes) {
@@ -10035,7 +10831,7 @@ function sceneHtmlToParagraphs(html) {
       let runs = runsForNode(node, {});
       // "<div><br></div>" is the editor's empty line — one empty paragraph, not two
       if (runs.length === 1 && node.children.length === 1 && node.children[0].tagName === 'BR') runs = [];
-      paragraphs.push(new Paragraph({ children: runs, heading: HEADINGS[node.tagName] }));
+      para(runs, HEADINGS[node.tagName]);
     } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
       flushLoose();
     } else {
@@ -10084,24 +10880,40 @@ async function exportToDocx(chapters = null, filenameBase = null, opts = {}) {
       children: [new TextRun(projectTitle)],
     }),
   );
-  for (const chapter of chapters) {
+  const sep = exportSceneBreak();
+  chapters.forEach((chapter, ci) => {
     children.push(new Paragraph({
       heading: HeadingLevel.HEADING_1,
-      children: [new TextRun(chapter.title || t('writing.untitled.chapter'))],
+      children: [new TextRun(exportChapterHeading(chapter, ci))],
     }));
-    for (const scene of (chapter.scenes || [])) {
-      if (chapter.scenes.length > 1 || scene.title) {
+    (chapter.scenes || []).forEach((scene, si) => {
+      if (sep === null) {
+        if (chapter.scenes.length > 1 || scene.title) {
+          children.push(new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [new TextRun(scene.title || t('writing.untitled.scene'))],
+          }));
+        }
+      } else if (si > 0) {
         children.push(new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [new TextRun(scene.title || t('writing.untitled.scene'))],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 240, after: 240 },
+          children: sep ? [new TextRun(sep)] : [],
         }));
       }
-      children.push(...sceneHtmlToParagraphs(scene.content || ''));
-    }
-  }
+      children.push(...sceneHtmlToParagraphs(scene.content || '', { indent: projectSettings.indent }));
+    });
+  });
 
   try {
-    const doc = new Document({ sections: [{ children }] });
+    const ex = projectSettings.export;
+    const doc = new Document({
+      styles: { default: { document: {
+        run: { font: ex.font, size: ex.size * 2 },
+        paragraph: { spacing: { line: Math.round(240 * ex.lineSpacing) } },
+      } } },
+      sections: [{ children }],
+    });
     const blob = await Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -10186,34 +10998,44 @@ const MD_INNER_HEADINGS = { h1: '#### ', h2: '##### ', h3: '###### ' };
 
 function manuscriptToMarkdown(chapters, projectTitle) {
   const lines = ['# ' + mdEscape(projectTitle)];
-  for (const chapter of chapters) {
-    lines.push('', '## ' + mdEscape(chapter.title || t('writing.untitled.chapter')));
-    for (const scene of (chapter.scenes || [])) {
-      if (chapter.scenes.length > 1 || scene.title) {
-        lines.push('', '### ' + mdEscape(scene.title || t('writing.untitled.scene')));
+  const sep = exportSceneBreak();
+  chapters.forEach((chapter, ci) => {
+    lines.push('', '## ' + mdEscape(exportChapterHeading(chapter, ci)));
+    (chapter.scenes || []).forEach((scene, si) => {
+      if (sep === null) {
+        if (chapter.scenes.length > 1 || scene.title) {
+          lines.push('', '### ' + mdEscape(scene.title || t('writing.untitled.scene')));
+        }
+      } else if (si > 0) {
+        lines.push('', sep ? mdEscape(sep) : '&nbsp;'); // a bare blank line would vanish
       }
       lines.push('');
       for (const b of sceneHtmlToBlocks(scene.content || '')) {
         lines.push((MD_INNER_HEADINGS[b.type] || '') + runsToMarkdown(b.runs), '');
       }
-    }
-  }
+    });
+  });
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
 }
 
 function manuscriptToText(chapters, projectTitle) {
   const out = [projectTitle];
-  for (const chapter of chapters) {
-    out.push('', '———', '', chapter.title || t('writing.untitled.chapter'), '');
-    for (const scene of (chapter.scenes || [])) {
-      if (chapter.scenes.length > 1 || scene.title) {
-        out.push('', '· ' + (scene.title || t('writing.untitled.scene')), '');
+  const sep = exportSceneBreak();
+  chapters.forEach((chapter, ci) => {
+    out.push('', '———', '', exportChapterHeading(chapter, ci), '');
+    (chapter.scenes || []).forEach((scene, si) => {
+      if (sep === null) {
+        if (chapter.scenes.length > 1 || scene.title) {
+          out.push('', '· ' + (scene.title || t('writing.untitled.scene')), '');
+        }
+      } else if (si > 0) {
+        out.push('', sep, '');
       }
       for (const b of sceneHtmlToBlocks(scene.content || '')) {
         out.push(b.runs.map(r => r.text).join(''));
       }
-    }
-  }
+    });
+  });
   return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
 }
 
@@ -10308,6 +11130,7 @@ projTitleEl.addEventListener('blur', () => commitProjectTitle(projTitleEl.textCo
   const data = await loadInitialProject();
   projectReady = true; // loaded — saving is safe from here on
   applyProjectData(data);
+  if (uiPrefs.startPage === 'last') openLastScene();
   // The home page rendered while still locked (empty) — show the projects now.
   if (vault.cfg && document.getElementById('page-home').classList.contains('active')) renderHome();
 })();

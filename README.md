@@ -24,6 +24,27 @@ InkTink is a hobby project I thought about for a long time and could finally rea
 - **Stats** — word count, writing goals, and progress over time
 - **Export** — download your manuscript (or one chapter, in any story language) as Word, Markdown, or plain text
 
+## Make it yours
+
+Open **Settings** with the ⚙ button in the top bar. Settings come in two kinds:
+
+**This device** (stays in this browser or desktop app)
+
+- **Colour scheme** — light, sepia, high contrast, dark, night, or follow your system
+- **Accent colour** — sage, terracotta, blue, plum, amber, rose, or teal
+- **Editor typography** — font, size, line spacing, and text width, with a live preview
+- **Focus mode** — hides everything but your text (⛶ Focus in the editor toolbar, or Ctrl+Shift+F; Esc leaves it), with optional typewriter scrolling and dimming of every paragraph except the current one
+- **Navigation** — hide pages you don't use from the left bar and change their order
+- **On start** — open the home page, or continue right where you left off
+
+**This project** (saved with the project, so it travels with Export and Import)
+
+- **Scene statuses** — your own stages instead of Draft / Revised / Done, each with a colour
+- **Book-style paragraphs** — indent the first line of each paragraph, in the editor and in Word exports
+- **Word targets** — per chapter and scene, set in the 📌 notes panel; progress bars appear in the chapter list
+- **Colours** — for chapters and Plot Notes categories
+- **Export layout** — font, size, and line spacing for Word; scene breaks (titles, * * *, #, blank line) and chapter headings ("Chapter 1: Title") for all formats
+
 ## Your data & privacy
 
 Project files are saved only in your browser's local storage — nothing is ever sent to a server, and nobody but you can see your writing. To back up or move a project to another device, use the **Export** button to download a `.json` file and **Import** to open it again.

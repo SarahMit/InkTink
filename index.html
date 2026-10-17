@@ -10,8 +10,18 @@
   <meta name="theme-color" content="#1a1a1a">
   <script>
     (function () {
+      // Same mapping as applyTheme() in app.js, applied before first paint.
+      var root = document.documentElement;
       var t = localStorage.getItem('inktink-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      var map = { light: ['light', ''], sepia: ['light', 'sepia'], contrast: ['light', 'contrast'], dark: ['dark', ''], night: ['dark', 'night'] };
+      if (t === 'system') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      var m = map[t] || map.light;
+      root.setAttribute('data-theme', m[0]);
+      if (m[1]) root.setAttribute('data-scheme', m[1]);
+      try {
+        var ui = JSON.parse(localStorage.getItem('inktink-ui') || '{}');
+        if (ui && ui.accent) root.setAttribute('data-accent', ui.accent);
+      } catch (e) {}
     })();
   </script>
 </head>
@@ -31,6 +41,7 @@
       <button class="sprint-chip" id="sprint-chip" hidden></button>
       <button class="tb-util" id="gsearch-btn" title="Search (Ctrl+K)" aria-label="Search">&#128269;</button>
       <button class="tb-util" id="history-btn" title="Version history" aria-label="Version history">⟲</button>
+      <button class="tb-util" id="settings-btn" title="Settings" aria-label="Settings">&#9881;</button>
       <button class="tb-util" id="lang-toggle">EN</button>
       <a class="tb-util" id="github-link" href="https://github.com/SarahMit/InkTink" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View on GitHub">
         <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
@@ -243,6 +254,9 @@
 
     <div class="split-divider" id="split-divider" hidden></div>
   </main>
+
+  <!-- Focus mode: the only way back besides Esc / Ctrl+Shift+F -->
+  <button class="focus-exit" id="focus-exit" hidden>&#10005;</button>
 
   <!-- Inline note popover -->
   <div class="note-popover" id="note-popover">
